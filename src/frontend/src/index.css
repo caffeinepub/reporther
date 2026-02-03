@@ -1,0 +1,173 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.5rem;
+        /* Light mode - Bold and empowering with high contrast */
+        --background: 0.98 0.01 320;
+        --foreground: 0.15 0.02 340;
+        --card: 1 0 0;
+        --card-foreground: 0.15 0.02 340;
+        --popover: 1 0 0;
+        --popover-foreground: 0.15 0.02 340;
+        /* Deep magenta primary */
+        --primary: 0.45 0.25 330;
+        --primary-foreground: 0.99 0 0;
+        /* Crimson secondary */
+        --secondary: 0.50 0.22 10;
+        --secondary-foreground: 0.99 0 0;
+        --muted: 0.94 0.01 320;
+        --muted-foreground: 0.45 0.02 340;
+        /* Bold accent magenta */
+        --accent: 0.55 0.28 320;
+        --accent-foreground: 0.99 0 0;
+        --destructive: 0.55 0.26 15;
+        --destructive-foreground: 0.99 0 0;
+        --border: 0.88 0.02 330;
+        --input: 0.88 0.02 330;
+        --ring: 0.45 0.25 330;
+        --chart-1: 0.55 0.25 330;
+        --chart-2: 0.50 0.22 10;
+        --chart-3: 0.60 0.20 340;
+        --chart-4: 0.45 0.23 320;
+        --chart-5: 0.65 0.18 350;
+        --sidebar: 0.98 0.01 320;
+        --sidebar-foreground: 0.15 0.02 340;
+        --sidebar-primary: 0.45 0.25 330;
+        --sidebar-primary-foreground: 0.99 0 0;
+        --sidebar-accent: 0.94 0.01 320;
+        --sidebar-accent-foreground: 0.15 0.02 340;
+        --sidebar-border: 0.88 0.02 330;
+        --sidebar-ring: 0.45 0.25 330;
+    }
+
+    .dark {
+        /* Dark mode - Noir backgrounds with bold magenta/crimson accents */
+        --background: 0.10 0.02 340;
+        --foreground: 0.98 0.01 320;
+        --card: 0.14 0.02 340;
+        --card-foreground: 0.98 0.01 320;
+        --popover: 0.16 0.02 340;
+        --popover-foreground: 0.98 0.01 320;
+        /* Bright magenta for dark mode */
+        --primary: 0.65 0.28 330;
+        --primary-foreground: 0.10 0.02 340;
+        /* Crimson accent */
+        --secondary: 0.60 0.24 10;
+        --secondary-foreground: 0.98 0 0;
+        --muted: 0.20 0.02 340;
+        --muted-foreground: 0.70 0.02 320;
+        /* Bold accent */
+        --accent: 0.70 0.30 320;
+        --accent-foreground: 0.10 0.02 340;
+        --destructive: 0.60 0.28 15;
+        --destructive-foreground: 0.98 0 0;
+        --border: 0.24 0.03 330;
+        --input: 0.24 0.03 330;
+        --ring: 0.65 0.28 330;
+        --chart-1: 0.65 0.28 330;
+        --chart-2: 0.60 0.24 10;
+        --chart-3: 0.70 0.22 340;
+        --chart-4: 0.55 0.26 320;
+        --chart-5: 0.75 0.20 350;
+        --sidebar: 0.14 0.02 340;
+        --sidebar-foreground: 0.98 0.01 320;
+        --sidebar-primary: 0.65 0.28 330;
+        --sidebar-primary-foreground: 0.98 0 0;
+        --sidebar-accent: 0.20 0.02 340;
+        --sidebar-accent-foreground: 0.98 0.01 320;
+        --sidebar-border: 0.24 0.03 330;
+        --sidebar-ring: 0.65 0.28 330;
+    }
+
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+/* Custom gradient utilities for empowerment theme */
+@layer utilities {
+    .gradient-empowerment {
+        background: linear-gradient(135deg, oklch(0.45 0.25 330) 0%, oklch(0.50 0.22 10) 100%);
+    }
+    
+    .gradient-empowerment-dark {
+        background: linear-gradient(135deg, oklch(0.65 0.28 330) 0%, oklch(0.60 0.24 10) 100%);
+    }
+}
+
+/* Mobile-specific optimizations */
+@layer utilities {
+    /* Extra small breakpoint for very small phones */
+    @media (min-width: 360px) {
+        .xs\:text-xs {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+        .xs\:text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        .xs\:text-base {
+            font-size: 1rem;
+            line-height: 1.5rem;
+        }
+        .xs\:px-2 {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        .xs\:px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .xs\:py-3 {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+        .xs\:gap-2 {
+            gap: 0.5rem;
+        }
+        .xs\:h-9 {
+            height: 2.25rem;
+        }
+        .xs\:w-9 {
+            width: 2.25rem;
+        }
+        .xs\:h-11 {
+            height: 2.75rem;
+        }
+        .xs\:w-11 {
+            width: 2.75rem;
+        }
+        .xs\:h-7 {
+            height: 1.75rem;
+        }
+        .xs\:w-7 {
+            width: 1.75rem;
+        }
+        .xs\:h-3\.5 {
+            height: 0.875rem;
+        }
+        .xs\:w-3\.5 {
+            width: 0.875rem;
+        }
+        .xs\:h-4\.5 {
+            height: 1.125rem;
+        }
+        .xs\:w-4\.5 {
+            width: 1.125rem;
+        }
+        .xs\:ml-1 {
+            margin-left: 0.25rem;
+        }
+        .xs\:w-44 {
+            width: 11rem;
+        }
+    }
+}
+

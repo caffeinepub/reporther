@@ -1,0 +1,386 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "ReportHer remains a React+TypeScript PWA backed by an Internet Computer (Motoko) canister for documenting stalking/harassment incidents, generating messages and summaries, and supporting police reporting. Recent scope additions discussed include mobile navigation simplification (grouping report-related tabs under a \"Report!\" dropdown), improved police department discovery (Google-based lookup plus manual/verified department directory with contact details), a legal disclosure acknowledgment checkbox before police submission, and improvements to auto-generated content (messages/evidence/documentation) and incident summary access.",
+  "existing_features": [
+    {
+      "id": "IF-1",
+      "title": "Internet Identity authentication provider",
+      "synonyms": [
+        "II auth",
+        "DFINITY login",
+        "AuthClient integration"
+      ],
+      "description": "Provides login/logout and persistent identity loading using Internet Identity via an InternetIdentityProvider context, including login status state and 30-day delegation TTL configuration.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-2",
+      "title": "Backend actor creation with identity binding and access-control initialization",
+      "synonyms": [
+        "Actor hook",
+        "useActor",
+        "Access control bootstrap"
+      ],
+      "description": "Creates an authenticated or anonymous backend actor depending on identity presence, initializes access control using a secret admin token from the URL hash, and invalidates/refetches dependent React Query caches on actor changes.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-3",
+      "title": "Role-based access control in Motoko backend",
+      "synonyms": [
+        "RBAC",
+        "admin/user/guest roles"
+      ],
+      "description": "Implements admin/user/guest roles and permission checks across all backend methods. Includes admin bootstrap via CAFFEINE_ADMIN_TOKEN env var and role assignment functions guarded by admin-only checks.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-4",
+      "title": "User profile creation and retrieval",
+      "synonyms": [
+        "Profile setup",
+        "Caller profile"
+      ],
+      "description": "Allows an authenticated user to create and store a basic UserProfile (name) and fetch it for personalization; frontend enforces profile setup after first login if none exists.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-5",
+      "title": "Victim/survivor profile management",
+      "synonyms": [
+        "Victim profile",
+        "User info for police"
+      ],
+      "description": "Supports saving and retrieving optional victim information (name, DOB, address, email, phone) for inclusion in police submissions; UI tracks unsaved changes and shows a summary of provided fields.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-6",
+      "title": "Single (legacy) stalker profile management",
+      "synonyms": [
+        "Current stalker record",
+        "Stalker info"
+      ],
+      "description": "Stores and retrieves a single per-user StalkerProfile (name required, other fields optional) used as the current record for reference and downstream reporting workflows.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-7",
+      "title": "Multiple stalker profiles CRUD",
+      "synonyms": [
+        "Saved stalker profiles",
+        "Stalker profile library"
+      ],
+      "description": "Allows users to save multiple stalker profiles, list profile IDs, view details, load a profile into the current form, update existing profiles, and delete profiles; implemented via backend Map keyed by per-user profile IDs.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-8",
+      "title": "Incident reporting (create and list)",
+      "synonyms": [
+        "Incident form",
+        "Document incident"
+      ],
+      "description": "Enables authenticated users to submit incident reports with location, description, evidence notes, and additional notes; lists all incidents for the caller and supports selecting an incident to view full details.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-9",
+      "title": "Criminal Activity Report Number generation",
+      "synonyms": [
+        "CAR number",
+        "Incident ID format"
+      ],
+      "description": "Backend generates a date-based sequential incident identifier (used as both id and criminalActivityReportNumber) and the UI consistently displays it as 'Criminal Activity Report Number'.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-10",
+      "title": "Incident detail view with evidence and messages",
+      "synonyms": [
+        "IncidentDetail",
+        "Incident viewer"
+      ],
+      "description": "Provides a detailed incident view including incident metadata, evidence list (when available), and generated message list/generator access; includes a police reporting entrypoint for the incident.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-11",
+      "title": "Evidence metadata storage and retrieval (backend)",
+      "synonyms": [
+        "Evidence upload metadata",
+        "Evidence index"
+      ],
+      "description": "Backend supports uploading evidence metadata (storageId, filename, type, size) linked to an incident and retrieving all evidence metadata for an incident; frontend includes hooks and UI to display evidence files for an incident.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-12",
+      "title": "Message generation with tone and intensity selection",
+      "synonyms": [
+        "Warning generator",
+        "Legal-style message drafts"
+      ],
+      "description": "Allows generating messages for an incident with selectable MessageTone (directWarning, formalEvidence, documentationNotice) and optional ToneIntensity for direct warnings; messages are stored and retrievable per incident.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-13",
+      "title": "Message actions: copy, share, and SMS sending with logging",
+      "synonyms": [
+        "MessageList actions",
+        "SMS logging"
+      ],
+      "description": "Frontend supports copying and sharing message text via clipboard/Web Share API and (on mobile) opening the SMS app with a prefilled message; SMS usage is logged to the backend per principal for documentation.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-14",
+      "title": "Police department record management (CRUD)",
+      "synonyms": [
+        "Saved police departments",
+        "Department directory"
+      ],
+      "description": "Backend supports saving, listing, updating, and deleting police departments; frontend provides manual entry/edit/delete flows, dropdown selection, and tel: links for contact numbers.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-15",
+      "title": "Nearest police department placeholder lookup and refresh (frontend)",
+      "synonyms": [
+        "Police lookup",
+        "Zip-based department suggestion"
+      ],
+      "description": "Frontend attempts to derive a nearest police department from a zip code using a public ZIP geocoding API (zippopotam.us) and supports refreshing this derived info; used to prefill police reporting workflows.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-16",
+      "title": "Police report submission dialog and submission logging",
+      "synonyms": [
+        "PoliceReportDialog",
+        "Submit report"
+      ],
+      "description": "UI supports selecting evidence to include, optionally including victim info and an interactive summary flag, requires acknowledging a legal disclaimer, and logs the submission result + attached evidence in backend policeSubmissionLogs.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-17",
+      "title": "Police submission history (evidence record)",
+      "synonyms": [
+        "Submission logs",
+        "Evidence record"
+      ],
+      "description": "Displays the caller’s logged police submissions with status indicators, department details, timestamp formatting, victim-info inclusion, and attached evidence metadata with file icons and sizes.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-18",
+      "title": "Interactive incident summary view (timeline + patterns)",
+      "synonyms": [
+        "Full summary",
+        "InteractiveSummaryView"
+      ],
+      "description": "Fetches a backend-generated IncidentSummary and renders overview totals, optional pattern analysis sections, and a scrollable incident timeline showing evidence and messages; includes print support via window.print().",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-19",
+      "title": "App sharing messages and installation/share guide",
+      "synonyms": [
+        "InstallationGuide",
+        "Share templates"
+      ],
+      "description": "Backend provides share message templates by ShareMessageType; frontend fetches and displays them alongside downloadable social media images and offers share/copy/download flows, plus platform installation instructions.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-20",
+      "title": "Progressive Web App (PWA) offline/install support",
+      "synonyms": [
+        "Manifest",
+        "Service worker",
+        "Install prompt"
+      ],
+      "description": "Includes a web manifest, icons, a service worker with precache/runtime caching and offline fallback response, and a UI install prompt handling beforeinstallprompt and iOS 'Add to Home Screen' guidance.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-21",
+      "title": "Authenticated-only motivational video modal",
+      "synonyms": [
+        "MotivationalVideo",
+        "Private content"
+      ],
+      "description": "Shows a motivational video entrypoint only for authenticated users, with buffering/loading UI, manual play overlay, and dialog controls; backend includes gated access methods for motivational content.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-22",
+      "title": "Camera capture hook for evidence acquisition",
+      "synonyms": [
+        "useCamera",
+        "Camera utility"
+      ],
+      "description": "Implements a reusable hook for starting/stopping camera streams, switching facing mode, retrying on errors, and capturing photos to File objects (with configurable format/quality).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-23",
+      "title": "Crime help and external legal resource linking",
+      "synonyms": [
+        "CrimeHelp",
+        "Legal resources"
+      ],
+      "description": "Provides an educational 'Crime Help & Legal Resources' page with explanations of rights and definitions and a link out to womenslaw.org for more comprehensive guidance.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-24",
+      "title": "Theme switching and responsive UI foundation",
+      "synonyms": [
+        "Dark mode",
+        "Tailwind theme"
+      ],
+      "description": "Implements light/dark theme switching using next-themes and a Tailwind-based design system with custom OKLCH color tokens, gradients, and an extra-small breakpoint for very small phones.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-incident-detail-police-department-autofill-flow-to-use-the-backend-findnearestpolicedepartment-instead-of-the-zippopotam-us-placeholder-fetch-and-ensure-it-refreshes-when-stalker-address-fields-change-zip-code-and-or-full-address",
+      "title": "Update the incident detail police-department autofill flow to use the backend `findNearestPoliceDepartment` instead of the `zippopotam.us` placeholder fetch, and ensure it refreshes when stalker address fields change (zip code and/or full address).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-clear-user-facing-error-and-empty-result-handling-for-police-department-autofill-so-the-ui-distinguishes-between-a-missing-address-data-b-lookup-failed-due-to-an-error-and-c-lookup-completed-but-found-no-department-keep-all-user-facing-text-in-english",
+      "title": "Add clear, user-facing error and empty-result handling for police department autofill so the UI distinguishes between (a) missing address data, (b) lookup failed due to an error, and (c) lookup completed but found no department; keep all user-facing text in English.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Mobile-friendly navigation: group New Report + History + Evidence Record under a single \"Report!\" dropdown to avoid tab overlap/clutter on phones",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Add legal disclosure/waiver text and require an acknowledgment checkbox immediately before submitting a police report",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Improve police department discovery: Google-based nearest-department lookup from stalker address, display name/address/phone/email with click-to-call/email, auto-refresh on address change, and show a small italic disclaimer about verifying results",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Add manual police department entry/edit flow when lookup misses or lacks contact details; save for reuse and allow selection from a dropdown in future reports/submissions",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Add globally shared/\"Verified\" police departments directory so verified department contact info (e.g., East Norriton) can be reused by all users, while preserving privacy boundaries",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Add a dedicated \"Summarize All Incidents\" button on History to generate/view the interactive all-incident overview without entering the police submission flow",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Allow attaching/recording verified public-record links (court dockets/news URLs) on stalker profiles and/or incident reports for law-enforcement-ready documentation",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Replace the backend placeholder implementation of `generateMessage(incidentId, tone, intensity)` so it generates meaningful, tone-based message content using the incident’s stored details (location, description, evidenceNotes, additionalNotes, criminalActivityReportNumber) and the caller’s stalker profile (if present). The generated message must vary by `MessageTone` (#directWarning, #formalEvidence, #documentationNotice) and, for #directWarning only, vary by `ToneIntensity` (#calm, #firm, #severe, #veryHarsh).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Implement backend `findNearestPoliceDepartment(address : Text) : async ?PoliceDepartment` so it returns a non-null police department result when a valid address/zip is provided, instead of always returning `null`.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    }
+  ],
+  "architecturalNotes": [
+    "Frontend uses React with a hook-driven architecture and @tanstack/react-query for data fetching, caching, optimistic updates, and invalidation.",
+    "Authentication uses DFINITY Internet Identity via @dfinity/auth-client, exposed through a context provider (InternetIdentityProvider).",
+    "Backend is a Motoko actor with in-canister state stored in mo:core/Map collections (per-principal for most user data).",
+    "Role-based access control is implemented in Motoko via an AccessControl module plus MixinAuthorization; first-user admin bootstrap is gated by an environment variable token (CAFFEINE_ADMIN_TOKEN) and a user-provided secret.",
+    "Frontend actor creation is centralized in useActor; it creates an authenticated/anonymous actor and initializes access control using a secret read from the URL hash (getSecretParameter).",
+    "PWA support includes a web manifest, a custom service worker with precache + runtime cache, and a UI install prompt for iOS/Android.",
+    "UI stack is Tailwind CSS with Shadcn-style component primitives; theme switching uses next-themes.",
+    "Backend includes HTTP outcall helper module and blob-storage mixins (certificate/gateway authorization, dead-blob pruning), though not fully wired to end-user flows.",
+    "Navigation should support a compact/mobile-first mode: consolidate report-related views behind a \"Report!\" dropdown/menu on small screens to prevent overlapping tabs.",
+    "Police-department discovery may require external lookup integration; ensure caching keys include normalized address and provide a manual override/saved-directory fallback when external results omit phone/email.",
+    "Add a required legal-disclosure acknowledgment gating police submission (UI disables submit until checked); disclosure text should be versioned for auditability."
+  ],
+  "knownIssues": [
+    "Frontend evidence upload flow in IncidentForm is currently simulated (fake evidenceId/storageId) and does not call the real backend uploadEvidence mutation; useSaveEvidenceFile exists but is not used in the upload path.",
+    "Backend message generation (generateMessage) currently produces placeholder content (\"Generated message for incident...\") and does not incorporate incident details, stalker profile, or selected tone/intensity as implied by the UI copy.",
+    "Backend incident summary generation (generateIncidentSummary) returns empty patternAnalysis, messageHistory, and totals with evidenceCount/messageCount hardcoded to 0, despite timeline items containing evidence/messages.",
+    "Backend police department discovery/search is largely stubbed: findNearestPoliceDepartment returns null; cached address/police lookups rely on cache only. Frontend uses a third-party zip lookup (zippopotam.us) as a placeholder and does not integrate Google Places as comments suggest.",
+    "Frontend HTTP outcall hooks (useMakeGetOutcall/useMakePostOutcall) throw \"Backend function not implemented\" and are not connected to backend outcall helpers.",
+    "Police departments are stored in a single global Map keyed by department ID (not by user principal). Any authenticated user can read the full list via getAllPoliceDepartments, which is likely a privacy/tenancy issue.",
+    "Migration logic resets multiple counters (incident/message/stalker/evidence counters) to 0 while preserving existing stored entities, risking ID collisions for newly created records after migration.",
+    "Profile setup UI says \"Welcome to SafeReport\" while the app branding elsewhere is \"ReportHer\" (inconsistent naming).",
+    "frontend/src/components/AnalyticsDashboard.tsx and frontend/src/components/MaleUserWarningMockup.tsx are present but empty in this snapshot, indicating incomplete or removed UI features.",
+    "Access control initialization traps if CAFFEINE_ADMIN_TOKEN is not set in the canister environment; this can prevent authenticated actor initialization depending on deployment config.",
+    "IncidentForm supports a 'supplement report' UI selection tied to a stalker profile, but the backend IncidentReport type/storage does not record any stalker-profile association; this is currently UI-only.",
+    "User reports that auto-generated content still does not work as intended: Direct Warning / Evidence / Documentation generation remains placeholder or fails to generate meaningful text.",
+    "Police department auto-populate/autofill is not working reliably; lookup results may not refresh when the stalker address changes and contact details (phone/email) often do not appear.",
+    "Mobile UI: top-level tabs overlap/clutter on iPhone portrait mode; requires responsive navigation consolidation (e.g., dropdown/menu)."
+  ],
+  "isFixRequest": true,
+  "gameProjectType": "none",
+  "projectName": "ReportHer",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0,
+  "requiresBackendChanges": true,
+  "requiresFrontendChanges": true
+}

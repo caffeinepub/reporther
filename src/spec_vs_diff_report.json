@@ -1,0 +1,69 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-03T11:44:51.134Z",
+  "summary": "Frontend work shows an incident-detail flow now calling a backend `useFindNearestPoliceDepartment` mutation and refreshing when stalker address fields change, but the diff summary does not provide evidence that the backend implementations for `generateMessage` and `findNearestPoliceDepartment` were actually replaced/implemented. Several unrelated features appear to have been added/modified (e.g., Google/places-style data structures and installation/share messaging).",
+  "missing_requirements": [
+    {
+      "id": "REQ-1",
+      "requirement": "Replace the backend placeholder implementation of `generateMessage(incidentId, tone, intensity)` to generate meaningful tone-based content using incident details and caller stalker profile; enforce auth; persist generated messages.",
+      "reason": "The diff summary for `backend/main.mo` is truncated and does not include any `generateMessage` implementation changes or evidence of message content generation/persistence behavior beyond type definitions.",
+      "evidence": [
+        "backend/main.mo (truncated; no generateMessage implementation shown)"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Implement backend `findNearestPoliceDepartment(address : Text) : async ?PoliceDepartment` to return a non-null department for valid inputs (null only when none can be determined) while keeping authentication checks.",
+      "reason": "Although a new `backend/police-department.mo` type module was added and frontend calls a nearest-department hook, the diff summary does not show the actual backend `findNearestPoliceDepartment` method implementation or evidence it no longer always returns null and still enforces authentication.",
+      "evidence": [
+        "backend/main.mo (truncated; no findNearestPoliceDepartment implementation shown)",
+        "backend/police-department.mo"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Add clear, user-facing error and empty-result handling for police department autofill distinguishing missing address data vs lookup error vs lookup completed but no department found (English text).",
+      "reason": "The `IncidentDetail.tsx` snippet shows auto-refresh setting the department to null for missing address and on errors, but does not show any UI prompt/message distinguishing the three cases; the manual refresh handler is truncated before its toast logic.",
+      "evidence": [
+        "frontend/src/components/IncidentDetail.tsx (truncated; auto-refresh clears state silently; manual refresh handler truncated)"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Introduction of Google/Places-style candidate data structures and HTTP outcall plumbing for place lookup (appears like a specific provider integration).",
+      "reason": "The BuildRequest explicitly notes Google Places integration is a non-goal; only functional nearest-department lookup is required, not provider-specific structures.",
+      "evidence": [
+        "backend/main.mo (imports `OutCall \"http-outcalls/outcall\"`; defines `PlaceCandidate`, `AddressPlaceCandidate`, `LatLong`, `AddressLocation` types)"
+      ]
+    },
+    {
+      "description": "Changes/additions to installation/share messaging content and local share message enum/types.",
+      "reason": "Not requested by any REQ; BuildRequest focuses on message auto-generation for incidents and police department autofill.",
+      "evidence": [
+        "frontend/src/components/InstallationGuide.tsx"
+      ]
+    },
+    {
+      "description": "Addition of `project_state.json` describing broader scope items (mobile navigation, legal disclosure checkbox, Google-based lookup, etc.).",
+      "reason": "Not requested deliverable; appears to be meta/project documentation unrelated to implementing REQ-1..REQ-4.",
+      "evidence": [
+        "project_state.json"
+      ]
+    }
+  ],
+  "confidence": 0.62,
+  "changed_files": [
+    "backend/main.mo",
+    "backend/police-department.mo",
+    "backend/stalker-profile.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/components/IncidentDetail.tsx",
+    "frontend/src/components/InstallationGuide.tsx",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/types.ts",
+    "project_state.json"
+  ]
+}

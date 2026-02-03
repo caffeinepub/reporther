@@ -1,0 +1,50 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-update-the-incident-detail-police-department-autofill-flow-to-use-the-backend-findnearestpolicedepartment-instead-of-the-zippopotam-us-placeholder-fetch-and-ensure-it-refreshes-when-stalker-address-fields-change-zip-code-and-or-full-address",
+      "featureTitle": "Update the incident detail police-department autofill flow to use the backend `findNearestPoliceDepartment` instead of the `zippopotam.us` placeholder fetch, and ensure it refreshes when stalker address fields change (zip code and/or full address).",
+      "files": [
+        "frontend/src/components/IncidentDetail.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0",
+        "camera@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-clear-user-facing-error-and-empty-result-handling-for-police-department-autofill-so-the-ui-distinguishes-between-a-missing-address-data-b-lookup-failed-due-to-an-error-and-c-lookup-completed-but-found-no-department-keep-all-user-facing-text-in-english",
+      "featureTitle": "Add clear, user-facing error and empty-result handling for police department autofill so the UI distinguishes between (a) missing address data, (b) lookup failed due to an error, and (c) lookup completed but found no department; keep all user-facing text in English.",
+      "files": [
+        "frontend/src/components/IncidentDetail.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0",
+        "camera@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

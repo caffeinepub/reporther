@@ -1,0 +1,94 @@
+{
+  "kind": "build_request",
+  "title": "Fix message auto-generation and police department autofill (ReportHer)",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Replace the backend placeholder implementation of `generateMessage(incidentId, tone, intensity)` so it generates meaningful, tone-based message content using the incident’s stored details (location, description, evidenceNotes, additionalNotes, criminalActivityReportNumber) and the caller’s stalker profile (if present). The generated message must vary by `MessageTone` (#directWarning, #formalEvidence, #documentationNotice) and, for #directWarning only, vary by `ToneIntensity` (#calm, #firm, #severe, #veryHarsh).",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "It did not"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Generating a message no longer returns a generic placeholder like \"Generated message for incident ...\" and instead produces multi-sentence, human-readable content that references the incident and selected tone (and intensity when applicable).",
+        "For the same incident, changing `tone` produces clearly different output appropriate to the selected tone.",
+        "For `MessageTone.#directWarning`, changing `intensity` produces clearly different output appropriate to the selected intensity; for the other tones, intensity is ignored and does not change output.",
+        "`generateMessage` continues to enforce existing authorization checks (only the incident owner or admin can generate messages).",
+        "Generated messages are persisted and appear in `getMessagesForIncident(incidentId)` after generation."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement backend `findNearestPoliceDepartment(address : Text) : async ?PoliceDepartment` so it returns a non-null police department result when a valid address/zip is provided, instead of always returning `null`.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "It did not"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Calling `findNearestPoliceDepartment` with a non-empty address/zip returns `?PoliceDepartment` for valid inputs (and returns `null` only when no department can be determined).",
+        "`findNearestPoliceDepartment` continues to require authenticated users (keeps the existing permission check)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Update the incident detail police-department autofill flow to use the backend `findNearestPoliceDepartment` instead of the `zippopotam.us` placeholder fetch, and ensure it refreshes when stalker address fields change (zip code and/or full address).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "It did not"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On Incident Detail, when stalker info includes a zip code and/or full address, the app requests the nearest department via the backend and populates `currentPoliceDepartment` when a result is returned.",
+        "Changing stalker zip code or full address triggers a refresh that updates (or clears) the populated department accordingly.",
+        "The manual “Refresh Police Dept” button triggers the same backend-based refresh and shows a success toast when a department is found and set, and an error toast when it cannot be found.",
+        "No direct calls to `https://api.zippopotam.us/us/...` remain in the Incident Detail police autofill path."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Add clear, user-facing error and empty-result handling for police department autofill so the UI distinguishes between (a) missing address data, (b) lookup failed due to an error, and (c) lookup completed but found no department; keep all user-facing text in English.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "It did not"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If stalker info has no zip code/full address, the UI prompts the user to add address info (zip code minimum) and does not attempt lookup.",
+        "If lookup throws/returns an error, the UI shows an actionable error message and does not leave the app in a perpetual loading state.",
+        "If lookup returns `null`, the UI indicates that no department could be found and suggests using manual entry in the Stalker Info area."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor in `backend/main.mo` (no additional backend services).",
+    "Do not edit files under `frontend/src/components/ui` or the immutable hook paths listed in SYSTEM_CONTEXT.",
+    "All user-facing text added/changed by this build request must be in English."
+  ],
+  "nonGoals": [
+    "Implementing Google Places integration specifically (the requirement is functional nearest-department lookup via the backend API, not a particular provider).",
+    "Adding new police department fields (e.g., email) to the shared `PoliceDepartment` type unless required to make autofill function."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

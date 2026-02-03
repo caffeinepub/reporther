@@ -1,0 +1,45 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Incident Detail police department autofill via backend lookup (ReportHer)",
+  "requirements": [
+    {
+      "id": "REQ-3",
+      "summary": "Switch Incident Detail police-department autofill to use backend nearest-department lookup and refresh when stalker address fields change.",
+      "acceptanceCriteria": [
+        "On Incident Detail, when stalker info includes a zip code and/or full address, the app requests the nearest department via the backend and populates currentPoliceDepartment when a result is returned.",
+        "Changing stalker zip code or full address triggers a refresh that updates (or clears) the populated department accordingly.",
+        "The manual “Refresh Police Dept” button triggers the same backend-based refresh and shows a success toast when a department is found and set, and an error toast when it cannot be found.",
+        "No direct calls to https://api.zippopotam.us/us/... remain in the Incident Detail police autofill path."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a React Query mutation hook for requesting the nearest police department via the backendInterface.findNearestPoliceDepartment(address) backend capability, including safe handling when the actor is not available."
+        },
+        {
+          "path": "frontend/src/components/IncidentDetail.tsx",
+          "operation": "modify",
+          "description": "Replace the zippopotam.us placeholder fetch logic with a shared refresh function that calls the new backend-based nearest-department lookup hook, and wire refresh to trigger on stalkerInfo.zipCode/fullAddress changes as well as from the “Refresh Police Dept” button."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Add clear UI states and messaging for missing address data, lookup errors, and empty lookup results in the police department autofill flow (English-only).",
+      "acceptanceCriteria": [
+        "If stalker info has no zip code/full address, the UI prompts the user to add address info (zip code minimum) and does not attempt lookup.",
+        "If lookup throws/returns an error, the UI shows an actionable error message and does not leave the app in a perpetual loading state.",
+        "If lookup returns null, the UI indicates that no department could be found and suggests using manual entry in the Stalker Info area."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/IncidentDetail.tsx",
+          "operation": "modify",
+          "description": "Update the police department alert/toast logic to distinguish: (a) missing zip/full address (do not attempt lookup, show prompt), (b) lookup error (actionable error message + ensure loading state clears), and (c) lookup completed but returned null (explicit 'not found' guidance suggesting manual entry), keeping all user-facing text in English."
+        }
+      ]
+    }
+  ]
+}
