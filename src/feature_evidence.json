@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-incident-detail-police-department-autofill-flow-to-use-the-backend-findnearestpolicedepartment-instead-of-the-zippopotam-us-placeholder-fetch-and-ensure-it-refreshes-when-stalker-address-fields-change-zip-code-and-or-full-address",
-      "featureTitle": "Update the incident detail police-department autofill flow to use the backend `findNearestPoliceDepartment` instead of the `zippopotam.us` placeholder fetch, and ensure it refreshes when stalker address fields change (zip code and/or full address).",
+      "featureId": "feature-fix-the-incident-evidence-upload-flow-so-uploaded-evidence-is-actually-persisted-in-the-backend-and-appears-in-the-police-report-submission-dialog-as-selectable-attachments-specifically-1-update-frontend-src-components-incidentform-tsx-so-uploadfile-calls-the-existing-react-query-mutation-usesaveevidencefile-which-calls-backend-uploadevidence-instead-of-generating-a-fake-evidenceid-2-stop-calling-uselinkevidencetoincident-as-a-no-op-for-linking-and-treat-backend-uploadevidence-incidentid-as-the-source-of-truth-for-linking-3-ensure-the-incident-evidence-react-query-cache-is-invalidated-refetched-after-each-successful-upload-so-incidentdetail-and-policereportdialog-receive-a-non-empty-availableevidence-when-evidence-exists",
+      "featureTitle": "Fix the incident evidence upload flow so uploaded evidence is actually persisted in the backend and appears in the Police Report submission dialog as selectable attachments. Specifically: (1) update `frontend/src/components/IncidentForm.tsx` so `uploadFile()` calls the existing React Query mutation `useSaveEvidenceFile()` (which calls backend `uploadEvidence`) instead of generating a fake evidenceId; (2) stop calling `useLinkEvidenceToIncident()` as a no-op for linking and treat backend `uploadEvidence(incidentId, ...)` as the source of truth for linking; (3) ensure the incident evidence React Query cache is invalidated/refetched after each successful upload so `IncidentDetail` and `PoliceReportDialog` receive a non-empty `availableEvidence` when evidence exists.",
       "files": [
-        "frontend/src/components/IncidentDetail.tsx",
+        "frontend/src/components/IncidentForm.tsx",
         "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
@@ -25,10 +25,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-clear-user-facing-error-and-empty-result-handling-for-police-department-autofill-so-the-ui-distinguishes-between-a-missing-address-data-b-lookup-failed-due-to-an-error-and-c-lookup-completed-but-found-no-department-keep-all-user-facing-text-in-english",
-      "featureTitle": "Add clear, user-facing error and empty-result handling for police department autofill so the UI distinguishes between (a) missing address data, (b) lookup failed due to an error, and (c) lookup completed but found no department; keep all user-facing text in English.",
+      "featureId": "feature-add-clear-user-facing-error-handling-for-evidence-upload-failures-in-frontend-src-components-incidentform-tsx-if-an-upload-fails-show-an-english-toast-message-that-a-states-the-specific-file-failed-to-attach-and-b-suggests-retrying-also-ensure-the-ui-does-not-mark-the-file-as-uploaded-successfully-unless-the-backend-uploadevidence-call-succeeded-and-returned-evidencemeta",
+      "featureTitle": "Add clear, user-facing error handling for evidence upload failures in `frontend/src/components/IncidentForm.tsx`: if an upload fails, show an English toast message that (a) states the specific file failed to attach, and (b) suggests retrying. Also ensure the UI does not mark the file as “Uploaded successfully” unless the backend `uploadEvidence` call succeeded and returned `EvidenceMeta`.",
       "files": [
-        "frontend/src/components/IncidentDetail.tsx"
+        "frontend/src/components/IncidentForm.tsx"
       ],
       "components": [
         "authorization@4.0.0",

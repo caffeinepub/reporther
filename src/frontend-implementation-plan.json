@@ -1,43 +1,42 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Incident Detail police department autofill via backend lookup (ReportHer)",
+  "title": "Fix incident evidence upload persistence and Police Report attachment selection",
   "requirements": [
     {
       "id": "REQ-3",
-      "summary": "Switch Incident Detail police-department autofill to use backend nearest-department lookup and refresh when stalker address fields change.",
+      "summary": "Persist uploaded incident evidence via existing save mutation, remove no-op linking, and ensure evidence caches refetch so Incident Detail and Police Report dialog show selectable attachments.",
       "acceptanceCriteria": [
-        "On Incident Detail, when stalker info includes a zip code and/or full address, the app requests the nearest department via the backend and populates currentPoliceDepartment when a result is returned.",
-        "Changing stalker zip code or full address triggers a refresh that updates (or clears) the populated department accordingly.",
-        "The manual “Refresh Police Dept” button triggers the same backend-based refresh and shows a success toast when a department is found and set, and an error toast when it cannot be found.",
-        "No direct calls to https://api.zippopotam.us/us/... remain in the Incident Detail police autofill path."
+        "After documenting an incident and uploading at least 1 file, the incident detail view shows the uploaded evidence under “Attached Evidence”.",
+        "Opening “Report to Police” for an incident with uploaded evidence shows those evidence items under “Attach Evidence”, and the user can select/deselect them and submit.",
+        "No part of the evidence upload flow uses fake/generated evidence IDs (e.g., `BigInt(Date.now())`) as a substitute for the backend’s returned `EvidenceMeta.id`.",
+        "`useLinkEvidenceToIncident()` is no longer used to imply evidence linking; evidence appears for an incident solely by calling backend `uploadEvidence(incidentId, ...)`."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/IncidentForm.tsx",
           "operation": "modify",
-          "description": "Add a React Query mutation hook for requesting the nearest police department via the backendInterface.findNearestPoliceDepartment(address) backend capability, including safe handling when the actor is not available."
+          "description": "Update `uploadFile()` to call `useSaveEvidenceFile().mutateAsync(...)` with the newly created incidentId and use the returned `EvidenceMeta.id` as the stored evidenceId; remove all usage of `useLinkEvidenceToIncident()` and any fake/generated evidence IDs; ensure the local file upload state only sets `uploaded: true` when the mutation succeeds and stores returned metadata needed by the UI."
         },
         {
-          "path": "frontend/src/components/IncidentDetail.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Replace the zippopotam.us placeholder fetch logic with a shared refresh function that calls the new backend-based nearest-department lookup hook, and wire refresh to trigger on stalkerInfo.zipCode/fullAddress changes as well as from the “Refresh Police Dept” button."
+          "description": "Enhance `useSaveEvidenceFile()` to invalidate/refetch the incident evidence React Query cache after successful uploads (e.g., `['incidentEvidence', incidentId]`) so `IncidentDetail` and `PoliceReportDialog` receive updated non-empty `availableEvidence` without a full page refresh."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Add clear UI states and messaging for missing address data, lookup errors, and empty lookup results in the police department autofill flow (English-only).",
+      "summary": "Add user-facing error handling for evidence upload failures and ensure UI upload success state only reflects successful backend uploads.",
       "acceptanceCriteria": [
-        "If stalker info has no zip code/full address, the UI prompts the user to add address info (zip code minimum) and does not attempt lookup.",
-        "If lookup throws/returns an error, the UI shows an actionable error message and does not leave the app in a perpetual loading state.",
-        "If lookup returns null, the UI indicates that no department could be found and suggests using manual entry in the Stalker Info area."
+        "If backend evidence upload fails, the file remains in a non-uploaded state in the UI and a toast explains the failure and suggests retrying.",
+        "If backend evidence upload succeeds, the UI marks the file as uploaded and the incident evidence list updates without requiring a full page refresh."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/IncidentDetail.tsx",
+          "path": "frontend/src/components/IncidentForm.tsx",
           "operation": "modify",
-          "description": "Update the police department alert/toast logic to distinguish: (a) missing zip/full address (do not attempt lookup, show prompt), (b) lookup error (actionable error message + ensure loading state clears), and (c) lookup completed but returned null (explicit 'not found' guidance suggesting manual entry), keeping all user-facing text in English."
+          "description": "Add explicit failure handling in the evidence upload flow: on mutation error, keep the file in a non-uploaded state, stop the uploading/progress UI, and show an English toast that includes the specific filename and suggests retrying; ensure the UI never shows “Uploaded successfully” unless `uploadEvidence` succeeded and returned `EvidenceMeta`."
         }
       ]
     }

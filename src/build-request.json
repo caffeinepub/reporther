@@ -1,91 +1,52 @@
 {
   "kind": "build_request",
-  "title": "Fix message auto-generation and police department autofill (ReportHer)",
+  "title": "Fix evidence attachment so Police Report screen can select incident evidence",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Replace the backend placeholder implementation of `generateMessage(incidentId, tone, intensity)` so it generates meaningful, tone-based message content using the incident’s stored details (location, description, evidenceNotes, additionalNotes, criminalActivityReportNumber) and the caller’s stalker profile (if present). The generated message must vary by `MessageTone` (#directWarning, #formalEvidence, #documentationNotice) and, for #directWarning only, vary by `ToneIntensity` (#calm, #firm, #severe, #veryHarsh).",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-9"
-        ],
-        "quotes": [
-          "It did not"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Generating a message no longer returns a generic placeholder like \"Generated message for incident ...\" and instead produces multi-sentence, human-readable content that references the incident and selected tone (and intensity when applicable).",
-        "For the same incident, changing `tone` produces clearly different output appropriate to the selected tone.",
-        "For `MessageTone.#directWarning`, changing `intensity` produces clearly different output appropriate to the selected intensity; for the other tones, intensity is ignored and does not change output.",
-        "`generateMessage` continues to enforce existing authorization checks (only the incident owner or admin can generate messages).",
-        "Generated messages are persisted and appear in `getMessagesForIncident(incidentId)` after generation."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Implement backend `findNearestPoliceDepartment(address : Text) : async ?PoliceDepartment` so it returns a non-null police department result when a valid address/zip is provided, instead of always returning `null`.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-9"
-        ],
-        "quotes": [
-          "It did not"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Calling `findNearestPoliceDepartment` with a non-empty address/zip returns `?PoliceDepartment` for valid inputs (and returns `null` only when no department can be determined).",
-        "`findNearestPoliceDepartment` continues to require authenticated users (keeps the existing permission check)."
-      ]
-    },
-    {
       "id": "REQ-3",
-      "text": "Update the incident detail police-department autofill flow to use the backend `findNearestPoliceDepartment` instead of the `zippopotam.us` placeholder fetch, and ensure it refreshes when stalker address fields change (zip code and/or full address).",
-      "target": "frontend",
+      "text": "Fix the incident evidence upload flow so uploaded evidence is actually persisted in the backend and appears in the Police Report submission dialog as selectable attachments. Specifically: (1) update `frontend/src/components/IncidentForm.tsx` so `uploadFile()` calls the existing React Query mutation `useSaveEvidenceFile()` (which calls backend `uploadEvidence`) instead of generating a fake evidenceId; (2) stop calling `useLinkEvidenceToIncident()` as a no-op for linking and treat backend `uploadEvidence(incidentId, ...)` as the source of truth for linking; (3) ensure the incident evidence React Query cache is invalidated/refetched after each successful upload so `IncidentDetail` and `PoliceReportDialog` receive a non-empty `availableEvidence` when evidence exists.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-9"
+          "msg-4"
         ],
         "quotes": [
-          "It did not"
+          "i can't attach evidence from the report"
         ]
       },
       "acceptanceCriteria": [
-        "On Incident Detail, when stalker info includes a zip code and/or full address, the app requests the nearest department via the backend and populates `currentPoliceDepartment` when a result is returned.",
-        "Changing stalker zip code or full address triggers a refresh that updates (or clears) the populated department accordingly.",
-        "The manual “Refresh Police Dept” button triggers the same backend-based refresh and shows a success toast when a department is found and set, and an error toast when it cannot be found.",
-        "No direct calls to `https://api.zippopotam.us/us/...` remain in the Incident Detail police autofill path."
+        "After documenting an incident and uploading at least 1 file, the incident detail view shows the uploaded evidence under “Attached Evidence”.",
+        "Opening “Report to Police” for an incident with uploaded evidence shows those evidence items under “Attach Evidence”, and the user can select/deselect them and submit.",
+        "No part of the evidence upload flow uses fake/generated evidence IDs (e.g., `BigInt(Date.now())`) as a substitute for the backend’s returned `EvidenceMeta.id`.",
+        "`useLinkEvidenceToIncident()` is no longer used to imply evidence linking; evidence appears for an incident solely by calling backend `uploadEvidence(incidentId, ...)`."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Add clear, user-facing error and empty-result handling for police department autofill so the UI distinguishes between (a) missing address data, (b) lookup failed due to an error, and (c) lookup completed but found no department; keep all user-facing text in English.",
+      "text": "Add clear, user-facing error handling for evidence upload failures in `frontend/src/components/IncidentForm.tsx`: if an upload fails, show an English toast message that (a) states the specific file failed to attach, and (b) suggests retrying. Also ensure the UI does not mark the file as “Uploaded successfully” unless the backend `uploadEvidence` call succeeded and returned `EvidenceMeta`.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-9"
+          "msg-4"
         ],
         "quotes": [
-          "It did not"
+          "i can't attach evidence from the report"
         ]
       },
       "acceptanceCriteria": [
-        "If stalker info has no zip code/full address, the UI prompts the user to add address info (zip code minimum) and does not attempt lookup.",
-        "If lookup throws/returns an error, the UI shows an actionable error message and does not leave the app in a perpetual loading state.",
-        "If lookup returns `null`, the UI indicates that no department could be found and suggests using manual entry in the Stalker Info area."
+        "If backend evidence upload fails, the file remains in a non-uploaded state in the UI and a toast explains the failure and suggests retrying.",
+        "If backend evidence upload succeeds, the UI marks the file as uploaded and the incident evidence list updates without requiring a full page refresh."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in `backend/main.mo` (no additional backend services).",
-    "Do not edit files under `frontend/src/components/ui` or the immutable hook paths listed in SYSTEM_CONTEXT.",
-    "All user-facing text added/changed by this build request must be in English."
+    "Backend must remain a single-actor Motoko canister; do not introduce additional backend services.",
+    "Do not edit any frontend files under `frontend/src/components/ui` or any paths listed in `frontend.immutablePaths` in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Implementing Google Places integration specifically (the requirement is functional nearest-department lookup via the backend API, not a particular provider).",
-    "Adding new police department fields (e.g., email) to the shared `PoliceDepartment` type unless required to make autofill function."
+    "Do not implement actual binary file blob storage/download in this change (store evidence metadata only, as currently supported by backend `uploadEvidence`).",
+    "Do not change Police Department lookup or the overall Police Report submission flow beyond what is necessary to make evidence attachment work."
   ],
   "imageRequirements": {
     "required": [],

@@ -1,13 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Fix ReportHer’s message auto-generation to produce meaningful, tone-based content and make police department autofill work reliably via the backend.
+**Goal:** Fix incident evidence uploads so they are persisted by the backend and become selectable attachments in the “Submit Police Report” dialog.
 
 **Planned changes:**
-- Replace the placeholder backend `generateMessage(incidentId, tone, intensity)` to generate multi-sentence, human-readable messages using stored incident details and (when present) the caller’s stalker profile, varying by selected tone and (for direct warnings only) by intensity.
-- Ensure generated messages remain authorization-protected and are persisted so they appear in the incident’s message list after generation.
-- Implement backend `findNearestPoliceDepartment(address)` to return a best-match police department for valid address/zip inputs (returning null only when no department can be determined), while preserving existing authentication checks.
-- Update the Incident Detail police-department autofill to call the backend lookup (removing the zippopotam.us placeholder path), and refresh results when stalker zip code and/or full address changes or when the user taps “Refresh Police Dept”.
-- Add clear UI handling for police department autofill states: missing address data (prompt user to add it), lookup error (actionable error message without stuck loading), and lookup completed with no result (suggest manual entry), with all user-facing text in English.
+- Update `frontend/src/components/IncidentForm.tsx` so `uploadFile()` uses the existing React Query mutation `useSaveEvidenceFile()` (backend `uploadEvidence`) and uses the returned `EvidenceMeta.id` (no fake/generated IDs).
+- Remove reliance on `useLinkEvidenceToIncident()` for linking evidence; treat `uploadEvidence(incidentId, ...)` as the source of truth for associating evidence to an incident.
+- Invalidate/refetch the incident evidence React Query cache after each successful upload so `IncidentDetail` and `PoliceReportDialog` receive updated, non-empty `availableEvidence` when evidence exists.
+- Add user-facing error handling in `IncidentForm.tsx`: on upload failure, show an English toast that names the file that failed and suggests retrying; only mark a file as uploaded when the backend upload succeeds and returns `EvidenceMeta`.
 
-**User-visible outcome:** Users can generate incident messages that clearly reflect the chosen tone (and intensity for direct warnings) and see them saved in the incident’s messages; police department autofill on Incident Detail updates from the backend based on stalker address changes, with clear feedback for missing info, errors, or no results.
+**User-visible outcome:** After uploading evidence to an incident, the evidence appears under “Attached Evidence” in the incident detail view and is selectable under “Attach Evidence” when submitting a police report; failed uploads show a clear retry message and are not shown as successfully uploaded.

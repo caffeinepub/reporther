@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
+import { waitForActorReady } from '../utils/waitForActorReady';
+import { getActorErrorMessage } from '../utils/actorInitErrorMessage';
 import type {
   UserProfile,
   IncidentReport,
@@ -43,8 +45,14 @@ export function useSaveCallerUserProfile() {
 
   return useMutation({
     mutationFn: async (profile: UserProfile) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.saveCallerUserProfile(profile);
+      if (!actor) {
+        await waitForActorReady(queryClient);
+      }
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      return currentActor.saveCallerUserProfile(profile);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
@@ -74,8 +82,21 @@ export function useSaveStalkerInfo() {
 
   return useMutation({
     mutationFn: async (stalker: StalkerProfile) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.saveStalkerProfile(stalker);
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
+      
+      // Get the actor again after waiting
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.saveStalkerProfile(stalker);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stalkerInfo'] });
@@ -91,8 +112,21 @@ export function useAddStalkerProfile() {
 
   return useMutation({
     mutationFn: async (profile: StalkerProfile) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.saveMultipleStalkerProfile(profile);
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
+      
+      // Get the actor again after waiting
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.saveMultipleStalkerProfile(profile);
     },
     onSuccess: () => {
       const principalStr = identity?.getPrincipal().toString();
@@ -154,8 +188,21 @@ export function useUpdateStalkerProfile() {
 
   return useMutation({
     mutationFn: async (data: { profileId: bigint; profile: StalkerProfile }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.updateStalkerProfile(data.profileId, data.profile);
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
+      
+      // Get the actor again after waiting
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.updateStalkerProfile(data.profileId, data.profile);
     },
     onSuccess: (_, variables) => {
       const principalStr = identity?.getPrincipal().toString();
@@ -175,8 +222,21 @@ export function useDeleteStalkerProfile() {
 
   return useMutation({
     mutationFn: async (profileId: bigint) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.deleteStalkerProfile(profileId);
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
+      
+      // Get the actor again after waiting
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.deleteStalkerProfile(profileId);
     },
     onSuccess: () => {
       const principalStr = identity?.getPrincipal().toString();
@@ -222,8 +282,20 @@ export function useSavePoliceDepartment() {
 
   return useMutation({
     mutationFn: async (department: PoliceDepartment) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.savePoliceDepartment(department);
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
+      
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.savePoliceDepartment(department);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allPoliceDepartments'] });
@@ -237,8 +309,20 @@ export function useUpdatePoliceDepartment() {
 
   return useMutation({
     mutationFn: async (data: { deptId: bigint; department: PoliceDepartment }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.updatePoliceDepartment(data.deptId, data.department);
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
+      
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.updatePoliceDepartment(data.deptId, data.department);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allPoliceDepartments'] });
@@ -252,8 +336,20 @@ export function useDeletePoliceDepartment() {
 
   return useMutation({
     mutationFn: async (deptId: bigint) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.deletePoliceDepartment(deptId);
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
+      
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.deletePoliceDepartment(deptId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allPoliceDepartments'] });
@@ -435,6 +531,7 @@ export function useGetIncidentEvidence(incidentId: string | null) {
 
 export function useSaveEvidenceFile() {
   const { actor } = useActor();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (data: {
@@ -453,20 +550,8 @@ export function useSaveEvidenceFile() {
         data.fileSize
       );
     },
-  });
-}
-
-export function useLinkEvidenceToIncident() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: { incidentId: string; evidenceId: bigint }) => {
-      if (!actor) throw new Error('Actor not available');
-      // Evidence is automatically linked when uploaded
-      return Promise.resolve();
-    },
     onSuccess: (_, variables) => {
+      // Invalidate evidence cache for this incident so it refetches
       queryClient.invalidateQueries({ 
         queryKey: ['incidentEvidence', variables.incidentId] 
       });

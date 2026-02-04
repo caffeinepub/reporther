@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGetStalkerInfo, useSaveStalkerInfo, useAddStalkerProfile, useGetAllPoliceDepartments, useSavePoliceDepartment, useUpdatePoliceDepartment, useDeletePoliceDepartment } from '../hooks/useQueries';
+import { useActorReadiness } from '../hooks/useActorReadiness';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +29,7 @@ export default function StalkerRecord({ onPoliceDepartmentFound }: StalkerRecord
   const saveDepartment = useSavePoliceDepartment();
   const updateDepartment = useUpdatePoliceDepartment();
   const deleteDepartment = useDeletePoliceDepartment();
+  const { isReady: actorReady, isInitializing: actorInitializing, hasError: actorHasError } = useActorReadiness();
 
   const [activeTab, setActiveTab] = useState('current');
   const [formData, setFormData] = useState<{
@@ -423,6 +425,10 @@ export default function StalkerRecord({ onPoliceDepartmentFound }: StalkerRecord
     a[1].name.localeCompare(b[1].name)
   );
 
+  // Determine if save buttons should be disabled
+  const isSaveDisabled = !actorReady || actorInitializing || saveStalkerInfo.isPending;
+  const isSaveAsProfileDisabled = !actorReady || actorInitializing || addStalkerProfile.isPending;
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -443,6 +449,15 @@ export default function StalkerRecord({ onPoliceDepartmentFound }: StalkerRecord
           This data is encrypted and only accessible to you. Save multiple profiles for different individuals. Only the name is required.
         </AlertDescription>
       </Alert>
+
+      {actorHasError && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertDescription>
+            <strong>Connection Error:</strong> Unable to connect to the backend service. Please try logging out and logging back in, or refresh the page.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-muted/50 border-2 border-primary/20">
@@ -633,10 +648,15 @@ export default function StalkerRecord({ onPoliceDepartmentFound }: StalkerRecord
               <div className="flex flex-wrap gap-3 justify-end">
                 <Button
                   onClick={handleSaveAsProfile}
-                  disabled={addStalkerProfile.isPending}
+                  disabled={isSaveAsProfileDisabled}
                   className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-6"
                 >
-                  {addStalkerProfile.isPending ? (
+                  {actorInitializing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Connecting...
+                    </>
+                  ) : addStalkerProfile.isPending ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                       Saving...
@@ -650,10 +670,15 @@ export default function StalkerRecord({ onPoliceDepartmentFound }: StalkerRecord
                 </Button>
                 <Button
                   onClick={handleSave}
-                  disabled={saveStalkerInfo.isPending}
+                  disabled={isSaveDisabled}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8"
                 >
-                  {saveStalkerInfo.isPending ? (
+                  {actorInitializing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Connecting...
+                    </>
+                  ) : saveStalkerInfo.isPending ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                       Saving...

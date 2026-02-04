@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, FileImage, FileAudio, FileText, AlertCircle, User, BarChart3, AlertTriangle } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Shield, FileImage, FileAudio, FileText, AlertCircle, User, BarChart3, AlertTriangle, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import type { PoliceDepartment, EvidenceMeta } from '../backend';
 
@@ -31,9 +32,10 @@ export default function PoliceReportDialog({
   onSubmitSuccess,
 }: PoliceReportDialogProps) {
   const [selectedEvidence, setSelectedEvidence] = useState<Set<bigint>>(new Set());
-  const [includeVictimInfo, setIncludeVictimInfo] = useState(true);
+  const [includeVictimInfo, setIncludeVictimInfo] = useState(false);
   const [includeSummary, setIncludeSummary] = useState(false);
   const [acknowledgedDisclaimer, setAcknowledgedDisclaimer] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const submitReport = useSubmitPoliceReportWithEvidence();
   const { data: victimProfile } = useGetVictimProfile();
 
@@ -51,13 +53,15 @@ export default function PoliceReportDialog({
   };
 
   const toggleEvidence = (evidenceId: bigint) => {
-    const newSelected = new Set(selectedEvidence);
-    if (newSelected.has(evidenceId)) {
-      newSelected.delete(evidenceId);
-    } else {
-      newSelected.add(evidenceId);
-    }
-    setSelectedEvidence(newSelected);
+    setSelectedEvidence((prev) => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(evidenceId)) {
+        newSelected.delete(evidenceId);
+      } else {
+        newSelected.add(evidenceId);
+      }
+      return newSelected;
+    });
   };
 
   const selectAll = () => {
@@ -80,7 +84,7 @@ export default function PoliceReportDialog({
 
   const handleSubmit = async () => {
     if (!acknowledgedDisclaimer) {
-      toast.error('Please acknowledge the legal disclaimer before submitting');
+      toast.error('Please acknowledge the legal disclosure before submitting');
       return;
     }
 
@@ -101,7 +105,11 @@ export default function PoliceReportDialog({
       onSubmitSuccess();
       onOpenChange(false);
       // Reset state when closing
+      setSelectedEvidence(new Set());
+      setIncludeVictimInfo(false);
+      setIncludeSummary(false);
       setAcknowledgedDisclaimer(false);
+      setAdvancedOpen(false);
     } catch (error) {
       toast.error('Failed to submit police report');
       console.error(error);
@@ -112,20 +120,20 @@ export default function PoliceReportDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-primary" />
+          <DialogTitle className="flex items-center gap-2 flex-wrap">
+            <Shield className="w-5 h-5 text-primary flex-shrink-0" />
             <span>Submit Police Report - </span>
             <span className="font-normal">Criminal Activity Report Number </span>
             <span className="font-bold">{criminalActivityReportNumber}</span>
           </DialogTitle>
           <DialogDescription>
-            Review and select evidence to include in your police report submission
+            Review your report before submission. Optional attachments are available below.
           </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="flex-1 pr-4">
           <div className="space-y-6">
-            {/* Department Information */}
+            {/* Core: Department Information */}
             <div className="bg-muted/50 rounded-lg p-4 border">
               <h4 className="font-semibold text-sm mb-2">Submitting to:</h4>
               <div className="space-y-1 text-sm">
@@ -136,126 +144,167 @@ export default function PoliceReportDialog({
               </div>
             </div>
 
-            {/* Victim Information Section */}
-            {victimProfile && (
-              <>
-                <Separator />
+            {/* Core: Note about optional attachments */}
+            <p className="text-sm text-muted-foreground">
+              Optional attachments can be added under Advanced Attachments below. Not required for submission.
+            </p>
+
+            <Separator />
+
+            {/* Advanced Attachments (Optional) - Collapsed by default */}
+            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-between p-4 h-auto hover:bg-muted/50"
+                >
+                  <div className="text-left">
+                    <h4 className="font-semibold text-sm">Advanced Attachments (Optional)</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Attach additional context if available. Not required for submission.
+                    </p>
+                  </div>
+                  <ChevronDown
+                    className={`w-5 h-5 text-muted-foreground transition-transform flex-shrink-0 ml-2 ${
+                      advancedOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </Button>
+              </CollapsibleTrigger>
+
+              <CollapsibleContent className="space-y-6 mt-4">
+                {/* Victim/Survivor Information */}
+                {victimProfile && (
+                  <>
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-sm flex items-center gap-2">
+                          <User className="w-4 h-4" />
+                          Victim/Survivor Information
+                        </h4>
+                        <Checkbox
+                          id="includeVictimInfo"
+                          checked={includeVictimInfo}
+                          onCheckedChange={(checked) => setIncludeVictimInfo(checked as boolean)}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Include your personal information in the report. Optional.
+                      </p>
+                      {includeVictimInfo && (
+                        <div className="bg-primary/5 rounded-lg p-3 border border-primary/20 text-sm space-y-1">
+                          {victimProfile.name && <p><span className="text-muted-foreground">Name:</span> {victimProfile.name}</p>}
+                          {victimProfile.dob && <p><span className="text-muted-foreground">Date of Birth:</span> {victimProfile.dob}</p>}
+                          {victimProfile.address && <p><span className="text-muted-foreground">Address:</span> {victimProfile.address}</p>}
+                          {victimProfile.email && <p><span className="text-muted-foreground">Email:</span> {victimProfile.email}</p>}
+                          {victimProfile.phoneNumber && <p><span className="text-muted-foreground">Phone:</span> {victimProfile.phoneNumber}</p>}
+                        </div>
+                      )}
+                    </div>
+                    <Separator />
+                  </>
+                )}
+
+                {/* Include Incident Timeline Summary */}
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold text-sm flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      Victim/Survivor Information
-                    </h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4" />
+                      <Label htmlFor="includeSummary" className="font-semibold text-sm cursor-pointer">
+                        Include Incident Timeline Summary
+                      </Label>
+                    </div>
                     <Checkbox
-                      id="includeVictimInfo"
-                      checked={includeVictimInfo}
-                      onCheckedChange={(checked) => setIncludeVictimInfo(checked as boolean)}
+                      id="includeSummary"
+                      checked={includeSummary}
+                      onCheckedChange={(checked) => setIncludeSummary(checked as boolean)}
                     />
                   </div>
-                  {includeVictimInfo && (
-                    <div className="bg-primary/5 rounded-lg p-3 border border-primary/20 text-sm space-y-1">
-                      {victimProfile.name && <p><span className="text-muted-foreground">Name:</span> {victimProfile.name}</p>}
-                      {victimProfile.dob && <p><span className="text-muted-foreground">Date of Birth:</span> {victimProfile.dob}</p>}
-                      {victimProfile.address && <p><span className="text-muted-foreground">Address:</span> {victimProfile.address}</p>}
-                      {victimProfile.email && <p><span className="text-muted-foreground">Email:</span> {victimProfile.email}</p>}
-                      {victimProfile.phoneNumber && <p><span className="text-muted-foreground">Phone:</span> {victimProfile.phoneNumber}</p>}
+                  <p className="text-xs text-muted-foreground">
+                    Include comprehensive pattern analysis and timeline data to demonstrate escalation. Optional.
+                  </p>
+                </div>
+
+                <Separator />
+
+                {/* Attach Evidence */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-sm">
+                      Attach Evidence ({selectedEvidence.size} of {availableEvidence.length} selected)
+                    </h4>
+                    {availableEvidence.length > 0 && (
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={selectAll}>
+                          Select All
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={deselectAll}>
+                          Deselect All
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Evidence can be added later. Incident details alone are valid.
+                  </p>
+
+                  {availableEvidence.length === 0 ? (
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        No evidence files attached to this incident. You can still submit the report with incident details only.
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <div className="space-y-2">
+                      {availableEvidence.map((evidence) => (
+                        <div
+                          key={evidence.id.toString()}
+                          className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                            selectedEvidence.has(evidence.id)
+                              ? 'bg-primary/5 border-primary'
+                              : 'bg-card hover:bg-muted/50'
+                          }`}
+                          onClick={() => toggleEvidence(evidence.id)}
+                        >
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={selectedEvidence.has(evidence.id)}
+                              onCheckedChange={() => toggleEvidence(evidence.id)}
+                            />
+                          </div>
+                          <div className="w-10 h-10 flex items-center justify-center bg-primary/10 rounded">
+                            {getFileIcon(evidence.fileType)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{evidence.originalFilename}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {evidence.fileType} • {formatFileSize(evidence.fileSize)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedEvidence.size > 0 && (
+                    <div className="mt-3 p-3 bg-muted/50 rounded-lg border">
+                      <p className="text-sm font-medium">
+                        Total selected: {selectedEvidence.size} file{selectedEvidence.size !== 1 ? 's' : ''} ({getTotalSize()})
+                      </p>
                     </div>
                   )}
                 </div>
-              </>
-            )}
+              </CollapsibleContent>
+            </Collapsible>
 
-            {/* Include Summary Option */}
-            <Separator />
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4" />
-                  <Label htmlFor="includeSummary" className="font-semibold text-sm cursor-pointer">
-                    Include Interactive Summary
-                  </Label>
-                </div>
-                <Checkbox
-                  id="includeSummary"
-                  checked={includeSummary}
-                  onCheckedChange={(checked) => setIncludeSummary(checked as boolean)}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Include comprehensive pattern analysis and timeline data to demonstrate escalation
-              </p>
-            </div>
-
-            {/* Evidence Selection */}
-            <Separator />
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="font-semibold text-sm">
-                  Select Evidence to Include ({selectedEvidence.size} of {availableEvidence.length} selected)
-                </h4>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={selectAll}>
-                    Select All
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={deselectAll}>
-                    Deselect All
-                  </Button>
-                </div>
-              </div>
-
-              {availableEvidence.length === 0 ? (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    No evidence files attached to this incident. You can still submit the report with incident details only.
-                  </AlertDescription>
-                </Alert>
-              ) : (
-                <div className="space-y-2">
-                  {availableEvidence.map((evidence) => (
-                    <div
-                      key={evidence.id.toString()}
-                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedEvidence.has(evidence.id)
-                          ? 'bg-primary/5 border-primary'
-                          : 'bg-card hover:bg-muted/50'
-                      }`}
-                      onClick={() => toggleEvidence(evidence.id)}
-                    >
-                      <Checkbox
-                        checked={selectedEvidence.has(evidence.id)}
-                        onCheckedChange={() => toggleEvidence(evidence.id)}
-                      />
-                      <div className="w-10 h-10 flex items-center justify-center bg-primary/10 rounded">
-                        {getFileIcon(evidence.fileType)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{evidence.originalFilename}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {evidence.fileType} • {formatFileSize(evidence.fileSize)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {selectedEvidence.size > 0 && (
-                <div className="mt-3 p-3 bg-muted/50 rounded-lg border">
-                  <p className="text-sm font-medium">
-                    Total selected: {selectedEvidence.size} file{selectedEvidence.size !== 1 ? 's' : ''} ({getTotalSize()})
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Legal Disclaimer Section */}
+            {/* Core: Legal Disclosure Section */}
             <Separator />
             <div className="border-2 border-primary/30 rounded-lg p-4 bg-primary/5">
               <div className="flex items-start gap-3 mb-3">
                 <AlertTriangle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
-                  <h4 className="font-bold text-sm mb-2 text-primary">Legal Disclaimer</h4>
+                  <h4 className="font-bold text-sm mb-2 text-primary">Legal Disclosure</h4>
                   <p className="text-sm leading-relaxed italic text-foreground/90">
                     ReportHer is a platform for documentation and awareness. Users are solely responsible for the accuracy of all reports and submissions. The developers, owners, and hosting providers are not liable for false reporting, data loss, technical errors, or third-party integrations. Use of this application constitutes acceptance of these terms.
                   </p>
@@ -266,7 +315,7 @@ export default function PoliceReportDialog({
                   id="acknowledgeDisclaimer"
                   checked={acknowledgedDisclaimer}
                   onCheckedChange={(checked) => setAcknowledgedDisclaimer(checked as boolean)}
-                  aria-label="Acknowledge legal disclaimer"
+                  aria-label="Acknowledge legal disclosure"
                   className="mt-0.5"
                 />
                 <Label

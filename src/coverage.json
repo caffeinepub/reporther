@@ -1,80 +1,48 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-03T11:44:51.170Z",
+  "generatedAt": "2026-02-04T02:43:35.725Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
+    "total": 2,
     "implemented": 2,
     "items": [
       {
-        "id": "REQ-1",
-        "summary": "Replace the backend placeholder implementation of `generateMessage(incidentId, tone, intensity)` so it generates meaningful, tone-based message content using the incident’s stored details (location, description, evidenceNotes, additionalNotes, criminalActivityReportNumber) and the caller’s stalker profile (if present). The generated message must vary by `MessageTone` (#directWarning, #formalEvidence, #documentationNotice) and, for #directWarning only, vary by `ToneIntensity` (#calm, #firm, #severe, #veryHarsh).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Implement backend `findNearestPoliceDepartment(address : Text) : async ?PoliceDepartment` so it returns a non-null police department result when a valid address/zip is provided, instead of always returning `null`.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
         "id": "REQ-3",
-        "summary": "Update the incident detail police-department autofill flow to use the backend `findNearestPoliceDepartment` instead of the `zippopotam.us` placeholder fetch, and ensure it refreshes when stalker address fields change (zip code and/or full address).",
+        "summary": "Fix the incident evidence upload flow so uploaded evidence is actually persisted in the backend and appears in the Police Report submission dialog as selectable attachments. Specifically: (1) update `frontend/src/components/IncidentForm.tsx` so `uploadFile()` calls the existing React Query mutation `useSaveEvidenceFile()` (which calls backend `uploadEvidence`) instead of generating a fake evidenceId; (2) stop calling `useLinkEvidenceToIncident()` as a no-op for linking and treat backend `uploadEvidence(incidentId, ...)` as the source of truth for linking; (3) ensure the incident evidence React Query cache is invalidated/refetched after each successful upload so `IncidentDetail` and `PoliceReportDialog` receive a non-empty `availableEvidence` when evidence exists.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/IncidentDetail.tsx"
+          "frontend/src/components/IncidentForm.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/IncidentDetail.tsx"
+          "frontend/src/components/IncidentForm.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Add clear, user-facing error and empty-result handling for police department autofill so the UI distinguishes between (a) missing address data, (b) lookup failed due to an error, and (c) lookup completed but found no department; keep all user-facing text in English.",
+        "summary": "Add clear, user-facing error handling for evidence upload failures in `frontend/src/components/IncidentForm.tsx`: if an upload fails, show an English toast message that (a) states the specific file failed to attach, and (b) suggests retrying. Also ensure the UI does not mark the file as “Uploaded successfully” unless the backend `uploadEvidence` call succeeded and returned `EvidenceMeta`.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/IncidentDetail.tsx"
+          "frontend/src/components/IncidentForm.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/IncidentDetail.tsx"
+          "frontend/src/components/IncidentForm.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/police-department.mo",
-    "backend/stalker-profile.mo",
     "build-request.json",
-    "build-template/Dockerfile",
-    "build-template/LICENSE",
-    "build-template/README.md",
-    "build-template/deploy.sh",
-    "build-template/icp.yaml",
-    "build-template/src/backend/canister.yaml",
-    "build-template/src/frontend/canister.yaml",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/IncidentDetail.tsx",
-    "frontend/src/components/InstallationGuide.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/components/IncidentForm.tsx",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/types.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

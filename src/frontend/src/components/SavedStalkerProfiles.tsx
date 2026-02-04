@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useGetStalkerProfiles, useGetStalkerProfileById, useUpdateStalkerProfile, useDeleteStalkerProfile } from '../hooks/useQueries';
+import { useActorReadiness } from '../hooks/useActorReadiness';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,7 @@ export default function SavedStalkerProfiles({ onLoadProfile }: SavedStalkerProf
   const { data: profileIds = [], isLoading } = useGetStalkerProfiles();
   const updateProfile = useUpdateStalkerProfile();
   const deleteProfile = useDeleteStalkerProfile();
+  const { hasError: actorHasError } = useActorReadiness();
 
   const [selectedProfileId, setSelectedProfileId] = useState<bigint | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -173,6 +175,15 @@ export default function SavedStalkerProfiles({ onLoadProfile }: SavedStalkerProf
   return (
     <>
       <div className="space-y-4">
+        {actorHasError && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-5 w-5" />
+            <AlertDescription>
+              <strong>Connection Error:</strong> Unable to connect to the backend service. Profile operations may fail. Please try logging out and logging back in.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Alert className="border-primary/50 bg-primary/5">
           <User className="h-5 w-5 text-primary" />
           <AlertDescription className="font-medium text-foreground">

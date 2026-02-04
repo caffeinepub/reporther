@@ -381,24 +381,24 @@ actor {
           case (?#firm) {
             "Firm Warning\n" #
             "----------------------\n" #
-            "You have been formally notified that your documented history of predatory, harassing, and illicit behavior has been submitted to the authorities and this platform. All legal loopholes and enablers of your repeated incidents have been mapped and analyzed, revealing patterns that highlight your attempts to exploit the legal system and maintain false innocence.\n" #
-            "You must immediately cease your manipulative and criminal conduct. Your past attempts to minimize your actions and hide behind legal technicalities are fully documented. If this behavior continues, we are prepared to take direct legal action and pursue the maximum charges against you, holding all collaborators and enablers accountable.\n" #
+            "You have been formally notified that your documented history of predatory, harassing, and illicit behavior has been submitted to the authorities and this platform. All legal loopholes and your repeated incidents have been mapped and analyzed, revealing patterns that highlight your attempts to exploit the legal system and maintain false innocence.\n" #
+            "You must immediately cease your manipulative and criminal conduct. Your past attempts to minimize your actions and hide behind legal technicalities are fully documented. If this behavior continues, we are prepared to take direct legal action and pursue the maximum charges against you.\n" #
             "Your actions will no longer remain hidden or ignored. This is your final warning: change your behavior, take full responsibility, and stop all predatory activities. We have compiled overwhelming evidence and are ready to permanently expose your illegal and harmful actions.\n";
           };
           case (?#severe) {
             "Severe Warning\n" #
             "----------------------\n" #
             "You are facing a formal ultimatum from this platform and legal representatives. Your manipulative, predatory, and illicit behavior has been documented across multiple cases. We have filed and escalated your records to ensure you face the maximum possible legal and social consequences.\n" #
-            "If your actions persist, you will face immediate, permanent legal action. Your attempts to exploit the legal system and maintain a facade of innocence will be publicly exposed. We are prepared to use all available resources to bring you to justice and hold your collaborators and enablers responsible.\n" #
-            "This is your last warning. Cooperate fully, change your behavior, and take immediate steps to prove your accountability. Continued illegal and harmful actions will result in criminal charges and significant consequences for everyone involved.\n";
+            "If your actions persist, you will face immediate, permanent legal action. Your attempts to exploit the legal system and maintain a facade of innocence will be publicly exposed. We are prepared to use all available resources to bring you to justice.\n" #
+            "This is your last warning. Cooperate fully, change your behavior, and take immediate steps to prove your accountability. Continued illegal and harmful actions will result in criminal charges and significant consequences for you.\n";
           };
           case (?#veryHarsh) {
             "Ultimate Warning\n" #
             "----------------------\n" #
-            "You are now officially and permanently labeled as a predator, manipulator, and criminal on this platform and within the legal system of this platform and law firm. We have completed a full analysis of your illegal and abusive behavior patterns, uncovering your repeated attempts to exploit legal loopholes and enablers.\n" #
-            "Your continued efforts to hide behind technicalities and collaborators have been systematically eliminated. Every aspect of your actions is now fully traceable and transparent, preventing any future manipulation or concealment. Your ongoing denial and avoidance only yes jeopardizes your legal standing but also exposes your enablers to severe legal consequences.\n" #
+            "You are now officially and permanently labeled as a predator, manipulator, and criminal on this platform and within the legal system of this platform and law firm. We have completed a full analysis of your illegal and abusive behavior patterns, uncovering your repeated attempts to exploit legal loopholes.\n" #
+            "Your continued efforts to hide behind technicalities have been systematically eliminated. Every aspect of your actions is now fully traceable and transparent, preventing any future manipulation or concealment. Your ongoing denial and avoidance only jeopardizes your legal standing.\n" #
             "Your attempts to minimize and hide the severity of these incidents have only confirmed your criminal intent. The undeniable evidence against you will follow you permanently, with the documentation timestamped and preserved for official investigations.\n" #
-            "This is a permanent record of your actions. Further misconduct will lead to the complete and irreversible destruction of your legal and social reputation, as well as those of your collaborators. We are prepared to enforce the strictest legal measures available to hold all parties fully accountable.\n";
+            "This is a permanent record of your actions. Further misconduct will lead to the complete and irreversible destruction of your legal and social reputation. We are prepared to enforce the strictest legal measures available to hold you fully accountable.\n";
           };
           case (null) {
             "Standard Warning\n" #

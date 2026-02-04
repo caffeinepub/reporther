@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSubmitIncident, useSaveEvidenceFile, useLinkEvidenceToIncident, useGetAllStalkerProfiles } from '../hooks/useQueries';
+import { useSubmitIncident, useSaveEvidenceFile, useGetAllStalkerProfiles } from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,7 +50,6 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
 
   const submitIncident = useSubmitIncident();
   const saveEvidenceFile = useSaveEvidenceFile();
-  const linkEvidence = useLinkEvidenceToIncident();
   const { data: allProfiles = [], isLoading: profilesLoading } = useGetAllStalkerProfiles();
 
   const validateForm = (): boolean => {
@@ -137,7 +136,7 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const uploadFile = async (fileUpload: FileUpload, index: number): Promise<bigint | null> => {
+  const uploadFile = async (fileUpload: FileUpload, index: number, incidentId: string): Promise<bigint | null> => {
     try {
       setFiles((prev) =>
         prev.map((f, i) => (i === index ? { ...f, uploading: true, progress: 0 } : f))
@@ -155,37 +154,37 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
         );
       }, 200);
 
-      // For now, use a simple storage ID based on timestamp and filename
+      // Generate storage ID
       const storageId = `evidence_${Date.now()}_${fileUpload.file.name}`;
 
-      // Backend function not available yet, so we'll skip this for now
-      // const evidenceMeta = await saveEvidenceFile.mutateAsync({
-      //   fileId: storageId,
-      //   filename: fileUpload.file.name,
-      //   fileType: fileUpload.file.type,
-      //   fileSize: BigInt(fileUpload.file.size),
-      // });
+      // Call backend to upload evidence
+      const evidenceMeta = await saveEvidenceFile.mutateAsync({
+        incidentId,
+        storageId,
+        filename: fileUpload.file.name,
+        fileType: fileUpload.file.type,
+        fileSize: BigInt(fileUpload.file.size),
+      });
 
       clearInterval(progressInterval);
-
-      // Simulate successful upload with a fake ID
-      const fakeId = BigInt(Date.now());
 
       setFiles((prev) =>
         prev.map((f, i) =>
           i === index
-            ? { ...f, uploading: false, uploaded: true, progress: 100, evidenceId: fakeId, storageId }
+            ? { ...f, uploading: false, uploaded: true, progress: 100, evidenceId: evidenceMeta.id, storageId }
             : f
         )
       );
 
-      return fakeId;
-    } catch (error) {
+      return evidenceMeta.id;
+    } catch (error: any) {
       console.error('Error uploading file:', error);
       setFiles((prev) =>
         prev.map((f, i) => (i === index ? { ...f, uploading: false, progress: 0 } : f))
       );
-      toast.error(`Failed to upload ${fileUpload.file.name}`);
+      toast.error(`Failed to upload ${fileUpload.file.name}`, {
+        description: error?.message || 'Please try again. If the issue persists, you can upload evidence later.',
+      });
       return null;
     }
   };
@@ -208,19 +207,14 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
         additionalNotes: formData.additionalNotes.trim(),
       });
 
-      // Upload files and link to incident
+      // Upload files to the newly created incident
       if (files.length > 0) {
         toast.info('Uploading evidence files...');
 
         for (let i = 0; i < files.length; i++) {
           const fileUpload = files[i];
           if (!fileUpload.uploaded) {
-            const evidenceId = await uploadFile(fileUpload, i);
-            if (evidenceId) {
-              await linkEvidence.mutateAsync({ incidentId: incident.id, evidenceId });
-            }
-          } else if (fileUpload.evidenceId) {
-            await linkEvidence.mutateAsync({ incidentId: incident.id, evidenceId: fileUpload.evidenceId });
+            await uploadFile(fileUpload, i, incident.id);
           }
         }
       }
