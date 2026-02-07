@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Fix incident evidence uploads so they are persisted by the backend and become selectable attachments in the “Submit Police Report” dialog.
+**Goal:** Ensure the user’s selected police department persists and is reliably available when opening or reloading the “Report to Police” flow.
 
 **Planned changes:**
-- Update `frontend/src/components/IncidentForm.tsx` so `uploadFile()` uses the existing React Query mutation `useSaveEvidenceFile()` (backend `uploadEvidence`) and uses the returned `EvidenceMeta.id` (no fake/generated IDs).
-- Remove reliance on `useLinkEvidenceToIncident()` for linking evidence; treat `uploadEvidence(incidentId, ...)` as the source of truth for associating evidence to an incident.
-- Invalidate/refetch the incident evidence React Query cache after each successful upload so `IncidentDetail` and `PoliceReportDialog` receive updated, non-empty `availableEvidence` when evidence exists.
-- Add user-facing error handling in `IncidentForm.tsx`: on upload failure, show an English toast that names the file that failed and suggests retrying; only mark a file as uploaded when the backend upload succeeds and returns `EvidenceMeta`.
+- Backend: Add per-user persistence endpoints to get/save (and optionally clear) the caller’s saved police department selection.
+- Frontend: Update the Stalker Info police department selector to save via the backend API and invalidate/refetch relevant React Query caches; show English success/error toasts.
+- Frontend: Update the incident detail / Report to Police entry flow to load and prefer the saved police department on mount and across refresh, avoiding automatic overwrite by auto-lookup unless no saved department exists or the user explicitly refreshes.
+- Frontend: When no saved department exists and no valid address is available, show an actionable English message and keep “Report to Police” disabled without crashing.
 
-**User-visible outcome:** After uploading evidence to an incident, the evidence appears under “Attached Evidence” in the incident detail view and is selectable under “Attach Evidence” when submitting a police report; failed uploads show a clear retry message and are not shown as successfully uploaded.
+**User-visible outcome:** A previously saved police department continues to appear as the “Submitting to” department in the police report dialog even after navigating to an incident or refreshing the page, and the report action remains safely disabled with guidance when no department can be determined.

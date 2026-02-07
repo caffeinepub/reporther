@@ -2,10 +2,33 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-incident-evidence-upload-flow-so-uploaded-evidence-is-actually-persisted-in-the-backend-and-appears-in-the-police-report-submission-dialog-as-selectable-attachments-specifically-1-update-frontend-src-components-incidentform-tsx-so-uploadfile-calls-the-existing-react-query-mutation-usesaveevidencefile-which-calls-backend-uploadevidence-instead-of-generating-a-fake-evidenceid-2-stop-calling-uselinkevidencetoincident-as-a-no-op-for-linking-and-treat-backend-uploadevidence-incidentid-as-the-source-of-truth-for-linking-3-ensure-the-incident-evidence-react-query-cache-is-invalidated-refetched-after-each-successful-upload-so-incidentdetail-and-policereportdialog-receive-a-non-empty-availableevidence-when-evidence-exists",
-      "featureTitle": "Fix the incident evidence upload flow so uploaded evidence is actually persisted in the backend and appears in the Police Report submission dialog as selectable attachments. Specifically: (1) update `frontend/src/components/IncidentForm.tsx` so `uploadFile()` calls the existing React Query mutation `useSaveEvidenceFile()` (which calls backend `uploadEvidence`) instead of generating a fake evidenceId; (2) stop calling `useLinkEvidenceToIncident()` as a no-op for linking and treat backend `uploadEvidence(incidentId, ...)` as the source of truth for linking; (3) ensure the incident evidence React Query cache is invalidated/refetched after each successful upload so `IncidentDetail` and `PoliceReportDialog` receive a non-empty `availableEvidence` when evidence exists.",
+      "featureId": "feature-ensure-the-selected-police-department-persists-and-is-available-when-the-user-opens-or-reloads-the-incident-report-to-police-flow-instead-of-resetting-to-null-or-being-lost-between-pages",
+      "featureTitle": "Ensure the selected police department persists and is available when the user opens (or reloads) the incident “Report to Police” flow, instead of resetting to null or being lost between pages.",
       "files": [
-        "frontend/src/components/IncidentForm.tsx",
+        "frontend/src/components/IncidentDetail.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0",
+        "camera@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-frontend-update-the-stalker-info-police-department-ui-to-save-the-selected-department-via-the-new-backend-persistence-api-and-invalidate-refetch-relevant-react-query-caches-so-subsequent-page-loads-use-the-saved-value",
+      "featureTitle": "Frontend: Update the Stalker Info / police department UI to save the selected department via the new backend persistence API and invalidate/refetch relevant React Query caches so subsequent page loads use the saved value.",
+      "files": [
+        "frontend/src/components/StalkerRecord.tsx",
         "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
@@ -25,10 +48,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-clear-user-facing-error-handling-for-evidence-upload-failures-in-frontend-src-components-incidentform-tsx-if-an-upload-fails-show-an-english-toast-message-that-a-states-the-specific-file-failed-to-attach-and-b-suggests-retrying-also-ensure-the-ui-does-not-mark-the-file-as-uploaded-successfully-unless-the-backend-uploadevidence-call-succeeded-and-returned-evidencemeta",
-      "featureTitle": "Add clear, user-facing error handling for evidence upload failures in `frontend/src/components/IncidentForm.tsx`: if an upload fails, show an English toast message that (a) states the specific file failed to attach, and (b) suggests retrying. Also ensure the UI does not mark the file as “Uploaded successfully” unless the backend `uploadEvidence` call succeeded and returned `EvidenceMeta`.",
+      "featureId": "feature-frontend-update-incident-detail-report-to-police-entry-logic-so-it-loads-and-prefers-the-user-s-saved-police-department-on-mount-and-does-not-overwrite-it-with-the-auto-lookup-effect-unless-the-user-explicitly-refreshes-or-no-saved-department-exists",
+      "featureTitle": "Frontend: Update incident detail / report-to-police entry logic so it loads and prefers the user’s saved police department on mount, and does not overwrite it with the auto-lookup effect unless the user explicitly refreshes or no saved department exists.",
       "files": [
-        "frontend/src/components/IncidentForm.tsx"
+        "frontend/src/components/IncidentDetail.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",

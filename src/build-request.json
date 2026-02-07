@@ -1,52 +1,88 @@
 {
   "kind": "build_request",
-  "title": "Fix evidence attachment so Police Report screen can select incident evidence",
-  "priority": "high",
+  "title": "Fix police department persistence when loading the Report to Police page",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-3",
-      "text": "Fix the incident evidence upload flow so uploaded evidence is actually persisted in the backend and appears in the Police Report submission dialog as selectable attachments. Specifically: (1) update `frontend/src/components/IncidentForm.tsx` so `uploadFile()` calls the existing React Query mutation `useSaveEvidenceFile()` (which calls backend `uploadEvidence`) instead of generating a fake evidenceId; (2) stop calling `useLinkEvidenceToIncident()` as a no-op for linking and treat backend `uploadEvidence(incidentId, ...)` as the source of truth for linking; (3) ensure the incident evidence React Query cache is invalidated/refetched after each successful upload so `IncidentDetail` and `PoliceReportDialog` receive a non-empty `availableEvidence` when evidence exists.",
+      "id": "REQ-1",
+      "text": "Ensure the selected police department persists and is available when the user opens (or reloads) the incident “Report to Police” flow, instead of resetting to null or being lost between pages.",
       "target": "both",
       "source": {
         "messageIds": [
-          "msg-4"
+          "recent-messages-10"
         ],
         "quotes": [
-          "i can't attach evidence from the report"
+          "the police department won't save when loading to the report page"
         ]
       },
       "acceptanceCriteria": [
-        "After documenting an incident and uploading at least 1 file, the incident detail view shows the uploaded evidence under “Attached Evidence”.",
-        "Opening “Report to Police” for an incident with uploaded evidence shows those evidence items under “Attach Evidence”, and the user can select/deselect them and submit.",
-        "No part of the evidence upload flow uses fake/generated evidence IDs (e.g., `BigInt(Date.now())`) as a substitute for the backend’s returned `EvidenceMeta.id`.",
-        "`useLinkEvidenceToIncident()` is no longer used to imply evidence linking; evidence appears for an incident solely by calling backend `uploadEvidence(incidentId, ...)`."
+        "After the user sets/saves a police department in the Stalker Info area and navigates to an incident detail page, the \"Submitting to\" department shown in the police report dialog matches the saved department.",
+        "Refreshing the browser while on the incident detail page still results in a police department being available for \"Report to Police\" (assuming one was previously saved).",
+        "If no police department has been saved and no valid address is available, the app shows an actionable message and keeps \"Report to Police\" disabled (no crash)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Backend: Add explicit per-user persistence APIs for police department selection (store and retrieve the caller’s saved police department, and optionally clear it), so the frontend can load the saved department on the report page without relying on transient UI state.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "recent-messages-10"
+        ],
+        "quotes": [
+          "the police department won't save when loading to the report page"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend exposes a query method to fetch the caller’s saved police department (returns null when not set).",
+        "Backend exposes an update method to save the caller’s police department (idempotent overwrite).",
+        "Saved police department data is retained across page navigation and canister calls (and across upgrade if the project already uses stable state for user data; use migration only if required by existing stable layout)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Frontend: Update the Stalker Info / police department UI to save the selected department via the new backend persistence API and invalidate/refetch relevant React Query caches so subsequent page loads use the saved value.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages-10"
+        ],
+        "quotes": [
+          "the police department won't save when loading to the report page"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Saving/choosing a police department triggers a successful mutation and shows an English success toast; failures show an English error toast.",
+        "React Query caches for the saved police department are invalidated on success, and a reload of the page reflects the saved department without additional user action."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Add clear, user-facing error handling for evidence upload failures in `frontend/src/components/IncidentForm.tsx`: if an upload fails, show an English toast message that (a) states the specific file failed to attach, and (b) suggests retrying. Also ensure the UI does not mark the file as “Uploaded successfully” unless the backend `uploadEvidence` call succeeded and returned `EvidenceMeta`.",
+      "text": "Frontend: Update incident detail / report-to-police entry logic so it loads and prefers the user’s saved police department on mount, and does not overwrite it with the auto-lookup effect unless the user explicitly refreshes or no saved department exists.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "recent-messages-10"
         ],
         "quotes": [
-          "i can't attach evidence from the report"
+          "the police department won't save when loading to the report page"
         ]
       },
       "acceptanceCriteria": [
-        "If backend evidence upload fails, the file remains in a non-uploaded state in the UI and a toast explains the failure and suggests retrying.",
-        "If backend evidence upload succeeds, the UI marks the file as uploaded and the incident evidence list updates without requiring a full page refresh."
+        "When a saved department exists, the incident detail page enables \"Report to Police\" without requiring an auto-lookup call.",
+        "Auto-refresh/lookup does not clear or replace the saved department automatically; manual \"Refresh Police Dept\" may update it according to the designed behavior.",
+        "The PoliceReportDialog always receives a non-null department object when the button is enabled and opened."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single-actor Motoko canister; do not introduce additional backend services.",
-    "Do not edit any frontend files under `frontend/src/components/ui` or any paths listed in `frontend.immutablePaths` in SYSTEM_CONTEXT."
+    "Backend must remain a single Motoko actor (all logic in backend/main.mo).",
+    "Do not edit files under frontend/src/components/ui or other immutablePaths listed in SYSTEM_CONTEXT; compose them instead.",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Do not implement actual binary file blob storage/download in this change (store evidence metadata only, as currently supported by backend `uploadEvidence`).",
-    "Do not change Police Department lookup or the overall Police Report submission flow beyond what is necessary to make evidence attachment work."
+    "Adding third-party mapping/geolocation integrations beyond the existing backend lookup method.",
+    "Implementing real-time updates (e.g., WebSockets) for police department changes."
   ],
   "imageRequirements": {
     "required": [],

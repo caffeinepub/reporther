@@ -15,6 +15,10 @@ import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
 import OutCall "http-outcalls/outcall";
 
+import Migration "migration";
+
+// Use migration for police submission logs to include a narrative field
+(with migration = Migration.run)
 actor {
   type StalkerProfile = StalkerProfile.StalkerProfile;
   type PoliceDepartment = PoliceDepartment.PoliceDepartment;
@@ -61,6 +65,7 @@ actor {
     additionalNotes : Text;
   };
 
+  // Updated police submission log type with narrative field
   public type PoliceSubmissionLog = {
     timestamp : Int;
     department : PoliceDepartment;
@@ -69,6 +74,7 @@ actor {
     victimInfoIncluded : Bool;
     victimInfo : ?VictimProfile;
     includedSummary : Bool;
+    narrative : Text;
   };
 
   public type UserProfile = {
@@ -219,6 +225,9 @@ actor {
   let policeDepartments = Map.empty<Nat, PoliceDepartment>();
   var policeDepartmentCounter = 0;
 
+  // NEW: Persist user police department selection
+  let userSelectedDepartments = Map.empty<Principal, PoliceDepartment>();
+
   // Motivational video storage - only accessible to authenticated users
   let motivationalVideoStorageId = "motivational-video-storage-id";
   let accessControlState = AccessControl.initState();
@@ -320,6 +329,30 @@ actor {
         "Install for FREE at `https://reporther-2cs.caffeine.xyz.\n`";
       };
     };
+  };
+
+  // NEW Feature: Save the selected department for the caller
+  public shared ({ caller }) func saveSelectedDepartment(persistedDepartment : PoliceDepartment) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can store police department selection");
+    };
+    userSelectedDepartments.add(caller, persistedDepartment);
+  };
+
+  // NEW Feature: Retrieve the previously selected department for the caller (or null if none)
+  public query ({ caller }) func getSelectedDepartment() : async ?PoliceDepartment {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access police department selection");
+    };
+    userSelectedDepartments.get(caller);
+  };
+
+  // NEW Feature: Remove/clear the user's selected department
+  public shared ({ caller }) func clearSelectedDepartment() : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can clear police department selection");
+    };
+    userSelectedDepartments.remove(caller);
   };
 
   public shared ({ caller }) func generateMessage(
@@ -484,7 +517,6 @@ actor {
     };
   };
 
-  // Motivational video access - only for authenticated users
   public query ({ caller }) func getMotivationalVideoAccess() : async Bool {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can access motivational content");
@@ -795,6 +827,7 @@ actor {
     };
   };
 
+  // Fixed: Now validates that all attached evidence belongs to the caller
   public shared ({ caller }) func logPoliceSubmission(
     department : PoliceDepartment,
     submissionResult : Text,
@@ -802,9 +835,24 @@ actor {
     victimInfoIncluded : Bool,
     victimInfo : ?VictimProfile,
     includedSummary : Bool,
+    narrative : Text,
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can log police submissions");
+    };
+
+    // Validate that all attached evidence belongs to the caller
+    for (evidence in attachedEvidence.vals()) {
+      switch (evidenceStore.get(evidence.id)) {
+        case (null) {
+          Runtime.trap("Invalid evidence: Evidence ID " # evidence.id.toText() # " does not exist");
+        };
+        case (?storedEvidence) {
+          if (storedEvidence.uploadedBy != caller and not AccessControl.isAdmin(accessControlState, caller)) {
+            Runtime.trap("Unauthorized: Cannot attach evidence that does not belong to you");
+          };
+        };
+      };
     };
 
     let log : PoliceSubmissionLog = {
@@ -815,6 +863,7 @@ actor {
       victimInfoIncluded;
       victimInfo;
       includedSummary;
+      narrative;
     };
 
     let logList = switch (policeSubmissionLogs.get(caller)) {
@@ -1017,9 +1066,6 @@ actor {
     };
   };
 
-  // Transform function for HTTP outcalls - must be public for system access
-  // This is a required exception to authentication as it's called by the IC system
-  // during HTTP outcall processing, not by end users
   public query func transform(input : OutCall.TransformationInput) : async OutCall.TransformationOutput {
     OutCall.transform(input);
   };

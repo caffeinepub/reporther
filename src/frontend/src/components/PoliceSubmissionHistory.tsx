@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useGetPoliceSubmissionLogs } from '../hooks/useQueries';
-import { Shield, CheckCircle2, XCircle, FileImage, FileAudio, FileText, AlertTriangle, User } from 'lucide-react';
+import { Shield, CheckCircle2, XCircle, FileImage, FileAudio, FileText, AlertTriangle, User, FileCheck } from 'lucide-react';
 
 export default function PoliceSubmissionHistory() {
   const { data: logs, isLoading, error } = useGetPoliceSubmissionLogs();
@@ -93,6 +93,7 @@ export default function PoliceSubmissionHistory() {
       <div className="space-y-4">
         {logs.map((log, index) => {
           const isSuccess = log.submissionResult.toLowerCase().includes('success');
+          const hasNarrative = log.narrative && log.narrative.trim().length > 0;
           
           return (
             <Card key={index} className="border-2 border-secondary/20 shadow-md">
@@ -130,6 +131,22 @@ export default function PoliceSubmissionHistory() {
                   <h4 className="font-semibold text-sm mb-2">Submission Status</h4>
                   <p className="text-sm text-muted-foreground">{log.submissionResult}</p>
                 </div>
+
+                {/* Incident Description Section */}
+                {hasNarrative && (
+                  <>
+                    <Separator />
+                    <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
+                      <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                        <FileCheck className="w-4 h-4 text-primary" />
+                        Incident Description
+                      </h4>
+                      <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                        {log.narrative}
+                      </p>
+                    </div>
+                  </>
+                )}
 
                 {/* Victim Information Section */}
                 {log.victimInfoIncluded && log.victimInfo && (

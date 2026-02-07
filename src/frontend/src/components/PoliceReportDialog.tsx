@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSubmitPoliceReportWithEvidence, useGetVictimProfile } from '../hooks/useQueries';
+import { useSubmitPoliceReportWithEvidence, useGetVictimProfile, useGetIncident } from '../hooks/useQueries';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Shield, FileImage, FileAudio, FileText, AlertCircle, User, BarChart3, AlertTriangle, ChevronDown } from 'lucide-react';
+import { Shield, FileImage, FileAudio, FileText, AlertCircle, User, BarChart3, AlertTriangle, ChevronDown, FileCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import type { PoliceDepartment, EvidenceMeta } from '../backend';
 
@@ -38,6 +38,7 @@ export default function PoliceReportDialog({
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const submitReport = useSubmitPoliceReportWithEvidence();
   const { data: victimProfile } = useGetVictimProfile();
+  const { data: incident } = useGetIncident(incidentId);
 
   const getFileIcon = (type: string) => {
     if (type.startsWith('image/')) return <FileImage className="w-4 h-4" />;
@@ -92,6 +93,9 @@ export default function PoliceReportDialog({
       const selectedIds = Array.from(selectedEvidence);
       const selectedEvidenceItems = availableEvidence.filter(e => selectedIds.includes(e.id));
       
+      // Use incident description as narrative
+      const narrative = incident?.description || '';
+      
       await submitReport.mutateAsync({
         department,
         submissionResult: 'Successfully submitted to police department',
@@ -99,6 +103,7 @@ export default function PoliceReportDialog({
         victimInfoIncluded: includeVictimInfo,
         victimInfo: includeVictimInfo && victimProfile ? victimProfile : null,
         includedSummary: includeSummary,
+        narrative,
       });
 
       toast.success('Police report submitted successfully');
@@ -118,21 +123,23 @@ export default function PoliceReportDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 flex-wrap">
-            <Shield className="w-5 h-5 text-primary flex-shrink-0" />
-            <span>Submit Police Report - </span>
-            <span className="font-normal">Criminal Activity Report Number </span>
-            <span className="font-bold">{criminalActivityReportNumber}</span>
-          </DialogTitle>
-          <DialogDescription>
-            Review your report before submission. Optional attachments are available below.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+        <div className="flex-shrink-0 px-6 pt-6">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
+              <Shield className="w-5 h-5 text-primary flex-shrink-0" />
+              <span>Submit Police Report - </span>
+              <span className="font-normal">Criminal Activity Report Number </span>
+              <span className="font-bold">{criminalActivityReportNumber}</span>
+            </DialogTitle>
+            <DialogDescription>
+              Review your report before submission. Optional attachments are available below.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        <ScrollArea className="flex-1 pr-4">
-          <div className="space-y-6">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6">
+          <div className="space-y-6 py-4">
             {/* Core: Department Information */}
             <div className="bg-muted/50 rounded-lg p-4 border">
               <h4 className="font-semibold text-sm mb-2">Submitting to:</h4>
@@ -143,6 +150,22 @@ export default function PoliceReportDialog({
                 <p>Contact: {department.contactNumber}</p>
               </div>
             </div>
+
+            {/* Core: Incident Description */}
+            {incident && incident.description && (
+              <>
+                <Separator />
+                <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
+                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    <FileCheck className="w-4 h-4 text-primary" />
+                    Incident Description
+                  </h4>
+                  <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                    {incident.description}
+                  </p>
+                </div>
+              </>
+            )}
 
             {/* Core: Note about optional attachments */}
             <p className="text-sm text-muted-foreground">
@@ -326,21 +349,26 @@ export default function PoliceReportDialog({
                 </Label>
               </div>
             </div>
-          </div>
-        </ScrollArea>
 
-        <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitReport.isPending}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={submitReport.isPending || !acknowledgedDisclaimer}
-            className="bg-primary hover:bg-primary/90"
-          >
-            {submitReport.isPending ? 'Submitting...' : 'Submit Report'}
-          </Button>
-        </DialogFooter>
+            {/* Extra padding at bottom to ensure content is not hidden behind footer */}
+            <div className="h-4" />
+          </div>
+        </div>
+
+        <div className="flex-shrink-0 px-6 pb-6 pt-4 border-t bg-background">
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitReport.isPending}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={submitReport.isPending || !acknowledgedDisclaimer}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {submitReport.isPending ? 'Submitting...' : 'Submit Report'}
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

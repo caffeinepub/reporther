@@ -157,6 +157,7 @@ export const PoliceSubmissionLog = IDL.Record({
   'attachedEvidence' : IDL.Vec(EvidenceMeta),
   'includedSummary' : IDL.Bool,
   'submissionResult' : IDL.Text,
+  'narrative' : IDL.Text,
   'timestamp' : IDL.Int,
   'victimInfoIncluded' : IDL.Bool,
   'department' : PoliceDepartment,
@@ -217,6 +218,7 @@ export const idlService = IDL.Service({
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'clearSelectedDepartment' : IDL.Func([], [], []),
   'deletePoliceDepartment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteStalkerProfile' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'findNearestPoliceDepartment' : IDL.Func(
@@ -271,6 +273,11 @@ export const idlService = IDL.Service({
       [IDL.Vec(PoliceSubmissionLog)],
       ['query'],
     ),
+  'getSelectedDepartment' : IDL.Func(
+      [],
+      [IDL.Opt(PoliceDepartment)],
+      ['query'],
+    ),
   'getSmsLogs' : IDL.Func([], [IDL.Vec(SmsLog)], ['query']),
   'getStalkerProfile' : IDL.Func([], [IDL.Opt(StalkerProfile)], ['query']),
   'getUserProfile' : IDL.Func(
@@ -288,6 +295,7 @@ export const idlService = IDL.Service({
         IDL.Bool,
         IDL.Opt(VictimProfile),
         IDL.Bool,
+        IDL.Text,
       ],
       [],
       [],
@@ -305,6 +313,7 @@ export const idlService = IDL.Service({
     ),
   'saveMultipleStalkerProfile' : IDL.Func([StalkerProfile], [IDL.Nat], []),
   'savePoliceDepartment' : IDL.Func([PoliceDepartment], [IDL.Nat], []),
+  'saveSelectedDepartment' : IDL.Func([PoliceDepartment], [], []),
   'saveStalkerProfile' : IDL.Func([StalkerProfile], [], []),
   'saveVictimProfile' : IDL.Func([VictimProfile], [], []),
   'transform' : IDL.Func(
@@ -477,6 +486,7 @@ export const idlFactory = ({ IDL }) => {
     'attachedEvidence' : IDL.Vec(EvidenceMeta),
     'includedSummary' : IDL.Bool,
     'submissionResult' : IDL.Text,
+    'narrative' : IDL.Text,
     'timestamp' : IDL.Int,
     'victimInfoIncluded' : IDL.Bool,
     'department' : PoliceDepartment,
@@ -534,6 +544,7 @@ export const idlFactory = ({ IDL }) => {
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'clearSelectedDepartment' : IDL.Func([], [], []),
     'deletePoliceDepartment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteStalkerProfile' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'findNearestPoliceDepartment' : IDL.Func(
@@ -588,6 +599,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(PoliceSubmissionLog)],
         ['query'],
       ),
+    'getSelectedDepartment' : IDL.Func(
+        [],
+        [IDL.Opt(PoliceDepartment)],
+        ['query'],
+      ),
     'getSmsLogs' : IDL.Func([], [IDL.Vec(SmsLog)], ['query']),
     'getStalkerProfile' : IDL.Func([], [IDL.Opt(StalkerProfile)], ['query']),
     'getUserProfile' : IDL.Func(
@@ -605,6 +621,7 @@ export const idlFactory = ({ IDL }) => {
           IDL.Bool,
           IDL.Opt(VictimProfile),
           IDL.Bool,
+          IDL.Text,
         ],
         [],
         [],
@@ -622,6 +639,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'saveMultipleStalkerProfile' : IDL.Func([StalkerProfile], [IDL.Nat], []),
     'savePoliceDepartment' : IDL.Func([PoliceDepartment], [IDL.Nat], []),
+    'saveSelectedDepartment' : IDL.Func([PoliceDepartment], [], []),
     'saveStalkerProfile' : IDL.Func([StalkerProfile], [], []),
     'saveVictimProfile' : IDL.Func([VictimProfile], [], []),
     'transform' : IDL.Func(

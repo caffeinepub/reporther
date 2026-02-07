@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useGetIncidentMessages, useGetStalkerInfo, useGetIncidentEvidence, useGetAllStalkerProfiles, useFindNearestPoliceDepartment } from '../hooks/useQueries';
+import { useGetIncidentMessages, useGetStalkerInfo, useGetIncidentEvidence, useGetAllStalkerProfiles, useFindNearestPoliceDepartment, useGetSelectedDepartment, useSaveSelectedDepartment } from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,15 +22,31 @@ export default function IncidentDetail({ incident, onBack, policeDepartment: ini
   const [showGenerator, setShowGenerator] = useState(false);
   const [showPoliceDialog, setShowPoliceDialog] = useState(false);
   const [currentPoliceDepartment, setCurrentPoliceDepartment] = useState<PoliceDepartment | null>(initialPoliceDepartment || null);
+  const [hasLoadedSavedDept, setHasLoadedSavedDept] = useState(false);
   
   const { data: messages, isLoading: messagesLoading } = useGetIncidentMessages(incident.id);
   const { data: stalkerInfo } = useGetStalkerInfo();
   const { data: evidence, isLoading: evidenceLoading } = useGetIncidentEvidence(incident.id);
   const { data: stalkerProfiles = [] } = useGetAllStalkerProfiles();
+  const { data: savedDepartment, isLoading: savedDeptLoading } = useGetSelectedDepartment();
+  const saveSelectedDepartment = useSaveSelectedDepartment();
   const findNearestDepartment = useFindNearestPoliceDepartment();
 
-  // Auto-refresh police department when stalker info changes
+  // Load saved department on mount
   useEffect(() => {
+    if (!savedDeptLoading && savedDepartment && !hasLoadedSavedDept) {
+      setCurrentPoliceDepartment(savedDepartment);
+      setHasLoadedSavedDept(true);
+    }
+  }, [savedDepartment, savedDeptLoading, hasLoadedSavedDept]);
+
+  // Auto-refresh police department when stalker info changes (only if no saved department exists)
+  useEffect(() => {
+    // Skip auto-refresh if we have a saved department
+    if (hasLoadedSavedDept && currentPoliceDepartment) {
+      return;
+    }
+
     const refreshPoliceDepartment = async () => {
       if (!stalkerInfo) {
         setCurrentPoliceDepartment(null);
@@ -79,7 +95,7 @@ export default function IncidentDetail({ incident, onBack, policeDepartment: ini
     };
 
     refreshPoliceDepartment();
-  }, [stalkerInfo?.zipCode, stalkerInfo?.fullAddress, stalkerInfo?.city, stalkerInfo?.state]);
+  }, [stalkerInfo?.zipCode, stalkerInfo?.fullAddress, stalkerInfo?.city, stalkerInfo?.state, hasLoadedSavedDept, currentPoliceDepartment]);
 
   const formatDateTime = (timestamp: bigint) => {
     const date = new Date(Number(timestamp) / 1_000_000);
@@ -138,7 +154,9 @@ export default function IncidentDetail({ incident, onBack, policeDepartment: ini
       
       if (result) {
         setCurrentPoliceDepartment(result);
-        toast.success('Police department information refreshed');
+        // Save the refreshed department
+        await saveSelectedDepartment.mutateAsync(result);
+        toast.success('Police department information refreshed and saved');
       } else {
         setCurrentPoliceDepartment(null);
         toast.error('No police department found for the provided address. Please manually enter department information in the Stalker Info area.');
@@ -255,7 +273,7 @@ export default function IncidentDetail({ incident, onBack, policeDepartment: ini
         </Alert>
       )}
 
-      {stalkerInfo && (stalkerInfo.zipCode || stalkerInfo.fullAddress) && !currentPoliceDepartment && !isRefreshingDept && (
+      {stalkerInfo && (stalkerInfo.zipCode || stalkerInfo.fullAddress) && !currentPoliceDepartment && !isRefreshingDept && !savedDeptLoading && (
         <Alert className="border-primary/50 bg-primary/5">
           <AlertCircle className="h-4 w-4 text-primary" />
           <AlertDescription>

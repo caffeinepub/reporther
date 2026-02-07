@@ -5,7 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Copy, Share2, FileText, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
-import { useSaveSmsLog } from '../hooks/useQueries';
+import { useLogSmsUsage } from '../hooks/useQueries';
 import type { GeneratedMessage } from '../backend';
 
 interface MessageListProps {
@@ -15,7 +15,7 @@ interface MessageListProps {
 }
 
 export default function MessageList({ messages, isLoading, onGenerateNew }: MessageListProps) {
-  const saveSmsLog = useSaveSmsLog();
+  const logSmsUsage = useLogSmsUsage();
 
   const formatDateTime = (timestamp: bigint) => {
     const date = new Date(Number(timestamp) / 1_000_000);
@@ -109,7 +109,7 @@ export default function MessageList({ messages, isLoading, onGenerateNew }: Mess
   const sendViaSms = async (message: GeneratedMessage) => {
     try {
       // Log SMS usage to backend for documentation
-      await saveSmsLog.mutateAsync({
+      await logSmsUsage.mutateAsync({
         incidentId: message.incidentId,
         messageId: message.id,
         messageContent: message.content,
@@ -187,11 +187,11 @@ export default function MessageList({ messages, isLoading, onGenerateNew }: Mess
                       size="sm"
                       variant="default"
                       onClick={() => sendViaSms(message)}
-                      disabled={saveSmsLog.isPending}
+                      disabled={logSmsUsage.isPending}
                       className="bg-primary hover:bg-primary/90"
                     >
                       <MessageSquare className="w-4 h-4 mr-2" />
-                      {saveSmsLog.isPending ? 'Logging...' : 'Send via SMS'}
+                      {logSmsUsage.isPending ? 'Logging...' : 'Send via SMS'}
                     </Button>
                   ) : (
                     <Tooltip>

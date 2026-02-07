@@ -1,41 +1,60 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-04T02:43:35.683Z",
-  "summary": "Diff shows partial work toward the evidence upload fix (IncidentForm now imports/creates useSaveEvidenceFile; frontend-file-summaries claims evidence cache invalidation), but the provided truncated excerpts do not conclusively show the required upload flow changes, removal of useLinkEvidenceToIncident usage, or the required user-facing error toast behavior. Also includes unrelated project summary/documentation updates not requested.",
+  "generatedAt": "2026-02-07T01:11:04.363Z",
+  "summary": "Diff adds a migration to introduce per-user selected police department storage and updates IncidentDetail to load a saved department and prevent auto-refresh from overwriting it. However, the diff summary does not provide explicit evidence that the backend persistence APIs and the required frontend save/toast + cache invalidation behaviors are fully implemented, and some unrelated features (SMS/share logging, police submission log narrative) appear to have been added.",
   "missing_requirements": [
     {
-      "id": "REQ-3",
-      "requirement": "Update IncidentForm upload flow so uploadFile() uses useSaveEvidenceFile() (backend uploadEvidence) and does not generate fake evidence IDs; stop using useLinkEvidenceToIncident as linking; invalidate/refetch incident evidence query after successful upload so IncidentDetail and PoliceReportDialog see availableEvidence.",
-      "reason": "IncidentForm.tsx excerpt only shows import and initialization of useSaveEvidenceFile, but the diff snippet is truncated before any uploadFile() implementation. No evidence is shown that fake IDs were removed, that useLinkEvidenceToIncident is no longer called, or that successful uploads trigger invalidation/refetch in a way that updates IncidentDetail/PoliceReportDialog.",
+      "id": "REQ-2",
+      "requirement": "Backend exposes a query method to fetch the caller’s saved police department (returns null when not set) and an update method to save the caller’s police department (idempotent overwrite), with data retained across calls/upgrades as appropriate.",
+      "reason": "The diff shows a new stable field via migration, but does not show any explicit public backend methods (query/update/optional clear) for saving/fetching the caller’s selected department.",
       "evidence": [
-        "frontend/src/components/IncidentForm.tsx (truncated)",
+        "backend/migration.mo",
+        "backend/main.mo (truncated; no persistence API methods visible)"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Stalker Info / police department UI saves the selected department via the new backend persistence API and shows English success/error toasts; React Query caches for the saved police department are invalidated/refetched on success so reload reflects the saved value.",
+      "reason": "While StalkerRecord imports/uses useSaveSelectedDepartment, the provided diff excerpt does not show the mutation being invoked on save/selection, any English success/error toasts for that action, or explicit cache invalidation behavior tied to the department save.",
+      "evidence": [
+        "frontend/src/components/StalkerRecord.tsx (truncated)",
         "frontend/src/hooks/useQueries.ts (truncated)"
       ]
     },
     {
-      "id": "REQ-4",
-      "requirement": "Add clear user-facing error handling for evidence upload failures in IncidentForm: toast names the specific file and suggests retrying; do not mark file as uploaded unless backend uploadEvidence succeeded and returned EvidenceMeta.",
-      "reason": "The diff snippet for IncidentForm.tsx is truncated before the upload logic and does not show any toast error handling that includes the failing filename and retry suggestion, nor UI state handling to prevent marking as uploaded on failure.",
+      "id": "REQ-1",
+      "requirement": "If no police department has been saved and no valid address is available, the app shows an actionable message and keeps \"Report to Police\" disabled (no crash).",
+      "reason": "IncidentDetail sets the current department to null when no stalkerInfo/address, but the diff excerpt does not show the UI state that disables the Report-to-Police action and presents an actionable message in this scenario.",
       "evidence": [
-        "frontend/src/components/IncidentForm.tsx (truncated)"
+        "frontend/src/components/IncidentDetail.tsx (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Update/modify project-wide documentation/state files (frontend-file-summaries.txt and project_state.json) with broad feature descriptions unrelated to evidence attachment fix.",
-      "reason": "BuildRequest focuses on fixing evidence attachment flow and error handling. The diff includes modifications to summary/state files describing many unrelated app features; these are not requested deliverables.",
+      "description": "Added/changed police submission log data model to include a new 'narrative' field (and comments about migration for it).",
+      "reason": "The BuildRequest is focused on persisting the selected police department for reporting; it does not request changes to police submission log schema or adding a narrative field.",
       "evidence": [
-        "frontend-file-summaries.txt (truncated)",
-        "project_state.json (truncated)"
+        "backend/main.mo (\"Updated police submission log type with narrative field\")"
+      ]
+    },
+    {
+      "description": "Added/changed MessageList to include SMS sending support and logging SMS usage, plus share/copy behavior and related toasts.",
+      "reason": "The BuildRequest does not mention SMS/share functionality or fixing MessageList behavior; it is unrelated to police department persistence for the Report to Police flow.",
+      "evidence": [
+        "frontend/src/components/MessageList.tsx"
       ]
     }
   ],
-  "confidence": 0.6,
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/IncidentForm.tsx",
+    "frontend/src/components/IncidentDetail.tsx",
+    "frontend/src/components/MessageList.tsx",
+    "frontend/src/components/StalkerRecord.tsx",
     "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]

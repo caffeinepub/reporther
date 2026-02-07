@@ -237,6 +237,7 @@ export interface PoliceSubmissionLog {
     attachedEvidence: Array<EvidenceMeta>;
     includedSummary: boolean;
     submissionResult: string;
+    narrative: string;
     timestamp: bigint;
     victimInfoIncluded: boolean;
     department: PoliceDepartment;
@@ -279,6 +280,7 @@ export interface backendInterface {
     _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    clearSelectedDepartment(): Promise<void>;
     deletePoliceDepartment(deptId: bigint): Promise<boolean>;
     deleteStalkerProfile(profileId: bigint): Promise<boolean>;
     findNearestPoliceDepartment(address: string): Promise<PoliceDepartment | null>;
@@ -297,17 +299,19 @@ export interface backendInterface {
     getNearestAddresses(searchTerm: string): Promise<Array<AddressPlaceCandidate>>;
     getNearestPoliceDepartmentsToAddress(term: string): Promise<Array<PlaceCandidate>>;
     getPoliceSubmissionLogs(): Promise<Array<PoliceSubmissionLog>>;
+    getSelectedDepartment(): Promise<PoliceDepartment | null>;
     getSmsLogs(): Promise<Array<SmsLog>>;
     getStalkerProfile(): Promise<StalkerProfile | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getVictimProfile(): Promise<VictimProfile | null>;
     isCallerAdmin(): Promise<boolean>;
-    logPoliceSubmission(department: PoliceDepartment, submissionResult: string, attachedEvidence: Array<EvidenceMeta>, victimInfoIncluded: boolean, victimInfo: VictimProfile | null, includedSummary: boolean): Promise<void>;
+    logPoliceSubmission(department: PoliceDepartment, submissionResult: string, attachedEvidence: Array<EvidenceMeta>, victimInfoIncluded: boolean, victimInfo: VictimProfile | null, includedSummary: boolean, narrative: string): Promise<void>;
     logSmsUsage(incidentId: string, messageId: bigint, messageContent: string, recipient: string | null): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     saveIncident(location: string, description: string, evidenceNotes: string, additionalNotes: string): Promise<IncidentReport>;
     saveMultipleStalkerProfile(profile: StalkerProfile): Promise<bigint>;
     savePoliceDepartment(department: PoliceDepartment): Promise<bigint>;
+    saveSelectedDepartment(persistedDepartment: PoliceDepartment): Promise<void>;
     saveStalkerProfile(profile: StalkerProfile): Promise<void>;
     saveVictimProfile(profile: VictimProfile): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
@@ -427,6 +431,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n8(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async clearSelectedDepartment(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.clearSelectedDepartment();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.clearSelectedDepartment();
             return result;
         }
     }
@@ -682,6 +700,20 @@ export class Backend implements backendInterface {
             return from_candid_vec_n46(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getSelectedDepartment(): Promise<PoliceDepartment | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getSelectedDepartment();
+                return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getSelectedDepartment();
+            return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async getSmsLogs(): Promise<Array<SmsLog>> {
         if (this.processError) {
             try {
@@ -752,17 +784,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async logPoliceSubmission(arg0: PoliceDepartment, arg1: string, arg2: Array<EvidenceMeta>, arg3: boolean, arg4: VictimProfile | null, arg5: boolean): Promise<void> {
+    async logPoliceSubmission(arg0: PoliceDepartment, arg1: string, arg2: Array<EvidenceMeta>, arg3: boolean, arg4: VictimProfile | null, arg5: boolean, arg6: string): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.logPoliceSubmission(arg0, arg1, arg2, arg3, to_candid_opt_n56(this._uploadFile, this._downloadFile, arg4), arg5);
+                const result = await this.actor.logPoliceSubmission(arg0, arg1, arg2, arg3, to_candid_opt_n56(this._uploadFile, this._downloadFile, arg4), arg5, arg6);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.logPoliceSubmission(arg0, arg1, arg2, arg3, to_candid_opt_n56(this._uploadFile, this._downloadFile, arg4), arg5);
+            const result = await this.actor.logPoliceSubmission(arg0, arg1, arg2, arg3, to_candid_opt_n56(this._uploadFile, this._downloadFile, arg4), arg5, arg6);
             return result;
         }
     }
@@ -833,6 +865,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.savePoliceDepartment(arg0);
+            return result;
+        }
+    }
+    async saveSelectedDepartment(arg0: PoliceDepartment): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.saveSelectedDepartment(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.saveSelectedDepartment(arg0);
             return result;
         }
     }
@@ -1157,6 +1203,7 @@ function from_candid_record_n48(_uploadFile: (file: ExternalBlob) => Promise<Uin
     attachedEvidence: Array<_EvidenceMeta>;
     includedSummary: boolean;
     submissionResult: string;
+    narrative: string;
     timestamp: bigint;
     victimInfoIncluded: boolean;
     department: _PoliceDepartment;
@@ -1165,6 +1212,7 @@ function from_candid_record_n48(_uploadFile: (file: ExternalBlob) => Promise<Uin
     attachedEvidence: Array<EvidenceMeta>;
     includedSummary: boolean;
     submissionResult: string;
+    narrative: string;
     timestamp: bigint;
     victimInfoIncluded: boolean;
     department: PoliceDepartment;
@@ -1174,6 +1222,7 @@ function from_candid_record_n48(_uploadFile: (file: ExternalBlob) => Promise<Uin
         attachedEvidence: value.attachedEvidence,
         includedSummary: value.includedSummary,
         submissionResult: value.submissionResult,
+        narrative: value.narrative,
         timestamp: value.timestamp,
         victimInfoIncluded: value.victimInfoIncluded,
         department: value.department

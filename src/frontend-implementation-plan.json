@@ -1,42 +1,72 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix incident evidence upload persistence and Police Report attachment selection",
+  "title": "Persist and prefer saved police department in Report to Police flow (frontend-only)",
   "requirements": [
     {
-      "id": "REQ-3",
-      "summary": "Persist uploaded incident evidence via existing save mutation, remove no-op linking, and ensure evidence caches refetch so Incident Detail and Police Report dialog show selectable attachments.",
+      "id": "REQ-1",
+      "summary": "Load and keep the user’s previously saved police department available across navigation/reload for the incident “Report to Police” flow, with safe disabled-state messaging when unavailable.",
       "acceptanceCriteria": [
-        "After documenting an incident and uploading at least 1 file, the incident detail view shows the uploaded evidence under “Attached Evidence”.",
-        "Opening “Report to Police” for an incident with uploaded evidence shows those evidence items under “Attach Evidence”, and the user can select/deselect them and submit.",
-        "No part of the evidence upload flow uses fake/generated evidence IDs (e.g., `BigInt(Date.now())`) as a substitute for the backend’s returned `EvidenceMeta.id`.",
-        "`useLinkEvidenceToIncident()` is no longer used to imply evidence linking; evidence appears for an incident solely by calling backend `uploadEvidence(incidentId, ...)`."
+        "After the user sets/saves a police department in the Stalker Info area and navigates to an incident detail page, the \"Submitting to\" department shown in the police report dialog matches the saved department.",
+        "Refreshing the browser while on the incident detail page still results in a police department being available for \"Report to Police\" (assuming one was previously saved).",
+        "If no police department has been saved and no valid address is available, the app shows an actionable message and keeps \"Report to Police\" disabled (no crash)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/IncidentForm.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update `uploadFile()` to call `useSaveEvidenceFile().mutateAsync(...)` with the newly created incidentId and use the returned `EvidenceMeta.id` as the stored evidenceId; remove all usage of `useLinkEvidenceToIncident()` and any fake/generated evidence IDs; ensure the local file upload state only sets `uploaded: true` when the mutation succeeds and stores returned metadata needed by the UI."
+          "description": "Add React Query hooks for saved police department persistence using existing backend capabilities (getSelectedDepartment/saveSelectedDepartment/clearSelectedDepartment) and a stable queryKey (e.g., ['selectedDepartment', principal])."
         },
+        {
+          "path": "frontend/src/components/IncidentDetail.tsx",
+          "operation": "modify",
+          "description": "On mount, fetch and prefer the saved police department (via the new React Query hook) so the Report to Police button and dialog use it after navigation/reload; keep Report to Police disabled with an actionable English message when neither a saved department nor a valid address exists."
+        },
+        {
+          "path": "frontend/src/components/PoliceReportDialog.tsx",
+          "operation": "modify",
+          "description": "Ensure the dialog is only openable when a non-null department object is present (consistent with IncidentDetail enablement) and that the displayed \"Submitting to\" section reflects the provided department prop."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Save the selected police department from the Stalker Info area using persistence hooks, with English success/error toasts and React Query cache invalidation so subsequent page loads reflect the saved value.",
+      "acceptanceCriteria": [
+        "Saving/choosing a police department triggers a successful mutation and shows an English success toast; failures show an English error toast.",
+        "React Query caches for the saved police department are invalidated on success, and a reload of the page reflects the saved department without additional user action."
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Enhance `useSaveEvidenceFile()` to invalidate/refetch the incident evidence React Query cache after successful uploads (e.g., `['incidentEvidence', incidentId]`) so `IncidentDetail` and `PoliceReportDialog` receive updated non-empty `availableEvidence` without a full page refresh."
+          "description": "Implement mutations for saving and optionally clearing the caller’s selected department, and invalidate/refetch the selected department query on success so all pages read the persisted value."
+        },
+        {
+          "path": "frontend/src/components/StalkerRecord.tsx",
+          "operation": "modify",
+          "description": "Wire Stalker Info police department selection (dropdown/manual save/autolookup result) to call the save-selected-department mutation; show English success/error toasts; invalidate/refetch React Query caches related to the saved selection."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Add user-facing error handling for evidence upload failures and ensure UI upload success state only reflects successful backend uploads.",
+      "summary": "Update incident detail report-to-police logic to load the saved department on mount and prevent auto-lookup effects from clearing/replacing it unless the user manually refreshes or no saved department exists.",
       "acceptanceCriteria": [
-        "If backend evidence upload fails, the file remains in a non-uploaded state in the UI and a toast explains the failure and suggests retrying.",
-        "If backend evidence upload succeeds, the UI marks the file as uploaded and the incident evidence list updates without requiring a full page refresh."
+        "When a saved department exists, the incident detail page enables \"Report to Police\" without requiring an auto-lookup call.",
+        "Auto-refresh/lookup does not clear or replace the saved department automatically; manual \"Refresh Police Dept\" may update it according to the designed behavior.",
+        "The PoliceReportDialog always receives a non-null department object when the button is enabled and opened."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/IncidentForm.tsx",
+          "path": "frontend/src/components/IncidentDetail.tsx",
           "operation": "modify",
-          "description": "Add explicit failure handling in the evidence upload flow: on mutation error, keep the file in a non-uploaded state, stop the uploading/progress UI, and show an English toast that includes the specific filename and suggests retrying; ensure the UI never shows “Uploaded successfully” unless `uploadEvidence` succeeded and returned `EvidenceMeta`."
+          "description": "Refactor the auto-refresh effect so it does not run (or does not mutate currentPoliceDepartment) when a saved department exists; allow manual refresh to re-run lookup and (if successful) persist the refreshed department via the save-selected-department mutation, keeping button enablement and dialog inputs consistent."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Expose a composable API from hooks to support IncidentDetail behavior: a query for the saved department and a mutation to overwrite it when manual refresh is explicitly triggered."
         }
       ]
     }

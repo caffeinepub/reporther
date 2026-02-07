@@ -276,6 +276,79 @@ export function useGetAllPoliceDepartments() {
   });
 }
 
+export function useGetSelectedDepartment() {
+  const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+
+  return useQuery<PoliceDepartment | null>({
+    queryKey: ['selectedDepartment', identity?.getPrincipal().toString()],
+    queryFn: async () => {
+      if (!actor || !identity) return null;
+      const result = await actor.getSelectedDepartment();
+      return result || null;
+    },
+    enabled: !!actor && !actorFetching && !!identity,
+  });
+}
+
+export function useSaveSelectedDepartment() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
+
+  return useMutation({
+    mutationFn: async (department: PoliceDepartment) => {
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
+      
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.saveSelectedDepartment(department);
+    },
+    onSuccess: () => {
+      const principalStr = identity?.getPrincipal().toString();
+      queryClient.invalidateQueries({ queryKey: ['selectedDepartment', principalStr] });
+    },
+  });
+}
+
+export function useClearSelectedDepartment() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
+      
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.clearSelectedDepartment();
+    },
+    onSuccess: () => {
+      const principalStr = identity?.getPrincipal().toString();
+      queryClient.invalidateQueries({ queryKey: ['selectedDepartment', principalStr] });
+    },
+  });
+}
+
 export function useSavePoliceDepartment() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -589,73 +662,12 @@ export function useGenerateMessage() {
       return actor.generateMessage(data.incidentId, data.tone, data.intensity);
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['incidentMessages', variables.incidentId] 
-      });
+      queryClient.invalidateQueries({ queryKey: ['incidentMessages', variables.incidentId] });
     },
   });
 }
 
-// Police Submission Queries
-export function useGetPoliceSubmissionLogs() {
-  const { actor, isFetching: actorFetching } = useActor();
-  const { identity } = useInternetIdentity();
-
-  return useQuery<PoliceSubmissionLog[]>({
-    queryKey: ['policeSubmissionLogs', identity?.getPrincipal().toString()],
-    queryFn: async () => {
-      if (!actor || !identity) return [];
-      return actor.getPoliceSubmissionLogs();
-    },
-    enabled: !!actor && !actorFetching && !!identity,
-  });
-}
-
-export function useSubmitPoliceReportWithEvidence() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: {
-      department: PoliceDepartment;
-      submissionResult: string;
-      attachedEvidence: EvidenceMeta[];
-      victimInfoIncluded: boolean;
-      victimInfo: VictimProfile | null;
-      includedSummary: boolean;
-    }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.logPoliceSubmission(
-        data.department,
-        data.submissionResult,
-        data.attachedEvidence,
-        data.victimInfoIncluded,
-        data.victimInfo,
-        data.includedSummary
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['policeSubmissionLogs'] });
-    },
-  });
-}
-
-// SMS Log Queries
-export function useGetSmsLogs() {
-  const { actor, isFetching: actorFetching } = useActor();
-  const { identity } = useInternetIdentity();
-
-  return useQuery<SmsLog[]>({
-    queryKey: ['smsLogs', identity?.getPrincipal().toString()],
-    queryFn: async () => {
-      if (!actor || !identity) return [];
-      return actor.getSmsLogs();
-    },
-    enabled: !!actor && !actorFetching && !!identity,
-  });
-}
-
-export function useSaveSmsLog() {
+export function useLogSmsUsage() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
@@ -680,27 +692,72 @@ export function useSaveSmsLog() {
   });
 }
 
-// HTTP Outcall Queries
-export function useMakeGetOutcall() {
+export function useGetSmsLogs() {
+  const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+
+  return useQuery<SmsLog[]>({
+    queryKey: ['smsLogs', identity?.getPrincipal().toString()],
+    queryFn: async () => {
+      if (!actor || !identity) return [];
+      try {
+        return actor.getSmsLogs();
+      } catch (error) {
+        console.error('Error fetching SMS logs:', error);
+        return [];
+      }
+    },
+    enabled: !!actor && !actorFetching && !!identity,
+  });
+}
+
+// Police Submission Queries
+export function useSubmitPoliceReportWithEvidence() {
   const { actor } = useActor();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (url: string) => {
+    mutationFn: async (data: {
+      department: PoliceDepartment;
+      submissionResult: string;
+      attachedEvidence: EvidenceMeta[];
+      victimInfoIncluded: boolean;
+      victimInfo: VictimProfile | null;
+      includedSummary: boolean;
+      narrative: string;
+    }) => {
       if (!actor) throw new Error('Actor not available');
-      // Backend function not available yet
-      throw new Error('Backend function not implemented');
+      return actor.logPoliceSubmission(
+        data.department,
+        data.submissionResult,
+        data.attachedEvidence,
+        data.victimInfoIncluded,
+        data.victimInfo,
+        data.includedSummary,
+        data.narrative
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['policeSubmissionLogs'] });
     },
   });
 }
 
-export function useMakePostOutcall() {
-  const { actor } = useActor();
+export function useGetPoliceSubmissionLogs() {
+  const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
 
-  return useMutation({
-    mutationFn: async (data: { url: string; body: string }) => {
-      if (!actor) throw new Error('Actor not available');
-      // Backend function not available yet
-      throw new Error('Backend function not implemented');
+  return useQuery<PoliceSubmissionLog[]>({
+    queryKey: ['policeSubmissionLogs', identity?.getPrincipal().toString()],
+    queryFn: async () => {
+      if (!actor || !identity) return [];
+      try {
+        return actor.getPoliceSubmissionLogs();
+      } catch (error) {
+        console.error('Error fetching police submission logs:', error);
+        return [];
+      }
     },
+    enabled: !!actor && !actorFetching && !!identity,
   });
 }

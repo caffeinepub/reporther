@@ -144,6 +144,7 @@ export interface PoliceSubmissionLog {
     attachedEvidence: Array<EvidenceMeta>;
     includedSummary: boolean;
     submissionResult: string;
+    narrative: string;
     timestamp: bigint;
     victimInfoIncluded: boolean;
     department: PoliceDepartment;
@@ -179,6 +180,7 @@ export enum UserRole {
 }
 export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    clearSelectedDepartment(): Promise<void>;
     deletePoliceDepartment(deptId: bigint): Promise<boolean>;
     deleteStalkerProfile(profileId: bigint): Promise<boolean>;
     findNearestPoliceDepartment(address: string): Promise<PoliceDepartment | null>;
@@ -197,17 +199,19 @@ export interface backendInterface {
     getNearestAddresses(searchTerm: string): Promise<Array<AddressPlaceCandidate>>;
     getNearestPoliceDepartmentsToAddress(term: string): Promise<Array<PlaceCandidate>>;
     getPoliceSubmissionLogs(): Promise<Array<PoliceSubmissionLog>>;
+    getSelectedDepartment(): Promise<PoliceDepartment | null>;
     getSmsLogs(): Promise<Array<SmsLog>>;
     getStalkerProfile(): Promise<StalkerProfile | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getVictimProfile(): Promise<VictimProfile | null>;
     isCallerAdmin(): Promise<boolean>;
-    logPoliceSubmission(department: PoliceDepartment, submissionResult: string, attachedEvidence: Array<EvidenceMeta>, victimInfoIncluded: boolean, victimInfo: VictimProfile | null, includedSummary: boolean): Promise<void>;
+    logPoliceSubmission(department: PoliceDepartment, submissionResult: string, attachedEvidence: Array<EvidenceMeta>, victimInfoIncluded: boolean, victimInfo: VictimProfile | null, includedSummary: boolean, narrative: string): Promise<void>;
     logSmsUsage(incidentId: string, messageId: bigint, messageContent: string, recipient: string | null): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     saveIncident(location: string, description: string, evidenceNotes: string, additionalNotes: string): Promise<IncidentReport>;
     saveMultipleStalkerProfile(profile: StalkerProfile): Promise<bigint>;
     savePoliceDepartment(department: PoliceDepartment): Promise<bigint>;
+    saveSelectedDepartment(persistedDepartment: PoliceDepartment): Promise<void>;
     saveStalkerProfile(profile: StalkerProfile): Promise<void>;
     saveVictimProfile(profile: VictimProfile): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;

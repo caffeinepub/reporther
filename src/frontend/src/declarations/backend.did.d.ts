@@ -104,6 +104,7 @@ export interface PoliceSubmissionLog {
   'attachedEvidence' : Array<EvidenceMeta>,
   'includedSummary' : boolean,
   'submissionResult' : string,
+  'narrative' : string,
   'timestamp' : bigint,
   'victimInfoIncluded' : boolean,
   'department' : PoliceDepartment,
@@ -198,6 +199,7 @@ export interface _SERVICE {
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'clearSelectedDepartment' : ActorMethod<[], undefined>,
   'deletePoliceDepartment' : ActorMethod<[bigint], boolean>,
   'deleteStalkerProfile' : ActorMethod<[bigint], boolean>,
   'findNearestPoliceDepartment' : ActorMethod<
@@ -228,6 +230,7 @@ export interface _SERVICE {
     Array<PlaceCandidate>
   >,
   'getPoliceSubmissionLogs' : ActorMethod<[], Array<PoliceSubmissionLog>>,
+  'getSelectedDepartment' : ActorMethod<[], [] | [PoliceDepartment]>,
   'getSmsLogs' : ActorMethod<[], Array<SmsLog>>,
   'getStalkerProfile' : ActorMethod<[], [] | [StalkerProfile]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
@@ -241,6 +244,7 @@ export interface _SERVICE {
       boolean,
       [] | [VictimProfile],
       boolean,
+      string,
     ],
     undefined
   >,
@@ -255,6 +259,7 @@ export interface _SERVICE {
   >,
   'saveMultipleStalkerProfile' : ActorMethod<[StalkerProfile], bigint>,
   'savePoliceDepartment' : ActorMethod<[PoliceDepartment], bigint>,
+  'saveSelectedDepartment' : ActorMethod<[PoliceDepartment], undefined>,
   'saveStalkerProfile' : ActorMethod<[StalkerProfile], undefined>,
   'saveVictimProfile' : ActorMethod<[VictimProfile], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
