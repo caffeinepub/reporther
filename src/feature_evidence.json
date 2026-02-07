@@ -2,11 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-ensure-the-selected-police-department-persists-and-is-available-when-the-user-opens-or-reloads-the-incident-report-to-police-flow-instead-of-resetting-to-null-or-being-lost-between-pages",
-      "featureTitle": "Ensure the selected police department persists and is available when the user opens (or reloads) the incident “Report to Police” flow, instead of resetting to null or being lost between pages.",
+      "featureId": "feature-update-all-user-facing-branding-text-to-use-the-product-name-reporther-and-remove-my-safety-tracker-safety-tracker-copy-across-the-landing-login-experience-and-top-app-header",
+      "featureTitle": "Update all user-facing branding text to use the product name \"Reporther\" (and remove \"My Safety Tracker\" / \"Safety Tracker\" copy) across the landing/login experience and top app header.",
       "files": [
-        "frontend/src/components/IncidentDetail.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/Header.tsx",
+        "frontend/src/components/LoginPrompt.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -25,11 +25,36 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-frontend-update-the-stalker-info-police-department-ui-to-save-the-selected-department-via-the-new-backend-persistence-api-and-invalidate-refetch-relevant-react-query-caches-so-subsequent-page-loads-use-the-saved-value",
-      "featureTitle": "Frontend: Update the Stalker Info / police department UI to save the selected department via the new backend persistence API and invalidate/refetch relevant React Query caches so subsequent page loads use the saved value.",
+      "featureId": "feature-update-the-pwa-app-metadata-to-identify-the-app-as-reporther-so-it-does-not-appear-under-the-old-personalized-name-when-installed-or-shared-update-document-title-apple-pwa-title-opengraph-twitter-titles-and-the-web-app-manifest-name-short-name-description-as-needed-to-match-reporther",
+      "featureTitle": "Update the PWA/app metadata to identify the app as \"Reporther\" so it does not appear under the old/personalized name when installed or shared: update document title, Apple PWA title, OpenGraph/Twitter titles, and the Web App Manifest (name/short_name/description as needed) to match Reporther.",
       "files": [
-        "frontend/src/components/StalkerRecord.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/index.html",
+        "frontend/public/manifest.json"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0",
+        "camera@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-replace-the-current-app-icon-set-favicon-pwa-icons-with-a-man-behind-bars-icon-and-update-all-references-so-the-new-icon-is-used-everywhere-it-is-currently-referencing-the-private-app-icon-assets-html-favicon-apple-touch-icon-manifest-icons-and-any-in-app-logo-images",
+      "featureTitle": "Replace the current app icon set (favicon + PWA icons) with a \"man behind bars\" icon, and update all references so the new icon is used everywhere it is currently referencing the private-app icon assets (HTML favicon, Apple touch icon, manifest icons, and any in-app logo images).",
+      "files": [
+        "frontend/index.html",
+        "frontend/public/manifest.json",
+        "frontend/src/components/Header.tsx",
+        "frontend/src/components/LoginPrompt.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -48,11 +73,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-frontend-update-incident-detail-report-to-police-entry-logic-so-it-loads-and-prefers-the-user-s-saved-police-department-on-mount-and-does-not-overwrite-it-with-the-auto-lookup-effect-unless-the-user-explicitly-refreshes-or-no-saved-department-exists",
-      "featureTitle": "Frontend: Update incident detail / report-to-police entry logic so it loads and prefers the user’s saved police department on mount, and does not overwrite it with the auto-lookup effect unless the user explicitly refreshes or no saved department exists.",
+      "featureId": "feature-ensure-this-build-does-not-conflict-with-or-overwrite-the-existing-regular-reporther-app-identity-in-the-browser-by-updating-the-service-worker-cache-naming-and-precache-icon-urls-to-align-with-the-updated-reporther-icon-filenames-and-remove-old-private-app-icon-entries-from-the-precache-list",
+      "featureTitle": "Ensure this build does not conflict with or overwrite the existing regular Reporther app identity in the browser by updating the service worker cache naming and precache icon URLs to align with the updated Reporther icon filenames (and remove old private-app icon entries from the precache list).",
       "files": [
-        "frontend/src/components/IncidentDetail.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/public/service-worker.js"
       ],
       "components": [
         "authorization@4.0.0",

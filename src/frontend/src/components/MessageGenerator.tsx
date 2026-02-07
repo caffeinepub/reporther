@@ -83,9 +83,11 @@ export default function MessageGenerator({ incidentId, onCancel, onSuccess }: Me
       <Alert className="border-primary/50 bg-primary/5">
         <Info className="h-4 w-4 text-primary" />
         <AlertDescription className="text-sm">
-          <strong className="text-primary">Enhanced Message Generation:</strong> All messages are now generated with meaningful, 
-          contextually relevant content based on your incident details, stalker information, and selected tone. Each message type 
-          produces professional ReportHer language tailored to your specific situation.
+          <strong className="text-primary">Personalized Message Generation:</strong> All messages automatically include 
+          the stalker's name from your Stalker Info profile when available, making each message direct and personal. 
+          Messages are generated with meaningful, contextually relevant content based on your incident details, stalker 
+          information, and selected tone. Each message type produces professional ReportHer language tailored to your 
+          specific situation.
         </AlertDescription>
       </Alert>
 

@@ -1,7 +1,7 @@
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, FileText, MessageSquareWarning, AlertCircle, Smartphone } from 'lucide-react';
+import { Shield, FileText, MessageSquareWarning, AlertCircle } from 'lucide-react';
 
 export default function LoginPrompt() {
   const { login, loginStatus } = useInternetIdentity();
@@ -23,27 +23,26 @@ export default function LoginPrompt() {
         <div className="text-center mb-12">
           <div className="w-24 h-24 mx-auto mb-6 rounded-2xl gradient-empowerment dark:gradient-empowerment-dark flex items-center justify-center shadow-2xl">
             <img 
-              src="/assets/generated/app-icon-man-behind-bars-transparent.dim_200x200.png" 
-              alt="Justice icon" 
+              src="/assets/generated/reporther-app-icon-192.dim_192x192.png" 
+              alt="Reporther icon" 
               className="w-16 h-16"
             />
           </div>
           <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-4">
-            ReportHer
+            Reporther
           </h1>
           <p className="text-2xl font-bold text-primary mb-3">
-            Empowering women to document, report, and stop harassment.
+            Document, track, and report harassment with evidence-based accountability.
           </p>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            ReportHer is a safety empowerment app built for women to record stalking and harassment incidents, 
-            generate strong legal-style warnings, and report directly to law enforcement. With built-in evidence 
-            tracking and automatic police submission support, ReportHer gives women control, proof, and the power 
-            to take action.
+            A powerful safety tool to record incidents, generate warnings, and maintain evidence. 
+            Track stalking and harassment with built-in documentation and police reporting support. 
+            Your safety, your evidence, your power.
           </p>
         </div>
 
         {/* Feature Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           <Card className="border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
             <CardHeader>
               <div className="w-12 h-12 rounded-lg gradient-empowerment dark:gradient-empowerment-dark flex items-center justify-center mb-3 shadow-md">
@@ -81,21 +80,7 @@ export default function LoginPrompt() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Automatically submit reports to your nearest police department. Track all submissions in your evidence record for accountability.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-primary/20 hover:border-primary/40 transition-all shadow-lg hover:shadow-xl">
-            <CardHeader>
-              <div className="w-12 h-12 rounded-lg gradient-empowerment dark:gradient-empowerment-dark flex items-center justify-center mb-3 shadow-md">
-                <Smartphone className="w-6 h-6 text-white" />
-              </div>
-              <CardTitle className="text-lg font-bold text-primary">Install on Phone</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Add ReportHer to your home screen for instant access. Works offline and keeps your data secure.
+                Submit reports to your nearest police department. Track all submissions in your evidence record for accountability.
               </p>
             </CardContent>
           </Card>
@@ -106,10 +91,10 @@ export default function LoginPrompt() {
           <CardContent className="pt-8 pb-8 text-center">
             <AlertCircle className="w-16 h-16 text-primary mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-foreground mb-3">
-              Your Safety, Your Power
+              Take Control of Your Safety
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Take control of your evidence and protection. You deserve safety and respect. Login to start documenting incidents and holding offenders accountable for their actions.
+              Login to start documenting incidents and maintaining your evidence record with Reporther.
             </p>
             <Button
               onClick={handleLogin}
@@ -120,7 +105,7 @@ export default function LoginPrompt() {
               {disabled ? 'Logging in...' : 'Get Started - Login Now'}
             </Button>
             <p className="text-xs text-muted-foreground mt-4">
-              Secure authentication • Your data is private and protected
+              Secure authentication • Your data is protected
             </p>
           </CardContent>
         </Card>

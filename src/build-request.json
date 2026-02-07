@@ -1,91 +1,110 @@
 {
   "kind": "build_request",
-  "title": "Fix police department persistence when loading the Report to Police page",
+  "title": "Restore Reporther branding and app identity (name + man-behind-bars icon)",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Ensure the selected police department persists and is available when the user opens (or reloads) the incident “Report to Police” flow, instead of resetting to null or being lost between pages.",
-      "target": "both",
+      "text": "Update all user-facing branding text to use the product name \"Reporther\" (and remove \"My Safety Tracker\" / \"Safety Tracker\" copy) across the landing/login experience and top app header.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-10"
+          "msg-1"
         ],
         "quotes": [
-          "the police department won't save when loading to the report page"
+          "yes, it is supposed to say Reporther and have a picture of man behind bars as the icon"
         ]
       },
       "acceptanceCriteria": [
-        "After the user sets/saves a police department in the Stalker Info area and navigates to an incident detail page, the \"Submitting to\" department shown in the police report dialog matches the saved department.",
-        "Refreshing the browser while on the incident detail page still results in a police department being available for \"Report to Police\" (assuming one was previously saved).",
-        "If no police department has been saved and no valid address is available, the app shows an actionable message and keeps \"Report to Police\" disabled (no crash)."
+        "The login/unauthenticated landing page headline displays \"Reporther\" (not \"My Safety Tracker\").",
+        "The app header brand/title displays \"Reporther\" (not \"Your Safety, Your Power\" or other personalized branding).",
+        "No remaining occurrences of \"My Safety Tracker\" or \"Safety Tracker\" are shown in the core UI (header and login prompt) after this change."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Backend: Add explicit per-user persistence APIs for police department selection (store and retrieve the caller’s saved police department, and optionally clear it), so the frontend can load the saved department on the report page without relying on transient UI state.",
-      "target": "backend",
+      "text": "Update the PWA/app metadata to identify the app as \"Reporther\" so it does not appear under the old/personalized name when installed or shared: update document title, Apple PWA title, OpenGraph/Twitter titles, and the Web App Manifest (name/short_name/description as needed) to match Reporther.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-10"
+          "msg-1"
         ],
         "quotes": [
-          "the police department won't save when loading to the report page"
+          "yes, it is supposed to say Reporther and have a picture of man behind bars as the icon"
         ]
       },
       "acceptanceCriteria": [
-        "Backend exposes a query method to fetch the caller’s saved police department (returns null when not set).",
-        "Backend exposes an update method to save the caller’s police department (idempotent overwrite).",
-        "Saved police department data is retained across page navigation and canister calls (and across upgrade if the project already uses stable state for user data; use migration only if required by existing stable layout)."
+        "frontend/index.html <title> uses \"Reporther\".",
+        "frontend/index.html apple-mobile-web-app-title is \"Reporther\".",
+        "frontend/index.html og:title and twitter:title use \"Reporther\".",
+        "frontend/public/manifest.json name and short_name are set to \"Reporther\".",
+        "After installing as a PWA, the installed app name shows as \"Reporther\"."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Frontend: Update the Stalker Info / police department UI to save the selected department via the new backend persistence API and invalidate/refetch relevant React Query caches so subsequent page loads use the saved value.",
+      "text": "Replace the current app icon set (favicon + PWA icons) with a \"man behind bars\" icon, and update all references so the new icon is used everywhere it is currently referencing the private-app icon assets (HTML favicon, Apple touch icon, manifest icons, and any in-app logo images).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-10"
+          "msg-1"
         ],
         "quotes": [
-          "the police department won't save when loading to the report page"
+          "yes, it is supposed to say Reporther and have a picture of man behind bars as the icon"
         ]
       },
       "acceptanceCriteria": [
-        "Saving/choosing a police department triggers a successful mutation and shows an English success toast; failures show an English error toast.",
-        "React Query caches for the saved police department are invalidated on success, and a reload of the page reflects the saved department without additional user action."
+        "A new icon image set exists in frontend/public/assets/generated and is referenced by frontend/index.html and frontend/public/manifest.json.",
+        "Header logo image uses the new Reporther icon asset (not /assets/generated/private-app-icon-192.dim_192x192.png).",
+        "LoginPrompt hero/logo image uses the new Reporther icon asset (not /assets/generated/private-app-icon-192.dim_192x192.png).",
+        "Manifest icons and shortcut icon reference the new Reporther icon assets (not private-app-*).",
+        "Favicon (<link rel='icon'>) and og:image/twitter:image point at the new Reporther icon/fav asset."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Frontend: Update incident detail / report-to-police entry logic so it loads and prefers the user’s saved police department on mount, and does not overwrite it with the auto-lookup effect unless the user explicitly refreshes or no saved department exists.",
+      "text": "Ensure this build does not conflict with or overwrite the existing regular Reporther app identity in the browser by updating the service worker cache naming and precache icon URLs to align with the updated Reporther icon filenames (and remove old private-app icon entries from the precache list).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-10"
+          "msg-1"
         ],
         "quotes": [
-          "the police department won't save when loading to the report page"
+          "it needs to be removed from there"
         ]
       },
       "acceptanceCriteria": [
-        "When a saved department exists, the incident detail page enables \"Report to Police\" without requiring an auto-lookup call.",
-        "Auto-refresh/lookup does not clear or replace the saved department automatically; manual \"Refresh Police Dept\" may update it according to the designed behavior.",
-        "The PoliceReportDialog always receives a non-null department object when the button is enabled and opened."
+        "frontend/public/service-worker.js CACHE_NAME and RUNTIME_CACHE are updated to a Reporther-specific value (not 'my-safety-tracker-*').",
+        "The PRECACHE_URLS icon entries reference the new Reporther icon filenames and do not include private-app icon filenames.",
+        "After a refresh with the updated service worker, the app loads without 404s for icon assets and uses the new icon in cached/offline scenarios."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor (all logic in backend/main.mo).",
-    "Do not edit files under frontend/src/components/ui or other immutablePaths listed in SYSTEM_CONTEXT; compose them instead.",
-    "Use English for any user-facing text."
+    "Do not edit any files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT.",
+    "Use English for all user-facing text."
   ],
   "nonGoals": [
-    "Adding third-party mapping/geolocation integrations beyond the existing backend lookup method.",
-    "Implementing real-time updates (e.g., WebSockets) for police department changes."
+    "Do not add new product features beyond branding/icon/identity changes.",
+    "Do not implement third-party authentication; only Internet Identity remains.",
+    "Do not change backend data models unless required for branding (not expected)."
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "App icon illustration showing a man behind bars, bold and readable at small sizes (reporther-app-icon-192.dim_192x192.png)",
+      "App icon illustration showing a man behind bars, bold and readable at small sizes (reporther-app-icon-512.dim_512x512.png)",
+      "Square favicon illustration showing a man behind bars, bold and readable at small sizes (reporther-favicon.dim_200x200.png)"
+    ],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

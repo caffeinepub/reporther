@@ -15,10 +15,6 @@ import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
 import OutCall "http-outcalls/outcall";
 
-import Migration "migration";
-
-// Use migration for police submission logs to include a narrative field
-(with migration = Migration.run)
 actor {
   type StalkerProfile = StalkerProfile.StalkerProfile;
   type PoliceDepartment = PoliceDepartment.PoliceDepartment;
@@ -297,36 +293,39 @@ actor {
   };
 
   func getShareMessageInternal(messageType : ShareMessageType) : Text {
-    let shareIntro = "Download \"ReportHer\" - Empowerment & Safety at your fingertips. ";
-    let appTagline = "**ReportHer** - Your safety, your evidence, your power. \n- Report harassers\n- Document incidents\n- Safely store proof\n- Automatic police reporting";
-    let shareOutro = "Accountability, protection, and support all in one app. \n";
-    let appLaunch = "Install for FREE at\n`https://reporther-2cs.caffeine.xyz` and take control of your safety. \n";
-
     switch (messageType) {
       case (#appRecommendation) {
-        shareIntro # appTagline # appLaunch # shareOutro;
+        "Download \"ReportHer\" - Empowerment & Safety at your fingertips. {Add your website link here}\n"
+        # "**ReportHer** - Your safety, your evidence, your power. \n- Report harassers\n- Document incidents\n- Safely store proof\n- Automatic police reporting"
+        # "Accountability, protection, and support all in one app. \n"
+        # "\nNEW USER FLOW:\n"
+        # "1. **Register (100% anonymous, any email): ** ReportHerLegal.com\n"
+        # "2. **Activate AI Assistant:** 24/7 support & reporting in seconds.\n"
+        # "3. **Contact Lawyers:** Access legal protection and full analysis.\n"
+        # "**Install for free and take control of your safety. ** \n";
       };
       case (#noPermission) {
-        "\"ReportHer\" is a women's safety app for reporting and documenting harassment. This is a professional notification of your behavior for accountability purposes. \nLegal documentation has been created and may be submitted to law enforcement. If you have questions about police reporting, you can find more information at `https://reporther-2cs.caffeine.xyz`";
+        "\"ReportHer\" is a women's safety app for reporting and documenting harassment.\n"
+        # "This is a professional notification of your behavior for accountability and documentation purposes. This notification has generated a timestamped legal record. We take both female and male reports seriously and will address false accusations in the same legal manner.\n"
+        # "\nIf you need to justify your actions, you can request a review using \"ReportHer App\".\n"
+        # "All reported evidence, including call recordings, has been documented and timestamped for legal protection. If you have questions about police reporting, you can find more information on our website.\n";
       };
       case (#firmAccountability) {
-        "There is zero tolerance for men's predatory behavior.\nLegal documentation has been created and may be submitted to law enforcement. If you have questions about police reporting, you can find more information at `https://reporther-2cs.caffeine.xyz`";
+        "There is zero tolerance for men's predatory behavior. Legal documentation has been created for verification and may be submitted to law enforcement. If you need clarification, want to defend yourself, or are a lawyer seeking evidence, you can contact our legal department. All evidence has been timestamped and submitted to multiple trusted legal safekeepers. Find more information on our website.\n Keep in mind, every request will be reviewed by licensed female professionals for accountability purposes.\n";
       };
       case (#personalFeminineTouch) {
-        "\"Personal Feminine Touch (PFT) Share Message \"\n" #
-        "---------------------------\n" #
-        "Subject: New Female Safety & Self-Protection App\n" #
-        "---------------------------\n\n" #
-        "This platform helps to break the silence, give accountability, and empower female friends and family, while holding predatory behavior accountable.\n\n" #
-        "Full Legal Coverage & Evidence Storage: Reduces the risk of public discussions about harassment, stalking, and predatory behavior. Keeps no record on your device, while it's uploaded directly to ReportHer and a backup legal server with proof of submission.\n\n" #
-        "Exposure & Documentation: This platform holds accountable men who harass, stalk, exploit, or abuse legal gaps, without storing your private data on your phone. Accountability has started.\n\n" #
-        "Female Accountability: To all women who have hidden, deleted, or dropped complaints or have tolerated scary or intimidating behavior due to fear, lack of proof, or worry about 'legal loopholes,' this is the answer.\n" #
-        "No more ignoring or deleting proof out of fear.\n\n" #
-        "Male Accountability: To all men, predators, manipulators, offenders, and 'innocent bystanders,' this is your sign.\n" #
-        "With all evidence, content, photos, phone records, and vehicle details finally being documented, it is the end for manipulation, threats, and exploitation.\n\n" #
-        "Professional Profile: Every account is validated, checked, and protected.\n\n" #
-        "No More Manipulation: This app changes everything. For your own protection: install it and send this message to trusted friends and family.\n\n" #
-        "Install for FREE at `https://reporther-2cs.caffeine.xyz.\n`";
+        "**Personal Feminine Touch (PFT) Share Message**\n"
+        # "---------------------------\n"
+        # "Subject: New (100% Protected) Female Safety & Self-Protection App\n"
+        # "---------------------------\n\n"
+        # "This platform helps to break the silence, provide accountability, and empower female friends and family, while holding predatory behavior accountable.\n\n"
+        # "**Full Legal Coverage & Evidence Storage:** Reduces the risk of public discussions about harassment, stalking, and predatory behavior by keeping records off your device. Evidence is automatically uploaded directly to ReportHer and a backup legal server, providing proof of submission.\n\n"
+        # "**Exposure & Documentation:** This platform holds accountable men who harass, stalk, exploit, or abuse legal gaps, with professional records that do not store any shame, guilt, or private data on your phone. Accountability has started.\n\n"
+        # "**Female Accountability:** To all women who have hidden, deleted, or dropped complaints or have tolerated scary or intimidating behavior due to fear, lack of proof, or concern about \"legal loopholes,\" this is the answer. No more ignoring truth or deleting proof out of fear.\n\n"
+        # "**Male Accountability:** To all men, predators, manipulators, offenders, and \"innocent bystanders,\" this is your chance. With all evidence, content, photos, phone records, and vehicle details finally being uploaded to this platform, it is the end for manipulation, threats, and exploitation.\n\n"
+        # "**Professional Profile:** Every account is validated, checked, and protected pages are tested and 100% protected.\n\n"
+        # "**No More Manipulation:** This app brings child support and unpaid claims back to those who deserve it. For your own protection: install it and send this message to trusted friends and family.\n\n"
+        # "**Install for FREE at {Add your website link here}.**\n";
       };
     };
   };
@@ -393,7 +392,7 @@ actor {
     message;
   };
 
-  func composeMessage(incident : IncidentReport, _stalkerProfile : ?StalkerProfile, tone : MessageTone, intensity : ?ToneIntensity) : Text {
+  func composeMessage(incident : IncidentReport, stalkerProfile : ?StalkerProfile, tone : MessageTone, intensity : ?ToneIntensity) : Text {
     let basicInfo = "Incident Details\n" #
     "- Location: " # incident.location # "\n" #
     "- Description: " # incident.description # "\n" #
@@ -401,9 +400,16 @@ actor {
     "- Additional Notes: " # incident.additionalNotes # "\n" #
     "- Report Number: " # incident.criminalActivityReportNumber # "\n";
 
-    switch (tone) {
+    let stalkerName = switch (stalkerProfile) {
+      case (?profile) { profile.name };
+      case (null) { "Suspect" };
+    };
+
+    let messagePrefix = "Dear " # stalkerName # ",\n\n";
+
+    let messageBody = switch (tone) {
       case (#directWarning) {
-        let warning = switch (intensity) {
+        switch (intensity) {
           case (?#calm) {
             "Calm Warning\n" #
             "----------------------\n" #
@@ -440,22 +446,21 @@ actor {
             "There are no more loopholes or excuses. End this behavior now to avoid prosecution.\n";
           };
         };
-        warning # "\n" # basicInfo;
       };
       case (#formalEvidence) {
         "Formal Notification\n" #
         "----------------------\n" #
         "You are receiving this official incident report for legal documentation purposes. The information provided has been submitted as evidence for investigative and compliance reasons. Please retain this document for your records.\n" #
-        basicInfo #
         "If further information or clarification is needed regarding this report, contact the original submitter directly for official verification of the provided evidence and statements. All documentation has been timestamped and authenticated through the system, providing additional validation for investigative use.\n";
       };
       case (#documentationNotice) {
         "Documentation Notice\n" #
         "----------------------\n" #
-        basicInfo #
         "This message serves as a timestamped, documented record of the incident. All actions and communication related to this matter are permanently stored for legal and historical reference. If you need to verify any of the details or require proof of submission, the original submitter can confirm as both a legal representative and the owner.\n";
       };
     };
+
+    messagePrefix # messageBody # basicInfo;
   };
 
   public shared ({ caller }) func findNearestPoliceDepartment(address : Text) : async ?PoliceDepartment {

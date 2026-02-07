@@ -5,9 +5,9 @@ const RUNTIME_CACHE = 'reporther-runtime-v1';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
-  '/assets/generated/reporther-icon-192.dim_192x192.png',
-  '/assets/generated/reporther-icon-512.dim_512x512.png',
-  '/assets/generated/app-icon-man-behind-bars-transparent.dim_200x200.png',
+  '/assets/generated/reporther-app-icon-192.dim_192x192.png',
+  '/assets/generated/reporther-app-icon-512.dim_512x512.png',
+  '/assets/generated/reporther-favicon.dim_200x200.png',
   '/assets/generated/safety-illustration.dim_400x300.png'
 ];
 

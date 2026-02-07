@@ -14,9 +14,7 @@ import IncidentHistory from './IncidentHistory';
 import StalkerRecord from './StalkerRecord';
 import VictimProfile from './VictimProfile';
 import PoliceSubmissionHistory from './PoliceSubmissionHistory';
-import InstallationGuide from './InstallationGuide';
 import CrimeHelp from './CrimeHelp';
-import MotivationalVideo from './MotivationalVideo';
 import type { PoliceDepartment } from '../types';
 
 export default function MainContent() {
@@ -37,23 +35,20 @@ export default function MainContent() {
 
   return (
     <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-      {/* Welcome message and motivational video - only for authenticated users */}
+      {/* Welcome message - only for authenticated users */}
       {identity && userProfile && (
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-2">
             Welcome back, {userProfile.name}
           </h1>
-          <p className="text-muted-foreground text-sm sm:text-base mb-4">
+          <p className="text-muted-foreground text-sm sm:text-base">
             Your safety, your evidence, your power.
           </p>
-          
-          {/* Motivational Video Button - Private Access Only */}
-          <MotivationalVideo />
         </div>
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-6 sm:mb-8 gap-0.5 sm:gap-1 h-auto p-1">
+        <TabsList className="grid w-full grid-cols-4 mb-6 sm:mb-8 gap-0.5 sm:gap-1 h-auto p-1">
           <TabsTrigger 
             value="victim" 
             className="text-[10px] xs:text-xs sm:text-sm px-1.5 xs:px-2 sm:px-3 py-2 sm:py-2.5 leading-tight"
@@ -109,12 +104,6 @@ export default function MainContent() {
           >
             Crime Help
           </TabsTrigger>
-          <TabsTrigger 
-            value="install" 
-            className="text-[10px] xs:text-xs sm:text-sm px-1.5 xs:px-2 sm:px-3 py-2 sm:py-2.5 leading-tight"
-          >
-            Install Guide
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="victim">
@@ -142,10 +131,6 @@ export default function MainContent() {
 
         <TabsContent value="help">
           <CrimeHelp />
-        </TabsContent>
-
-        <TabsContent value="install">
-          <InstallationGuide />
         </TabsContent>
       </Tabs>
     </main>

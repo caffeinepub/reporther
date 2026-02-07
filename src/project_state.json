@@ -1,32 +1,41 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "Revert app to pre-personalized Version 75, ensure it is removed from the regular Reporther app, and set branding to name \"Reporther\" with a \"man behind bars\" app icon.",
   "architectural_notes": [],
   "known_issues": [
-    "Police department selection/data does not save/persist when loading the Report page."
+    "Revert/build attempts have failed due to internal LLM/build errors; revert to Version 75 not yet completed."
   ],
   "isFixRequest": true,
+  "imageRequirements": "## Required Images\n- App icon illustration showing a man behind bars, bold and readable at small sizes (reporther-app-icon-192.dim_192x192.png)\n- App icon illustration showing a man behind bars, bold and readable at small sizes (reporther-app-icon-512.dim_512x512.png)\n- Square favicon illustration showing a man behind bars, bold and readable at small sizes (reporther-favicon.dim_200x200.png)",
   "existing_features": [
     {
-      "id": "feature-ensure-the-selected-police-department-persists-and-is-available-when-the-user-opens-or-reloads-the-incident-report-to-police-flow-instead-of-resetting-to-null-or-being-lost-between-pages",
-      "title": "Ensure the selected police department persists and is available when the user opens (or reloads) the incident “Report to Police” flow, instead of resetting to null or being lost between pages.",
+      "id": "feature-update-all-user-facing-branding-text-to-use-the-product-name-reporther-and-remove-my-safety-tracker-safety-tracker-copy-across-the-landing-login-experience-and-top-app-header",
+      "title": "Update all user-facing branding text to use the product name \"Reporther\" (and remove \"My Safety Tracker\" / \"Safety Tracker\" copy) across the landing/login experience and top app header.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-frontend-update-the-stalker-info-police-department-ui-to-save-the-selected-department-via-the-new-backend-persistence-api-and-invalidate-refetch-relevant-react-query-caches-so-subsequent-page-loads-use-the-saved-value",
-      "title": "Frontend: Update the Stalker Info / police department UI to save the selected department via the new backend persistence API and invalidate/refetch relevant React Query caches so subsequent page loads use the saved value.",
+      "id": "feature-update-the-pwa-app-metadata-to-identify-the-app-as-reporther-so-it-does-not-appear-under-the-old-personalized-name-when-installed-or-shared-update-document-title-apple-pwa-title-opengraph-twitter-titles-and-the-web-app-manifest-name-short-name-description-as-needed-to-match-reporther",
+      "title": "Update the PWA/app metadata to identify the app as \"Reporther\" so it does not appear under the old/personalized name when installed or shared: update document title, Apple PWA title, OpenGraph/Twitter titles, and the Web App Manifest (name/short_name/description as needed) to match Reporther.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-current-app-icon-set-favicon-pwa-icons-with-a-man-behind-bars-icon-and-update-all-references-so-the-new-icon-is-used-everywhere-it-is-currently-referencing-the-private-app-icon-assets-html-favicon-apple-touch-icon-manifest-icons-and-any-in-app-logo-images",
+      "title": "Replace the current app icon set (favicon + PWA icons) with a \"man behind bars\" icon, and update all references so the new icon is used everywhere it is currently referencing the private-app icon assets (HTML favicon, Apple touch icon, manifest icons, and any in-app logo images).",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-frontend-update-incident-detail-report-to-police-entry-logic-so-it-loads-and-prefers-the-user-s-saved-police-department-on-mount-and-does-not-overwrite-it-with-the-auto-lookup-effect-unless-the-user-explicitly-refreshes-or-no-saved-department-exists",
-      "title": "Frontend: Update incident detail / report-to-police entry logic so it loads and prefers the user’s saved police department on mount, and does not overwrite it with the auto-lookup effect unless the user explicitly refreshes or no saved department exists.",
+      "id": "feature-ensure-this-build-does-not-conflict-with-or-overwrite-the-existing-regular-reporther-app-identity-in-the-browser-by-updating-the-service-worker-cache-naming-and-precache-icon-urls-to-align-with-the-updated-reporther-icon-filenames-and-remove-old-private-app-icon-entries-from-the-precache-list",
+      "title": "Ensure this build does not conflict with or overwrite the existing regular Reporther app identity in the browser by updating the service worker cache naming and precache icon URLs to align with the updated Reporther icon filenames (and remove old private-app icon entries from the precache list).",
       "reqIds": [
         "REQ-4"
       ],
@@ -35,15 +44,26 @@
   ],
   "new_feature_requests": [
     {
+      "id": "AR-1",
+      "summary": "Revert the app back to Version 75 (undo personalization changes).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
       "id": "AR-2",
-      "summary": "Backend: Add explicit per-user persistence APIs for police department selection (store and retrieve the caller’s saved police department, and optionally clear it), so the frontend can load the saved department on the report page without relying on transient UI state.",
-      "reqIds": [
-        "REQ-2"
-      ],
+      "summary": "Remove this build/app from the regular Reporther app (ensure it is not appearing there).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Set app display name to \"Reporther\" and update the app icon to a man behind bars.",
+      "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Fix police department persistence when loading the Report to Police page",
+  "gameProjectType": "none",
+  "projectName": "Reporther",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Ensure the user’s selected police department persists and is reliably available when opening or reloading the “Report to Police” flow.
+**Goal:** Restore the app’s Reporther branding and identity (name + man-behind-bars icon) across UI, PWA metadata, and cached assets.
 
 **Planned changes:**
-- Backend: Add per-user persistence endpoints to get/save (and optionally clear) the caller’s saved police department selection.
-- Frontend: Update the Stalker Info police department selector to save via the backend API and invalidate/refetch relevant React Query caches; show English success/error toasts.
-- Frontend: Update the incident detail / Report to Police entry flow to load and prefer the saved police department on mount and across refresh, avoiding automatic overwrite by auto-lookup unless no saved department exists or the user explicitly refreshes.
-- Frontend: When no saved department exists and no valid address is available, show an actionable English message and keep “Report to Police” disabled without crashing.
+- Update all user-facing branding text in the login/unauthenticated landing experience and the top app header to display “Reporther”, removing any “My Safety Tracker” / “Safety Tracker” copy.
+- Update PWA/app metadata to use “Reporther” everywhere (document title, Apple PWA title, OpenGraph/Twitter titles, and manifest name/short_name/description as needed).
+- Replace favicon and PWA icon assets with a “man behind bars” icon set, and update all references (index.html, manifest.json, in-app header logo, and login prompt hero/logo) to use the new Reporther icon assets instead of any private-app icon assets.
+- Update service worker cache naming and precache icon URLs to match the new Reporther icon filenames and remove old private-app icon entries to avoid cache conflicts and prevent 404s.
 
-**User-visible outcome:** A previously saved police department continues to appear as the “Submitting to” department in the police report dialog even after navigating to an incident or refreshing the page, and the report action remains safely disabled with guidance when no department can be determined.
+**User-visible outcome:** The app consistently shows the name “Reporther” (in the login screen, header, and when installed/shared as a PWA) and displays the man-behind-bars icon across the favicon, installed app icon, and in-app branding, including in cached/offline scenarios.

@@ -1,72 +1,113 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Persist and prefer saved police department in Report to Police flow (frontend-only)",
+  "title": "Restore Reporther branding, metadata, and icon identity",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Load and keep the user’s previously saved police department available across navigation/reload for the incident “Report to Police” flow, with safe disabled-state messaging when unavailable.",
+      "summary": "Replace all user-facing product name/branding copy with \"Reporther\" in the unauthenticated landing/login experience and the top app header.",
       "acceptanceCriteria": [
-        "After the user sets/saves a police department in the Stalker Info area and navigates to an incident detail page, the \"Submitting to\" department shown in the police report dialog matches the saved department.",
-        "Refreshing the browser while on the incident detail page still results in a police department being available for \"Report to Police\" (assuming one was previously saved).",
-        "If no police department has been saved and no valid address is available, the app shows an actionable message and keeps \"Report to Police\" disabled (no crash)."
+        "The login/unauthenticated landing page headline displays \"Reporther\" (not \"My Safety Tracker\").",
+        "The app header brand/title displays \"Reporther\" (not \"Your Safety, Your Power\" or other personalized branding).",
+        "No remaining occurrences of \"My Safety Tracker\" or \"Safety Tracker\" are shown in the core UI (header and login prompt) after this change."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/Header.tsx",
           "operation": "modify",
-          "description": "Add React Query hooks for saved police department persistence using existing backend capabilities (getSelectedDepartment/saveSelectedDepartment/clearSelectedDepartment) and a stable queryKey (e.g., ['selectedDepartment', principal])."
+          "description": "Update header brand/title text to \"Reporther\" and remove/replace any remaining \"My Safety Tracker\" / \"Safety Tracker\" / personalized header branding copy to match the restored app identity."
         },
         {
-          "path": "frontend/src/components/IncidentDetail.tsx",
+          "path": "frontend/src/components/LoginPrompt.tsx",
           "operation": "modify",
-          "description": "On mount, fetch and prefer the saved police department (via the new React Query hook) so the Report to Police button and dialog use it after navigation/reload; keep Report to Police disabled with an actionable English message when neither a saved department nor a valid address exists."
+          "description": "Update unauthenticated landing/login hero headline and related branding copy to use \"Reporther\" and remove/replace any remaining \"My Safety Tracker\" / \"Safety Tracker\" copy in the login prompt experience."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Update PWA/SEO/app metadata so the installed/shared app identifies as \"Reporther\" across title tags, Apple PWA title, OpenGraph/Twitter titles, and the manifest.",
+      "acceptanceCriteria": [
+        "frontend/index.html <title> uses \"Reporther\".",
+        "frontend/index.html apple-mobile-web-app-title is \"Reporther\".",
+        "frontend/index.html og:title and twitter:title use \"Reporther\".",
+        "frontend/public/manifest.json name and short_name are set to \"Reporther\".",
+        "After installing as a PWA, the installed app name shows as \"Reporther\"."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Change document <title> to \"Reporther\"; set apple-mobile-web-app-title to \"Reporther\"; update og:title and twitter:title to \"Reporther\"; ensure any remaining old/personalized title strings are removed."
         },
         {
-          "path": "frontend/src/components/PoliceReportDialog.tsx",
+          "path": "frontend/public/manifest.json",
           "operation": "modify",
-          "description": "Ensure the dialog is only openable when a non-null department object is present (consistent with IncidentDetail enablement) and that the displayed \"Submitting to\" section reflects the provided department prop."
+          "description": "Update manifest name/short_name (and description if needed) to consistently identify the app as \"Reporther\" so installed PWA name no longer shows the old/personalized identity."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Save the selected police department from the Stalker Info area using persistence hooks, with English success/error toasts and React Query cache invalidation so subsequent page loads reflect the saved value.",
+      "summary": "Replace favicon and PWA icon assets with the \"man behind bars\" Reporther icon set and update all UI/metadata references to use the new filenames.",
       "acceptanceCriteria": [
-        "Saving/choosing a police department triggers a successful mutation and shows an English success toast; failures show an English error toast.",
-        "React Query caches for the saved police department are invalidated on success, and a reload of the page reflects the saved department without additional user action."
+        "A new icon image set exists in frontend/public/assets/generated and is referenced by frontend/index.html and frontend/public/manifest.json.",
+        "Header logo image uses the new Reporther icon asset (not /assets/generated/private-app-icon-192.dim_192x192.png).",
+        "LoginPrompt hero/logo image uses the new Reporther icon asset (not /assets/generated/private-app-icon-192.dim_192x192.png).",
+        "Manifest icons and shortcut icon reference the new Reporther icon assets (not private-app-*).",
+        "Favicon (<link rel='icon'>) and og:image/twitter:image point at the new Reporther icon/fav asset."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Implement mutations for saving and optionally clearing the caller’s selected department, and invalidate/refetch the selected department query on success so all pages read the persisted value."
+          "path": "frontend/public/assets/generated/reporther-app-icon-192.dim_192x192.png",
+          "operation": "create",
+          "description": "Add the required generated Reporther app icon (man behind bars), 192x192, at frontend/public/assets/generated/reporther-app-icon-192.dim_192x192.png."
         },
         {
-          "path": "frontend/src/components/StalkerRecord.tsx",
+          "path": "frontend/public/assets/generated/reporther-app-icon-512.dim_512x512.png",
+          "operation": "create",
+          "description": "Add the required generated Reporther app icon (man behind bars), 512x512, at frontend/public/assets/generated/reporther-app-icon-512.dim_512x512.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/reporther-favicon.dim_200x200.png",
+          "operation": "create",
+          "description": "Add the required generated Reporther favicon (man behind bars), 200x200, at frontend/public/assets/generated/reporther-favicon.dim_200x200.png."
+        },
+        {
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Wire Stalker Info police department selection (dropdown/manual save/autolookup result) to call the save-selected-department mutation; show English success/error toasts; invalidate/refetch React Query caches related to the saved selection."
+          "description": "Update favicon, apple-touch-icon, og:image, and twitter:image references to use the new Reporther assets: frontend/public/assets/generated/reporther-favicon.dim_200x200.png and frontend/public/assets/generated/reporther-app-icon-192.dim_192x192.png; remove references to private-app-* icon assets."
+        },
+        {
+          "path": "frontend/public/manifest.json",
+          "operation": "modify",
+          "description": "Update manifest icons (including shortcut icon entries) to reference the new Reporther assets frontend/public/assets/generated/reporther-app-icon-192.dim_192x192.png, frontend/public/assets/generated/reporther-app-icon-512.dim_512x512.png, and frontend/public/assets/generated/reporther-favicon.dim_200x200.png; remove references to private-app-* icon assets."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Update the header logo <img> to use the new Reporther icon asset (frontend/public/assets/generated/reporther-app-icon-192.dim_192x192.png) and update alt text to match Reporther branding."
+        },
+        {
+          "path": "frontend/src/components/LoginPrompt.tsx",
+          "operation": "modify",
+          "description": "Update the login prompt hero/logo <img> to use the new Reporther icon asset (frontend/public/assets/generated/reporther-app-icon-192.dim_192x192.png) and update alt text to match Reporther branding."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Update incident detail report-to-police logic to load the saved department on mount and prevent auto-lookup effects from clearing/replacing it unless the user manually refreshes or no saved department exists.",
+      "summary": "Prevent conflicts with old identity by updating service worker cache naming and precache icon URLs to the new Reporther filenames and removing old private-app icon entries.",
       "acceptanceCriteria": [
-        "When a saved department exists, the incident detail page enables \"Report to Police\" without requiring an auto-lookup call.",
-        "Auto-refresh/lookup does not clear or replace the saved department automatically; manual \"Refresh Police Dept\" may update it according to the designed behavior.",
-        "The PoliceReportDialog always receives a non-null department object when the button is enabled and opened."
+        "frontend/public/service-worker.js CACHE_NAME and RUNTIME_CACHE are updated to a Reporther-specific value (not 'my-safety-tracker-*').",
+        "The PRECACHE_URLS icon entries reference the new Reporther icon filenames and do not include private-app icon filenames.",
+        "After a refresh with the updated service worker, the app loads without 404s for icon assets and uses the new icon in cached/offline scenarios."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/IncidentDetail.tsx",
+          "path": "frontend/public/service-worker.js",
           "operation": "modify",
-          "description": "Refactor the auto-refresh effect so it does not run (or does not mutate currentPoliceDepartment) when a saved department exists; allow manual refresh to re-run lookup and (if successful) persist the refreshed department via the save-selected-department mutation, keeping button enablement and dialog inputs consistent."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Expose a composable API from hooks to support IncidentDetail behavior: a query for the saved department and a mutation to overwrite it when manual refresh is explicitly triggered."
+          "description": "Update CACHE_NAME and RUNTIME_CACHE strings to Reporther-specific values; update PRECACHE_URLS to remove private-app icon entries and include the new Reporther icon assets (reporther-app-icon-192.dim_192x192.png, reporther-app-icon-512.dim_512x512.png, reporther-favicon.dim_200x200.png), ensuring offline caching does not request removed icon filenames."
         }
       ]
     }

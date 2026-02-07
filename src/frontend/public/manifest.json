@@ -1,7 +1,7 @@
 {
-  "name": "ReportHer",
-  "short_name": "ReportHer",
-  "description": "Empowering women to document, report, and stop harassment",
+  "name": "Reporther",
+  "short_name": "Reporther",
+  "description": "Document, track, and report harassment and stalking incidents with evidence-based accountability",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a0d1f",
@@ -9,19 +9,19 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/assets/generated/reporther-icon-192.dim_192x192.png",
+      "src": "/assets/generated/reporther-app-icon-192.dim_192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/generated/reporther-icon-512.dim_512x512.png",
+      "src": "/assets/generated/reporther-app-icon-512.dim_512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/generated/app-icon-man-behind-bars-transparent.dim_200x200.png",
+      "src": "/assets/generated/reporther-favicon.dim_200x200.png",
       "sizes": "200x200",
       "type": "image/png",
       "purpose": "any"
@@ -37,7 +37,7 @@
       "url": "/?action=new-report",
       "icons": [
         {
-          "src": "/assets/generated/app-icon-man-behind-bars-transparent.dim_200x200.png",
+          "src": "/assets/generated/reporther-favicon.dim_200x200.png",
           "sizes": "200x200",
           "type": "image/png"
         }

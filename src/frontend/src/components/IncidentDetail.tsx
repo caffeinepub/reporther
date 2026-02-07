@@ -5,12 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, MessageSquare, Plus, Shield, FileImage, FileAudio, FileText, Download, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, MessageSquare, Plus, Shield, FileImage, FileAudio, FileText, Download, Loader2, AlertCircle, RefreshCw, Flame } from 'lucide-react';
 import { toast } from 'sonner';
 import type { IncidentReport, PoliceDepartment, StalkerProfile } from '../types';
 import MessageGenerator from './MessageGenerator';
 import MessageList from './MessageList';
 import PoliceReportDialog from './PoliceReportDialog';
+import { useLocalStorageState } from '../hooks/useLocalStorageState';
 
 interface IncidentDetailProps {
   incident: IncidentReport;
@@ -23,6 +26,7 @@ export default function IncidentDetail({ incident, onBack, policeDepartment: ini
   const [showPoliceDialog, setShowPoliceDialog] = useState(false);
   const [currentPoliceDepartment, setCurrentPoliceDepartment] = useState<PoliceDepartment | null>(initialPoliceDepartment || null);
   const [hasLoadedSavedDept, setHasLoadedSavedDept] = useState(false);
+  const [redChatLogMode, setRedChatLogMode] = useLocalStorageState('reporther-red-chat-log-mode', false);
   
   const { data: messages, isLoading: messagesLoading } = useGetIncidentMessages(incident.id);
   const { data: stalkerInfo } = useGetStalkerInfo();
@@ -385,7 +389,7 @@ export default function IncidentDetail({ incident, onBack, policeDepartment: ini
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5" />
@@ -393,12 +397,25 @@ export default function IncidentDetail({ incident, onBack, policeDepartment: ini
               </CardTitle>
               <CardDescription>Create professional message drafts with contextual content based on this incident</CardDescription>
             </div>
-            {!showGenerator && (
-              <Button onClick={() => setShowGenerator(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Generate Message
-              </Button>
-            )}
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="red-chat-mode"
+                  checked={redChatLogMode}
+                  onCheckedChange={setRedChatLogMode}
+                />
+                <Label htmlFor="red-chat-mode" className="flex items-center gap-1.5 cursor-pointer text-sm font-medium">
+                  <Flame className="w-4 h-4 text-destructive" />
+                  Red Mode
+                </Label>
+              </div>
+              {!showGenerator && (
+                <Button onClick={() => setShowGenerator(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Generate Message
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -413,6 +430,7 @@ export default function IncidentDetail({ incident, onBack, policeDepartment: ini
               messages={messages || []}
               isLoading={messagesLoading}
               onGenerateNew={() => setShowGenerator(true)}
+              redChatLogMode={redChatLogMode}
             />
           )}
         </CardContent>

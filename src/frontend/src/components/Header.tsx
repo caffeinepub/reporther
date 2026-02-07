@@ -42,16 +42,16 @@ export default function Header() {
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <div className="w-10 h-10 xs:w-11 xs:h-11 sm:w-12 sm:h-12 rounded-xl gradient-empowerment dark:gradient-empowerment-dark flex items-center justify-center shadow-lg flex-shrink-0">
               <img 
-                src="/assets/generated/app-icon-man-behind-bars-transparent.dim_200x200.png" 
-                alt="Justice icon" 
+                src="/assets/generated/reporther-app-icon-192.dim_192x192.png" 
+                alt="Reporther icon" 
                 className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8"
               />
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="text-sm xs:text-base sm:text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent truncate">
-                Your Safety, Your Power
+                Reporther
               </h1>
-              <p className="text-[10px] xs:text-xs font-semibold text-primary/80 truncate">Take Control of Your Evidence</p>
+              <p className="text-[10px] xs:text-xs font-semibold text-primary/80 truncate">Document. Track. Report.</p>
             </div>
           </div>
 

@@ -1,61 +1,51 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T01:11:04.363Z",
-  "summary": "Diff adds a migration to introduce per-user selected police department storage and updates IncidentDetail to load a saved department and prevent auto-refresh from overwriting it. However, the diff summary does not provide explicit evidence that the backend persistence APIs and the required frontend save/toast + cache invalidation behaviors are fully implemented, and some unrelated features (SMS/share logging, police submission log narrative) appear to have been added.",
+  "generatedAt": "2026-02-07T16:03:25.113Z",
+  "summary": "Branding text and PWA metadata were updated to “Reporther”, and the service worker cache names/precache URLs were changed to Reporther-specific values. Icon references were switched to new Reporther filenames, but no new icon image assets were added in the diff, and several unrelated product-feature changes are described in the modified file summary (suggesting scope beyond branding).",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "Backend exposes a query method to fetch the caller’s saved police department (returns null when not set) and an update method to save the caller’s police department (idempotent overwrite), with data retained across calls/upgrades as appropriate.",
-      "reason": "The diff shows a new stable field via migration, but does not show any explicit public backend methods (query/update/optional clear) for saving/fetching the caller’s selected department.",
-      "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo (truncated; no persistence API methods visible)"
-      ]
-    },
-    {
       "id": "REQ-3",
-      "requirement": "Stalker Info / police department UI saves the selected department via the new backend persistence API and shows English success/error toasts; React Query caches for the saved police department are invalidated/refetched on success so reload reflects the saved value.",
-      "reason": "While StalkerRecord imports/uses useSaveSelectedDepartment, the provided diff excerpt does not show the mutation being invoked on save/selection, any English success/error toasts for that action, or explicit cache invalidation behavior tied to the department save.",
+      "requirement": "Add/replace the actual icon image files (favicon + PWA icons) with the new “man behind bars” assets under frontend/public/assets/generated so the referenced Reporther icon filenames exist.",
+      "reason": "The diff updates references to /assets/generated/reporther-*.png, but the diff shows “Added: 0” and no image assets were added or modified, so the newly referenced icon files are not evidenced as present.",
       "evidence": [
-        "frontend/src/components/StalkerRecord.tsx (truncated)",
-        "frontend/src/hooks/useQueries.ts (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-1",
-      "requirement": "If no police department has been saved and no valid address is available, the app shows an actionable message and keeps \"Report to Police\" disabled (no crash).",
-      "reason": "IncidentDetail sets the current department to null when no stalkerInfo/address, but the diff excerpt does not show the UI state that disables the Report-to-Police action and presents an actionable message in this scenario.",
-      "evidence": [
-        "frontend/src/components/IncidentDetail.tsx (truncated)"
+        "File diff summary header: \"Added: 0\"",
+        "frontend/index.html (references /assets/generated/reporther-favicon.dim_200x200.png and /assets/generated/reporther-app-icon-192.dim_192x192.png)",
+        "frontend/public/manifest.json (references /assets/generated/reporther-app-icon-192.dim_192x192.png, /assets/generated/reporther-app-icon-512.dim_512x512.png, /assets/generated/reporther-favicon.dim_200x200.png)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added/changed police submission log data model to include a new 'narrative' field (and comments about migration for it).",
-      "reason": "The BuildRequest is focused on persisting the selected police department for reporting; it does not request changes to police submission log schema or adding a narrative field.",
+      "description": "New backend/query features for persisting and retrieving the user’s selected police department (useGetSelectedDepartment/useSaveSelectedDepartment/useClearSelectedDepartment).",
+      "reason": "BuildRequest explicitly limits changes to branding/icon/identity; this appears to be additional product functionality unrelated to branding.",
       "evidence": [
-        "backend/main.mo (\"Updated police submission log type with narrative field\")"
+        "frontend-file-summaries.txt (entry for \"frontend/src/hooks/useQueries.ts\" describes new police department persistence hooks)"
       ]
     },
     {
-      "description": "Added/changed MessageList to include SMS sending support and logging SMS usage, plus share/copy behavior and related toasts.",
-      "reason": "The BuildRequest does not mention SMS/share functionality or fixing MessageList behavior; it is unrelated to police department persistence for the Report to Police flow.",
+      "description": "UI/feature changes such as a consolidated “Report!” dropdown with 4 tabs and removal of a “Zero Tolerance video feature.”",
+      "reason": "Not requested; appears to be new/changed product behavior beyond branding/icon/identity.",
       "evidence": [
-        "frontend/src/components/MessageList.tsx"
+        "frontend-file-summaries.txt (entry for \"frontend/src/components/MainContent.tsx\" describes consolidated \"Report!\" dropdown and video feature removal)"
+      ]
+    },
+    {
+      "description": "Incident/evidence workflow changes (evidence upload calling backend mutation with real incident IDs and cache invalidation) and incident history/detail/message generator functional enhancements (e.g., red chat-log mode persisted in localStorage, tone intensity selector, SMS/share/copy updates).",
+      "reason": "Not requested and conflicts with the non-goal of not adding product features beyond branding/icon/identity changes.",
+      "evidence": [
+        "frontend-file-summaries.txt (entries for \"frontend/src/components/IncidentForm.tsx\", \"IncidentHistory.tsx\", \"IncidentDetail.tsx\", \"MessageGenerator.tsx\", \"MessageList.tsx\")"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.78,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/IncidentDetail.tsx",
-    "frontend/src/components/MessageList.tsx",
-    "frontend/src/components/StalkerRecord.tsx",
-    "frontend/src/hooks/useQueries.ts",
+    "frontend/index.html",
+    "frontend/public/manifest.json",
+    "frontend/public/service-worker.js",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/components/LoginPrompt.tsx",
     "project_state.json"
   ]
 }

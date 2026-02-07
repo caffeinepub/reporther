@@ -94,7 +94,7 @@ export default function PWAInstallPrompt() {
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
               <Download className="h-5 w-5 text-primary" />
-              <CardTitle className="text-lg">Install ReportHer</CardTitle>
+              <CardTitle className="text-lg">Install Safety Tracker</CardTitle>
             </div>
             <Button
               variant="ghost"
@@ -107,8 +107,8 @@ export default function PWAInstallPrompt() {
           </div>
           <CardDescription>
             {isIOS
-              ? 'Add ReportHer to your home screen for quick access and offline support.'
-              : 'Install ReportHer as an app for quick access and offline support.'}
+              ? 'Add to your home screen for quick access and offline support.'
+              : 'Install as an app for quick access and offline support.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="pb-4">

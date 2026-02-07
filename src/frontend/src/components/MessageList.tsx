@@ -12,9 +12,10 @@ interface MessageListProps {
   messages: GeneratedMessage[];
   isLoading: boolean;
   onGenerateNew: () => void;
+  redChatLogMode?: boolean;
 }
 
-export default function MessageList({ messages, isLoading, onGenerateNew }: MessageListProps) {
+export default function MessageList({ messages, isLoading, onGenerateNew, redChatLogMode = false }: MessageListProps) {
   const logSmsUsage = useLogSmsUsage();
 
   const formatDateTime = (timestamp: bigint) => {
@@ -147,21 +148,30 @@ export default function MessageList({ messages, isLoading, onGenerateNew }: Mess
     <TooltipProvider>
       <div className="space-y-4">
         {messages.map((message) => (
-          <Card key={message.id.toString()} className="border-2">
+          <Card 
+            key={message.id.toString()} 
+            className={redChatLogMode ? 'red-chat-card' : 'border-2'}
+          >
             <CardContent className="pt-6">
               <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
                 <div>
                   <div className="flex gap-2 mb-2 flex-wrap">
-                    <Badge variant="secondary">
+                    <Badge 
+                      variant="secondary"
+                      className={redChatLogMode ? 'red-chat-badge' : ''}
+                    >
                       {getToneLabel(message.tone.toString())}
                     </Badge>
                     {message.intensity && (
-                      <Badge variant={getIntensityVariant(message.intensity.toString())}>
+                      <Badge 
+                        variant={getIntensityVariant(message.intensity.toString())}
+                        className={redChatLogMode ? 'red-chat-badge-intensity' : ''}
+                      >
                         {getIntensityLabel(message.intensity.toString())}
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className={`text-xs ${redChatLogMode ? 'red-chat-timestamp' : 'text-muted-foreground'}`}>
                     Generated: {formatDateTime(message.timestamp)}
                   </p>
                 </div>
@@ -215,9 +225,9 @@ export default function MessageList({ messages, isLoading, onGenerateNew }: Mess
                 </div>
               </div>
 
-              <Separator className="mb-4" />
+              <Separator className={redChatLogMode ? 'red-chat-separator' : 'mb-4'} />
 
-              <div className="bg-muted/30 rounded-lg p-4">
+              <div className={redChatLogMode ? 'red-chat-content' : 'bg-muted/30 rounded-lg p-4'}>
                 <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
                   {message.content}
                 </p>
