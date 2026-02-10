@@ -1,100 +1,76 @@
 {
   "kind": "build_request",
-  "title": "Restore Reporther branding and app identity (name + man-behind-bars icon)",
+  "title": "Add panic/abort (quick-exit) button that redirects to a weather website",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update all user-facing branding text to use the product name \"Reporther\" (and remove \"My Safety Tracker\" / \"Safety Tracker\" copy) across the landing/login experience and top app header.",
+      "text": "Add a clearly visible, one-tap \"Quick Exit\" panic/abort control that is accessible from anywhere in the authenticated app UI (e.g., in the sticky header) and immediately redirects the current tab to a weather report website to disguise reporting activity.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "yes, it is supposed to say Reporther and have a picture of man behind bars as the icon"
+          "are we able to add a panic button/abort button that if a woman is caught making a report, she can push the button and it will load a weather report website?"
         ]
       },
       "acceptanceCriteria": [
-        "The login/unauthenticated landing page headline displays \"Reporther\" (not \"My Safety Tracker\").",
-        "The app header brand/title displays \"Reporther\" (not \"Your Safety, Your Power\" or other personalized branding).",
-        "No remaining occurrences of \"My Safety Tracker\" or \"Safety Tracker\" are shown in the core UI (header and login prompt) after this change."
+        "When the user activates the Quick Exit control, the app navigates away to the configured weather report URL immediately.",
+        "The Quick Exit control is available across the app (not only on a single tab/screen).",
+        "The redirect uses a navigation method that minimizes the ability to return to the app via the browser back button (e.g., replace-style navigation)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the PWA/app metadata to identify the app as \"Reporther\" so it does not appear under the old/personalized name when installed or shared: update document title, Apple PWA title, OpenGraph/Twitter titles, and the Web App Manifest (name/short_name/description as needed) to match Reporther.",
+      "text": "Provide a simple in-app way to configure the Quick Exit destination URL (weather report website) and persist it locally on the device (so it works without requiring login or backend changes). Include safe validation and a default value if none is set.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "yes, it is supposed to say Reporther and have a picture of man behind bars as the icon"
+          "are we able to add a panic button/abort button that if a woman is caught making a report, she can push the button and it will load a weather report website?"
         ]
       },
       "acceptanceCriteria": [
-        "frontend/index.html <title> uses \"Reporther\".",
-        "frontend/index.html apple-mobile-web-app-title is \"Reporther\".",
-        "frontend/index.html og:title and twitter:title use \"Reporther\".",
-        "frontend/public/manifest.json name and short_name are set to \"Reporther\".",
-        "After installing as a PWA, the installed app name shows as \"Reporther\"."
+        "A user can view and edit the Quick Exit destination URL in the UI.",
+        "The configured URL persists across reloads (local device persistence).",
+        "Invalid/empty URL entries are rejected with an English error message and do not break the Quick Exit action.",
+        "If the user has never configured a URL, Quick Exit still works by using the app’s default weather destination."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Replace the current app icon set (favicon + PWA icons) with a \"man behind bars\" icon, and update all references so the new icon is used everywhere it is currently referencing the private-app icon assets (HTML favicon, Apple touch icon, manifest icons, and any in-app logo images).",
+      "text": "Add an optional fast activation shortcut for Quick Exit (keyboard shortcut on desktop and an additional placement within the incident reporting flow) without interfering with form submission or other critical actions.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "yes, it is supposed to say Reporther and have a picture of man behind bars as the icon"
+          "are we able to add a panic button/abort button that if a woman is caught making a report, she can push the button and it will load a weather report website?"
         ]
       },
       "acceptanceCriteria": [
-        "A new icon image set exists in frontend/public/assets/generated and is referenced by frontend/index.html and frontend/public/manifest.json.",
-        "Header logo image uses the new Reporther icon asset (not /assets/generated/private-app-icon-192.dim_192x192.png).",
-        "LoginPrompt hero/logo image uses the new Reporther icon asset (not /assets/generated/private-app-icon-192.dim_192x192.png).",
-        "Manifest icons and shortcut icon reference the new Reporther icon assets (not private-app-*).",
-        "Favicon (<link rel='icon'>) and og:image/twitter:image point at the new Reporther icon/fav asset."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Ensure this build does not conflict with or overwrite the existing regular Reporther app identity in the browser by updating the service worker cache naming and precache icon URLs to align with the updated Reporther icon filenames (and remove old private-app icon entries from the precache list).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "it needs to be removed from there"
-        ]
-      },
-      "acceptanceCriteria": [
-        "frontend/public/service-worker.js CACHE_NAME and RUNTIME_CACHE are updated to a Reporther-specific value (not 'my-safety-tracker-*').",
-        "The PRECACHE_URLS icon entries reference the new Reporther icon filenames and do not include private-app icon filenames.",
-        "After a refresh with the updated service worker, the app loads without 404s for icon assets and uses the new icon in cached/offline scenarios."
+        "A documented keyboard shortcut triggers Quick Exit on desktop browsers while the app is open.",
+        "A Quick Exit action is available within the incident report creation screen so a user can leave quickly while reporting.",
+        "Quick Exit activation does not require confirmation dialogs and does not trigger accidental form submission."
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT.",
-    "Use English for all user-facing text."
+    "Do not modify files under frontend/src/components/ui or any other immutable paths listed in SYSTEM_CONTEXT.",
+    "Do not add any third-party authentication; continue using Internet Identity only.",
+    "Implement as a frontend-only feature (no backend state required) unless strictly necessary."
   ],
   "nonGoals": [
-    "Do not add new product features beyond branding/icon/identity changes.",
-    "Do not implement third-party authentication; only Internet Identity remains.",
-    "Do not change backend data models unless required for branding (not expected)."
+    "Implementing real-time alerts, messaging, or notifications triggered by the panic button.",
+    "Wiping or deleting user data/evidence when Quick Exit is triggered.",
+    "Adding analytics/tracking around Quick Exit usage."
   ],
   "imageRequirements": {
-    "required": [
-      "App icon illustration showing a man behind bars, bold and readable at small sizes (reporther-app-icon-192.dim_192x192.png)",
-      "App icon illustration showing a man behind bars, bold and readable at small sizes (reporther-app-icon-512.dim_512x512.png)",
-      "Square favicon illustration showing a man behind bars, bold and readable at small sizes (reporther-favicon.dim_200x200.png)"
-    ],
+    "required": [],
     "edits": []
   },
   "userProfileUpdate": {

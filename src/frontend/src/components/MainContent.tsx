@@ -15,6 +15,7 @@ import StalkerRecord from './StalkerRecord';
 import VictimProfile from './VictimProfile';
 import PoliceSubmissionHistory from './PoliceSubmissionHistory';
 import CrimeHelp from './CrimeHelp';
+import InstallationGuide from './InstallationGuide';
 import type { PoliceDepartment } from '../types';
 
 export default function MainContent() {
@@ -48,16 +49,16 @@ export default function MainContent() {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6 sm:mb-8 gap-0.5 sm:gap-1 h-auto p-1">
+        <TabsList className="flex flex-wrap w-full mb-6 sm:mb-8 gap-0.5 sm:gap-1 h-auto p-1">
           <TabsTrigger 
             value="victim" 
-            className="text-[10px] xs:text-xs sm:text-sm px-1.5 xs:px-2 sm:px-3 py-2 sm:py-2.5 leading-tight"
+            className="text-[10px] xs:text-xs sm:text-sm px-1.5 xs:px-2 sm:px-3 py-2 sm:py-2.5 leading-tight flex-1 min-w-[70px]"
           >
             Your Info
           </TabsTrigger>
           <TabsTrigger 
             value="stalker" 
-            className="text-[10px] xs:text-xs sm:text-sm px-1.5 xs:px-2 sm:px-3 py-2 sm:py-2.5 leading-tight"
+            className="text-[10px] xs:text-xs sm:text-sm px-1.5 xs:px-2 sm:px-3 py-2 sm:py-2.5 leading-tight flex-1 min-w-[70px]"
           >
             Stalker Info
           </TabsTrigger>
@@ -66,7 +67,7 @@ export default function MainContent() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-1.5 xs:px-2 sm:px-3 py-2 sm:py-2.5 text-[10px] xs:text-xs sm:text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 leading-tight ${
+                className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-1.5 xs:px-2 sm:px-3 py-2 sm:py-2.5 text-[10px] xs:text-xs sm:text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 leading-tight flex-1 min-w-[70px] ${
                   activeTab === 'report' || activeTab === 'history' || activeTab === 'evidence'
                     ? 'bg-background text-foreground shadow'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -100,9 +101,16 @@ export default function MainContent() {
 
           <TabsTrigger 
             value="help" 
-            className="text-[10px] xs:text-xs sm:text-sm px-1.5 xs:px-2 sm:px-3 py-2 sm:py-2.5 leading-tight"
+            className="text-[10px] xs:text-xs sm:text-sm px-1.5 xs:px-2 sm:px-3 py-2 sm:py-2.5 leading-tight flex-1 min-w-[70px]"
           >
             Crime Help
+          </TabsTrigger>
+
+          <TabsTrigger 
+            value="install" 
+            className="text-[10px] xs:text-xs sm:text-sm px-1.5 xs:px-2 sm:px-3 py-2 sm:py-2.5 leading-tight flex-1 min-w-[70px]"
+          >
+            Install & Share
           </TabsTrigger>
         </TabsList>
 
@@ -131,6 +139,10 @@ export default function MainContent() {
 
         <TabsContent value="help">
           <CrimeHelp />
+        </TabsContent>
+
+        <TabsContent value="install">
+          <InstallationGuide />
         </TabsContent>
       </Tabs>
     </main>

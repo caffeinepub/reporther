@@ -2,8 +2,9 @@ import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useGetCallerUserProfile } from '../hooks/useQueries';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, LogOut } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { triggerQuickExit } from '../utils/quickExit';
 
 export default function Header() {
   const { login, clear, loginStatus, identity } = useInternetIdentity();
@@ -35,6 +36,10 @@ export default function Header() {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
+  const handleQuickExit = () => {
+    triggerQuickExit();
+  };
+
   return (
     <header className="border-b-2 border-primary/20 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
@@ -63,6 +68,19 @@ export default function Header() {
                 </div>
                 <span className="text-xs sm:text-sm font-semibold text-foreground">{userProfile.name}</span>
               </div>
+            )}
+
+            {isAuthenticated && (
+              <Button
+                onClick={handleQuickExit}
+                variant="destructive"
+                size="sm"
+                className="rounded-full font-bold border-2 text-xs xs:text-sm px-3 xs:px-4 h-8 xs:h-9 bg-destructive hover:bg-destructive/90 flex items-center gap-1.5"
+                title="Quick Exit - Leave immediately"
+              >
+                <LogOut className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                <span className="hidden xs:inline">Quick Exit</span>
+              </Button>
             )}
 
             <Button

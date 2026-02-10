@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Restore the app’s Reporther branding and identity (name + man-behind-bars icon) across UI, PWA metadata, and cached assets.
+**Goal:** Add an always-accessible Quick Exit control that immediately redirects the user to a configurable weather website to disguise in-app reporting activity.
 
 **Planned changes:**
-- Update all user-facing branding text in the login/unauthenticated landing experience and the top app header to display “Reporther”, removing any “My Safety Tracker” / “Safety Tracker” copy.
-- Update PWA/app metadata to use “Reporther” everywhere (document title, Apple PWA title, OpenGraph/Twitter titles, and manifest name/short_name/description as needed).
-- Replace favicon and PWA icon assets with a “man behind bars” icon set, and update all references (index.html, manifest.json, in-app header logo, and login prompt hero/logo) to use the new Reporther icon assets instead of any private-app icon assets.
-- Update service worker cache naming and precache icon URLs to match the new Reporther icon filenames and remove old private-app icon entries to avoid cache conflicts and prevent 404s.
+- Add a clearly visible, one-tap “Quick Exit” control in a global UI element (e.g., sticky header) so it’s accessible throughout the authenticated app.
+- Implement immediate redirect to a weather URL using replace-style navigation to minimize returning via the browser back button.
+- Add an in-app setting to view/edit the Quick Exit destination URL, validate it, provide an English error on invalid input, and persist it locally with a default fallback.
+- Add optional fast activation: a documented desktop keyboard shortcut and an additional Quick Exit placement within the incident report creation screen, without interfering with form submission.
 
-**User-visible outcome:** The app consistently shows the name “Reporther” (in the login screen, header, and when installed/shared as a PWA) and displays the man-behind-bars icon across the favicon, installed app icon, and in-app branding, including in cached/offline scenarios.
+**User-visible outcome:** Users can quickly exit from anywhere (including while creating a report) via a visible button or keyboard shortcut, instantly redirecting to a weather site using a saved (or default) destination URL.

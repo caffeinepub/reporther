@@ -1,43 +1,32 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Revert app to pre-personalized Version 75, ensure it is removed from the regular Reporther app, and set branding to name \"Reporther\" with a \"man behind bars\" app icon.",
+  "summary": "New project",
   "architectural_notes": [],
-  "known_issues": [
-    "Revert/build attempts have failed due to internal LLM/build errors; revert to Version 75 not yet completed."
-  ],
-  "isFixRequest": true,
-  "imageRequirements": "## Required Images\n- App icon illustration showing a man behind bars, bold and readable at small sizes (reporther-app-icon-192.dim_192x192.png)\n- App icon illustration showing a man behind bars, bold and readable at small sizes (reporther-app-icon-512.dim_512x512.png)\n- Square favicon illustration showing a man behind bars, bold and readable at small sizes (reporther-favicon.dim_200x200.png)",
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-update-all-user-facing-branding-text-to-use-the-product-name-reporther-and-remove-my-safety-tracker-safety-tracker-copy-across-the-landing-login-experience-and-top-app-header",
-      "title": "Update all user-facing branding text to use the product name \"Reporther\" (and remove \"My Safety Tracker\" / \"Safety Tracker\" copy) across the landing/login experience and top app header.",
+      "id": "feature-add-a-clearly-visible-one-tap-quick-exit-panic-abort-control-that-is-accessible-from-anywhere-in-the-authenticated-app-ui-e-g-in-the-sticky-header-and-immediately-redirects-the-current-tab-to-a-weather-report-website-to-disguise-reporting-activity",
+      "title": "Add a clearly visible, one-tap \"Quick Exit\" panic/abort control that is accessible from anywhere in the authenticated app UI (e.g., in the sticky header) and immediately redirects the current tab to a weather report website to disguise reporting activity.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-pwa-app-metadata-to-identify-the-app-as-reporther-so-it-does-not-appear-under-the-old-personalized-name-when-installed-or-shared-update-document-title-apple-pwa-title-opengraph-twitter-titles-and-the-web-app-manifest-name-short-name-description-as-needed-to-match-reporther",
-      "title": "Update the PWA/app metadata to identify the app as \"Reporther\" so it does not appear under the old/personalized name when installed or shared: update document title, Apple PWA title, OpenGraph/Twitter titles, and the Web App Manifest (name/short_name/description as needed) to match Reporther.",
+      "id": "feature-provide-a-simple-in-app-way-to-configure-the-quick-exit-destination-url-weather-report-website-and-persist-it-locally-on-the-device-so-it-works-without-requiring-login-or-backend-changes-include-safe-validation-and-a-default-value-if-none-is-set",
+      "title": "Provide a simple in-app way to configure the Quick Exit destination URL (weather report website) and persist it locally on the device (so it works without requiring login or backend changes). Include safe validation and a default value if none is set.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-replace-the-current-app-icon-set-favicon-pwa-icons-with-a-man-behind-bars-icon-and-update-all-references-so-the-new-icon-is-used-everywhere-it-is-currently-referencing-the-private-app-icon-assets-html-favicon-apple-touch-icon-manifest-icons-and-any-in-app-logo-images",
-      "title": "Replace the current app icon set (favicon + PWA icons) with a \"man behind bars\" icon, and update all references so the new icon is used everywhere it is currently referencing the private-app icon assets (HTML favicon, Apple touch icon, manifest icons, and any in-app logo images).",
+      "id": "feature-add-an-optional-fast-activation-shortcut-for-quick-exit-keyboard-shortcut-on-desktop-and-an-additional-placement-within-the-incident-reporting-flow-without-interfering-with-form-submission-or-other-critical-actions",
+      "title": "Add an optional fast activation shortcut for Quick Exit (keyboard shortcut on desktop and an additional placement within the incident reporting flow) without interfering with form submission or other critical actions.",
       "reqIds": [
         "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-this-build-does-not-conflict-with-or-overwrite-the-existing-regular-reporther-app-identity-in-the-browser-by-updating-the-service-worker-cache-naming-and-precache-icon-urls-to-align-with-the-updated-reporther-icon-filenames-and-remove-old-private-app-icon-entries-from-the-precache-list",
-      "title": "Ensure this build does not conflict with or overwrite the existing regular Reporther app identity in the browser by updating the service worker cache naming and precache icon URLs to align with the updated Reporther icon filenames (and remove old private-app icon entries from the precache list).",
-      "reqIds": [
-        "REQ-4"
       ],
       "version": 1
     }
@@ -45,25 +34,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Revert the app back to Version 75 (undo personalization changes).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Remove this build/app from the regular Reporther app (ensure it is not appearing there).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Set app display name to \"Reporther\" and update the app icon to a man behind bars.",
+      "summary": "Add a panic/abort button that quickly redirects to a weather report website to disguise reporting activity",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "Reporther",
+  "projectName": "Add panic/abort (quick-exit) button that redirects to a weather website",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

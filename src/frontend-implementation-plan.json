@@ -1,113 +1,74 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Restore Reporther branding, metadata, and icon identity",
+  "title": "Quick Exit panic/abort button with configurable weather redirect",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Replace all user-facing product name/branding copy with \"Reporther\" in the unauthenticated landing/login experience and the top app header.",
+      "summary": "Add a globally available, clearly visible Quick Exit control in the authenticated app UI that immediately redirects the current tab to a weather website using replace-style navigation.",
       "acceptanceCriteria": [
-        "The login/unauthenticated landing page headline displays \"Reporther\" (not \"My Safety Tracker\").",
-        "The app header brand/title displays \"Reporther\" (not \"Your Safety, Your Power\" or other personalized branding).",
-        "No remaining occurrences of \"My Safety Tracker\" or \"Safety Tracker\" are shown in the core UI (header and login prompt) after this change."
+        "When the user activates the Quick Exit control, the app navigates away to the configured weather report URL immediately.",
+        "The Quick Exit control is available across the app (not only on a single tab/screen).",
+        "The redirect uses a navigation method that minimizes the ability to return to the app via the browser back button (e.g., replace-style navigation)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Header.tsx",
-          "operation": "modify",
-          "description": "Update header brand/title text to \"Reporther\" and remove/replace any remaining \"My Safety Tracker\" / \"Safety Tracker\" / personalized header branding copy to match the restored app identity."
+          "path": "frontend/src/utils/quickExit.ts",
+          "operation": "create",
+          "description": "Add Quick Exit utilities: default weather destination, local persistence key, safe URL parsing/validation helper, and a single action function that triggers immediate redirect via replace-style navigation (e.g., window.location.replace) while safely falling back to the default when needed."
         },
         {
-          "path": "frontend/src/components/LoginPrompt.tsx",
+          "path": "frontend/src/components/Header.tsx",
           "operation": "modify",
-          "description": "Update unauthenticated landing/login hero headline and related branding copy to use \"Reporther\" and remove/replace any remaining \"My Safety Tracker\" / \"Safety Tracker\" copy in the login prompt experience."
+          "description": "Add a clearly visible one-tap \"Quick Exit\" button in the sticky header that appears in the authenticated UI and calls the shared Quick Exit action. Use the shadcn-ui Button component for consistent styling; verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Update PWA/SEO/app metadata so the installed/shared app identifies as \"Reporther\" across title tags, Apple PWA title, OpenGraph/Twitter titles, and the manifest.",
+      "summary": "Provide an in-app Quick Exit destination URL setting with local-device persistence, safe validation, and a default weather URL fallback.",
       "acceptanceCriteria": [
-        "frontend/index.html <title> uses \"Reporther\".",
-        "frontend/index.html apple-mobile-web-app-title is \"Reporther\".",
-        "frontend/index.html og:title and twitter:title use \"Reporther\".",
-        "frontend/public/manifest.json name and short_name are set to \"Reporther\".",
-        "After installing as a PWA, the installed app name shows as \"Reporther\"."
+        "A user can view and edit the Quick Exit destination URL in the UI.",
+        "The configured URL persists across reloads (local device persistence).",
+        "Invalid/empty URL entries are rejected with an English error message and do not break the Quick Exit action.",
+        "If the user has never configured a URL, Quick Exit still works by using the app’s default weather destination."
       ],
       "file_operations": [
         {
-          "path": "frontend/index.html",
-          "operation": "modify",
-          "description": "Change document <title> to \"Reporther\"; set apple-mobile-web-app-title to \"Reporther\"; update og:title and twitter:title to \"Reporther\"; ensure any remaining old/personalized title strings are removed."
+          "path": "frontend/src/components/QuickExitSettings.tsx",
+          "operation": "create",
+          "description": "Create a small settings UI for viewing/editing the Quick Exit destination URL, persisting it locally (using the existing localStorage hook), validating input (http/https only), and showing an English inline error message/toast on invalid entries. Use shadcn-ui components (Card/Input/Button/Label/Alert as appropriate); verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/public/manifest.json",
+          "path": "frontend/src/components/InstallationGuide.tsx",
           "operation": "modify",
-          "description": "Update manifest name/short_name (and description if needed) to consistently identify the app as \"Reporther\" so installed PWA name no longer shows the old/personalized identity."
+          "description": "Wire the new QuickExitSettings component into an existing in-app screen (append a \"Quick Exit\" section/card within the Install & Share tab) so users can configure the destination URL without adding new top-level routes. Use shadcn-ui layout components already used on this screen; verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Replace favicon and PWA icon assets with the \"man behind bars\" Reporther icon set and update all UI/metadata references to use the new filenames.",
+      "summary": "Add optional fast Quick Exit activation via a desktop keyboard shortcut and an additional Quick Exit placement within the incident reporting flow, avoiding accidental form submission or other critical actions.",
       "acceptanceCriteria": [
-        "A new icon image set exists in frontend/public/assets/generated and is referenced by frontend/index.html and frontend/public/manifest.json.",
-        "Header logo image uses the new Reporther icon asset (not /assets/generated/private-app-icon-192.dim_192x192.png).",
-        "LoginPrompt hero/logo image uses the new Reporther icon asset (not /assets/generated/private-app-icon-192.dim_192x192.png).",
-        "Manifest icons and shortcut icon reference the new Reporther icon assets (not private-app-*).",
-        "Favicon (<link rel='icon'>) and og:image/twitter:image point at the new Reporther icon/fav asset."
+        "A documented keyboard shortcut triggers Quick Exit on desktop browsers while the app is open.",
+        "A Quick Exit action is available within the incident report creation screen so a user can leave quickly while reporting.",
+        "Quick Exit activation does not require confirmation dialogs and does not trigger accidental form submission."
       ],
       "file_operations": [
         {
-          "path": "frontend/public/assets/generated/reporther-app-icon-192.dim_192x192.png",
-          "operation": "create",
-          "description": "Add the required generated Reporther app icon (man behind bars), 192x192, at frontend/public/assets/generated/reporther-app-icon-192.dim_192x192.png."
-        },
-        {
-          "path": "frontend/public/assets/generated/reporther-app-icon-512.dim_512x512.png",
-          "operation": "create",
-          "description": "Add the required generated Reporther app icon (man behind bars), 512x512, at frontend/public/assets/generated/reporther-app-icon-512.dim_512x512.png."
-        },
-        {
-          "path": "frontend/public/assets/generated/reporther-favicon.dim_200x200.png",
-          "operation": "create",
-          "description": "Add the required generated Reporther favicon (man behind bars), 200x200, at frontend/public/assets/generated/reporther-favicon.dim_200x200.png."
-        },
-        {
-          "path": "frontend/index.html",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Update favicon, apple-touch-icon, og:image, and twitter:image references to use the new Reporther assets: frontend/public/assets/generated/reporther-favicon.dim_200x200.png and frontend/public/assets/generated/reporther-app-icon-192.dim_192x192.png; remove references to private-app-* icon assets."
+          "description": "Add a global keydown listener while authenticated to trigger Quick Exit via a documented shortcut (e.g., Ctrl/Cmd+Shift+Q), ignoring events originating from inputs/textareas/selects/contenteditable and avoiding interference with normal typing or form submission. Call the shared Quick Exit action from the utility."
         },
         {
-          "path": "frontend/public/manifest.json",
+          "path": "frontend/src/components/IncidentForm.tsx",
           "operation": "modify",
-          "description": "Update manifest icons (including shortcut icon entries) to reference the new Reporther assets frontend/public/assets/generated/reporther-app-icon-192.dim_192x192.png, frontend/public/assets/generated/reporther-app-icon-512.dim_512x512.png, and frontend/public/assets/generated/reporther-favicon.dim_200x200.png; remove references to private-app-* icon assets."
+          "description": "Add an additional Quick Exit button within the incident report creation screen (ensure it is type=\"button\" so it cannot submit the form), calling the shared Quick Exit action for immediate navigation away. Use the shadcn-ui Button component for consistent behavior; verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/Header.tsx",
+          "path": "frontend/src/components/QuickExitSettings.tsx",
           "operation": "modify",
-          "description": "Update the header logo <img> to use the new Reporther icon asset (frontend/public/assets/generated/reporther-app-icon-192.dim_192x192.png) and update alt text to match Reporther branding."
-        },
-        {
-          "path": "frontend/src/components/LoginPrompt.tsx",
-          "operation": "modify",
-          "description": "Update the login prompt hero/logo <img> to use the new Reporther icon asset (frontend/public/assets/generated/reporther-app-icon-192.dim_192x192.png) and update alt text to match Reporther branding."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Prevent conflicts with old identity by updating service worker cache naming and precache icon URLs to the new Reporther filenames and removing old private-app icon entries.",
-      "acceptanceCriteria": [
-        "frontend/public/service-worker.js CACHE_NAME and RUNTIME_CACHE are updated to a Reporther-specific value (not 'my-safety-tracker-*').",
-        "The PRECACHE_URLS icon entries reference the new Reporther icon filenames and do not include private-app icon filenames.",
-        "After a refresh with the updated service worker, the app loads without 404s for icon assets and uses the new icon in cached/offline scenarios."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/public/service-worker.js",
-          "operation": "modify",
-          "description": "Update CACHE_NAME and RUNTIME_CACHE strings to Reporther-specific values; update PRECACHE_URLS to remove private-app icon entries and include the new Reporther icon assets (reporther-app-icon-192.dim_192x192.png, reporther-app-icon-512.dim_512x512.png, reporther-favicon.dim_200x200.png), ensuring offline caching does not request removed icon filenames."
+          "description": "Document the chosen desktop keyboard shortcut in the Quick Exit settings UI (short explanatory text) so users can discover it, without adding extra routes. Use existing shadcn-ui typography/layout patterns; verify the component's usage instructions before implementing."
         }
       ]
     }
