@@ -1,74 +1,58 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Quick Exit panic/abort button with configurable weather redirect",
+  "title": "Delete saved stalker profile from DV Journal saved-profiles dropdown",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add a globally available, clearly visible Quick Exit control in the authenticated app UI that immediately redirects the current tab to a weather website using replace-style navigation.",
+      "summary": "Add a per-saved-profile delete control inside the DV Journal saved-profiles dropdown list.",
       "acceptanceCriteria": [
-        "When the user activates the Quick Exit control, the app navigates away to the configured weather report URL immediately.",
-        "The Quick Exit control is available across the app (not only on a single tab/screen).",
-        "The redirect uses a navigation method that minimizes the ability to return to the app via the browser back button (e.g., replace-style navigation)."
+        "Each saved profile row in the dropdown shows the profile name and a visible delete button/icon.",
+        "Clicking the delete button does not select/change the dropdown value (i.e., it only initiates delete).",
+        "Deleting a profile removes it from the dropdown list after completion (list refreshes via React Query invalidation)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/quickExit.ts",
-          "operation": "create",
-          "description": "Add Quick Exit utilities: default weather destination, local persistence key, safe URL parsing/validation helper, and a single action function that triggers immediate redirect via replace-style navigation (e.g., window.location.replace) while safely falling back to the default when needed."
-        },
-        {
-          "path": "frontend/src/components/Header.tsx",
+          "path": "frontend/src/components/DVJournalSection.tsx",
           "operation": "modify",
-          "description": "Add a clearly visible one-tap \"Quick Exit\" button in the sticky header that appears in the authenticated UI and calls the shared Quick Exit action. Use the shadcn-ui Button component for consistent styling; verify the component's usage instructions before implementing."
+          "description": "Update the \"Select from saved profiles\" SelectContent rendering to show each profile row with both the profile name and an inline delete icon/button. Ensure the delete control prevents SelectItem selection (e.g., stopPropagation/preventDefault on pointer/click events) and triggers a delete-intent handler rather than onValueChange. Keep the Select's value-change behavior intact when the user clicks the profile name/row."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Provide an in-app Quick Exit destination URL setting with local-device persistence, safe validation, and a default weather URL fallback.",
+      "summary": "Confirm deletion and wire the delete action to useDeleteStalkerProfile with success/error toasts and loading-safe submission.",
       "acceptanceCriteria": [
-        "A user can view and edit the Quick Exit destination URL in the UI.",
-        "The configured URL persists across reloads (local device persistence).",
-        "Invalid/empty URL entries are rejected with an English error message and do not break the Quick Exit action.",
-        "If the user has never configured a URL, Quick Exit still works by using the app’s default weather destination."
+        "When a user clicks delete on a dropdown item, a confirmation dialog is shown with English text that clearly states the profile will be permanently deleted.",
+        "Confirming triggers the delete mutation for the correct profile id; canceling performs no delete.",
+        "On successful delete, show a success toast; on error, show an error toast with a helpful message.",
+        "While deletion is in progress, the UI prevents double-submission (e.g., disables the confirm button and/or shows a loading state)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/QuickExitSettings.tsx",
+          "path": "frontend/src/components/ProfileDeleteConfirmDialog.tsx",
           "operation": "create",
-          "description": "Create a small settings UI for viewing/editing the Quick Exit destination URL, persisting it locally (using the existing localStorage hook), validating input (http/https only), and showing an English inline error message/toast on invalid entries. Use shadcn-ui components (Card/Input/Button/Label/Alert as appropriate); verify the component's usage instructions before implementing."
+          "description": "Create a small, reusable confirmation dialog component (outside of frontend/src/components/ui) that displays clear English copy about permanent deletion, supports cancel/confirm actions, and exposes a loading/disabled state to prevent double-submission while deletion is in progress. Implement it using existing app UI primitives (e.g., shadcn Dialog/Button) without editing any files under frontend/src/components/ui."
         },
         {
-          "path": "frontend/src/components/InstallationGuide.tsx",
+          "path": "frontend/src/components/DVJournalSection.tsx",
           "operation": "modify",
-          "description": "Wire the new QuickExitSettings component into an existing in-app screen (append a \"Quick Exit\" section/card within the Install & Share tab) so users can configure the destination URL without adding new top-level routes. Use shadcn-ui layout components already used on this screen; verify the component's usage instructions before implementing."
+          "description": "Import and use useDeleteStalkerProfile from frontend/src/hooks/useQueries.ts to perform deletions by profile id, and render/wire ProfileDeleteConfirmDialog for the confirmation step. On confirm: call the mutation, disable the confirm button while pending, and show sonner toasts for success and error (with a helpful message). Rely on React Query invalidation from the existing mutation to refresh the dropdown list after completion."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Add optional fast Quick Exit activation via a desktop keyboard shortcut and an additional Quick Exit placement within the incident reporting flow, avoiding accidental form submission or other critical actions.",
+      "summary": "Safely clear the local DV Journal abuser name input when the currently-typed name corresponds to a deleted saved profile, without triggering any save.",
       "acceptanceCriteria": [
-        "A documented keyboard shortcut triggers Quick Exit on desktop browsers while the app is open.",
-        "A Quick Exit action is available within the incident report creation screen so a user can leave quickly while reporting.",
-        "Quick Exit activation does not require confirmation dialogs and does not trigger accidental form submission."
+        "If the deleted profile name equals the current abuser name input value, the input is cleared after successful deletion.",
+        "No automatic call is made to save/update the DV Journal abuser name as a side effect of deleting a saved profile."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/DVJournalSection.tsx",
           "operation": "modify",
-          "description": "Add a global keydown listener while authenticated to trigger Quick Exit via a documented shortcut (e.g., Ctrl/Cmd+Shift+Q), ignoring events originating from inputs/textareas/selects/contenteditable and avoiding interference with normal typing or form submission. Call the shared Quick Exit action from the utility."
-        },
-        {
-          "path": "frontend/src/components/IncidentForm.tsx",
-          "operation": "modify",
-          "description": "Add an additional Quick Exit button within the incident report creation screen (ensure it is type=\"button\" so it cannot submit the form), calling the shared Quick Exit action for immediate navigation away. Use the shadcn-ui Button component for consistent behavior; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/QuickExitSettings.tsx",
-          "operation": "modify",
-          "description": "Document the chosen desktop keyboard shortcut in the Quick Exit settings UI (short explanatory text) so users can discover it, without adding extra routes. Use existing shadcn-ui typography/layout patterns; verify the component's usage instructions before implementing."
+          "description": "After a successful delete mutation, compare the deleted profile name to the current abuserNameInput. If they match, clear abuserNameInput and keep the user in an editable state (e.g., set isEditingName true) so the existing initialization effect does not repopulate the cleared input. Do not call any DV Journal save/update mutation as part of the deletion flow."
         }
       ]
     }

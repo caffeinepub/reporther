@@ -1,81 +1,41 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T03:22:05.093Z",
-  "summary": "Implemented Quick Exit redirect utility (localStorage-configurable URL with validation + window.location.replace), added a Quick Exit button in the authenticated sticky header, and added a global keyboard shortcut handler. Also added a Quick Exit settings component and referenced it from the installation guide. Diff additionally includes multiple unrelated UI/features (police department persistence hooks, incident detail chat-log mode, SEO/PWA metadata changes, etc.) not requested by the BuildRequest.",
+  "generatedAt": "2026-02-11T03:21:07.028Z",
+  "summary": "The diff adds a reusable confirmation dialog component and starts plumbing delete-related state and imports in DVJournalSection, but the provided truncated DVJournalSection diff does not show the dropdown-row delete control implementation, mutation wiring, React Query invalidation, toast notifications, or abuser-name input clearing behavior after deletion.",
   "missing_requirements": [
     {
-      "id": "REQ-3",
-      "requirement": "Document the desktop keyboard shortcut for Quick Exit in the app UI.",
-      "reason": "The diff shows the keyboard shortcut implementation (Ctrl/Cmd+Shift+Q) in code comments, but no clear user-facing documentation is visible in the provided diff excerpts (the settings component is truncated before any shortcut documentation could be confirmed).",
+      "id": "REQ-1",
+      "requirement": "Add a per-profile delete control directly in the DV Journal saved-profiles dropdown list; clicking delete must not change the selected value; after deletion the profile disappears via React Query invalidation.",
+      "reason": "DVJournalSection shows new delete-related state and imports (Trash2, ProfileDeleteConfirmDialog, useDeleteStalkerProfile), but the truncated diff does not include the dropdown rendering (SelectItem rows) showing a visible delete control, nor evidence of preventing selection on delete-click, nor evidence of list refresh/invalidation after deletion.",
       "evidence": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/QuickExitSettings.tsx (truncated)"
+        "frontend/src/components/DVJournalSection.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Show a confirmation dialog before delete; confirm calls existing useDeleteStalkerProfile with correct id; cancel does nothing; success/error toasts; prevent double-submission while deleting.",
+      "reason": "A confirmation dialog component is added with permanent-delete English copy and disabled/loading UI, but the diff does not show DVJournalSection wiring: opening the dialog from a dropdown item, passing the correct profile id to the existing mutation, handling cancel/no-op, showing success/error toasts, or triggering React Query invalidation on success.",
+      "evidence": [
+        "frontend/src/components/ProfileDeleteConfirmDialog.tsx",
+        "frontend/src/components/DVJournalSection.tsx (truncated)"
       ]
     },
     {
       "id": "REQ-3",
-      "requirement": "Provide an additional Quick Exit placement within the incident report creation screen.",
-      "reason": "IncidentForm imports triggerQuickExit, but the provided truncated content does not show any rendered Quick Exit control/button within the incident reporting UI. The file summary claims such a button exists, but that statement is not verifiable from the shown IncidentForm excerpt.",
+      "requirement": "After successful deletion, if the deleted profile name equals the current abuser name input value, clear the input without auto-saving.",
+      "reason": "DVJournalSection contains abuserNameInput state, but there is no shown logic tying successful profile deletion to clearing abuserNameInput or ensuring no save/update mutation is triggered as a side effect.",
       "evidence": [
-        "frontend/src/components/IncidentForm.tsx (truncated)",
-        "frontend-file-summaries.txt"
+        "frontend/src/components/DVJournalSection.tsx (truncated)"
       ]
     }
   ],
-  "hallucinated_features": [
-    {
-      "description": "New React Query hooks for persisting/retrieving a selected police department (useGetSelectedDepartment/useSaveSelectedDepartment/useClearSelectedDepartment).",
-      "reason": "Not requested in REQ-1/2/3; unrelated to Quick Exit.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/hooks/useQueries.ts)"
-      ]
-    },
-    {
-      "description": "IncidentDetail changes adding a 'red chat-log mode' toggle that persists in localStorage.",
-      "reason": "Not requested in REQ-1/2/3; unrelated to Quick Exit.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/components/IncidentDetail.tsx)"
-      ]
-    },
-    {
-      "description": "MessageList styling changes to support red/crimson chat-log mode.",
-      "reason": "Not requested in REQ-1/2/3; unrelated to Quick Exit.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/components/MessageList.tsx)"
-      ]
-    },
-    {
-      "description": "Global CSS theme changes adding OKLCH color system, gradients, and utilities for red chat-log mode styling.",
-      "reason": "Not requested in REQ-1/2/3; unrelated to Quick Exit.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/index.css)"
-      ]
-    },
-    {
-      "description": "MainContent tabbed interface changes (five tabs, dropdown report options, welcome message, etc.).",
-      "reason": "Not requested in REQ-1/2/3; unrelated to Quick Exit.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/components/MainContent.tsx)"
-      ]
-    },
-    {
-      "description": "HTML entry point updates for PWA meta tags/manifest and expanded SEO/social metadata rebranding.",
-      "reason": "Not requested in REQ-1/2/3; unrelated to Quick Exit.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/index.html)"
-      ]
-    }
-  ],
-  "confidence": 0.63,
+  "hallucinated_features": [],
+  "confidence": 0.56,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
-    "frontend/src/components/Header.tsx",
-    "frontend/src/components/IncidentForm.tsx",
-    "frontend/src/components/InstallationGuide.tsx",
-    "frontend/src/components/QuickExitSettings.tsx",
-    "frontend/src/utils/quickExit.ts",
+    "frontend/src/components/DVJournalSection.tsx",
+    "frontend/src/components/ProfileDeleteConfirmDialog.tsx",
     "project_state.json"
   ]
 }

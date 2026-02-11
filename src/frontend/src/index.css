@@ -3,234 +3,177 @@
 @tailwind utilities;
 
 @layer base {
-    :root {
-        --radius: 0.5rem;
-        /* Light mode - Bold and empowering with high contrast */
-        --background: 0.98 0.01 320;
-        --foreground: 0.15 0.02 340;
-        --card: 1 0 0;
-        --card-foreground: 0.15 0.02 340;
-        --popover: 1 0 0;
-        --popover-foreground: 0.15 0.02 340;
-        /* Deep magenta primary */
-        --primary: 0.45 0.25 330;
-        --primary-foreground: 0.99 0 0;
-        /* Crimson secondary */
-        --secondary: 0.50 0.22 10;
-        --secondary-foreground: 0.99 0 0;
-        --muted: 0.94 0.01 320;
-        --muted-foreground: 0.45 0.02 340;
-        /* Bold accent magenta */
-        --accent: 0.55 0.28 320;
-        --accent-foreground: 0.99 0 0;
-        --destructive: 0.55 0.26 15;
-        --destructive-foreground: 0.99 0 0;
-        --border: 0.88 0.02 330;
-        --input: 0.88 0.02 330;
-        --ring: 0.45 0.25 330;
-        --chart-1: 0.55 0.25 330;
-        --chart-2: 0.50 0.22 10;
-        --chart-3: 0.60 0.20 340;
-        --chart-4: 0.45 0.23 320;
-        --chart-5: 0.65 0.18 350;
-        --sidebar: 0.98 0.01 320;
-        --sidebar-foreground: 0.15 0.02 340;
-        --sidebar-primary: 0.45 0.25 330;
-        --sidebar-primary-foreground: 0.99 0 0;
-        --sidebar-accent: 0.94 0.01 320;
-        --sidebar-accent-foreground: 0.15 0.02 340;
-        --sidebar-border: 0.88 0.02 330;
-        --sidebar-ring: 0.45 0.25 330;
-    }
+  :root {
+    /* Base colors - OKLCH format */
+    --background: 100% 0 0; /* Pure white */
+    --foreground: 20% 0 0; /* Near black */
 
-    .dark {
-        /* Dark mode - Noir backgrounds with bold magenta/crimson accents */
-        --background: 0.10 0.02 340;
-        --foreground: 0.98 0.01 320;
-        --card: 0.14 0.02 340;
-        --card-foreground: 0.98 0.01 320;
-        --popover: 0.16 0.02 340;
-        --popover-foreground: 0.98 0.01 320;
-        /* Bright magenta for dark mode */
-        --primary: 0.65 0.28 330;
-        --primary-foreground: 0.10 0.02 340;
-        /* Crimson accent */
-        --secondary: 0.60 0.24 10;
-        --secondary-foreground: 0.98 0 0;
-        --muted: 0.20 0.02 340;
-        --muted-foreground: 0.70 0.02 320;
-        /* Bold accent */
-        --accent: 0.70 0.30 320;
-        --accent-foreground: 0.10 0.02 340;
-        --destructive: 0.60 0.28 15;
-        --destructive-foreground: 0.98 0 0;
-        --border: 0.24 0.03 330;
-        --input: 0.24 0.03 330;
-        --ring: 0.65 0.28 330;
-        --chart-1: 0.65 0.28 330;
-        --chart-2: 0.60 0.24 10;
-        --chart-3: 0.70 0.22 340;
-        --chart-4: 0.55 0.26 320;
-        --chart-5: 0.75 0.20 350;
-        --sidebar: 0.14 0.02 340;
-        --sidebar-foreground: 0.98 0.01 320;
-        --sidebar-primary: 0.65 0.28 330;
-        --sidebar-primary-foreground: 0.98 0 0;
-        --sidebar-accent: 0.20 0.02 340;
-        --sidebar-accent-foreground: 0.98 0.01 320;
-        --sidebar-border: 0.24 0.03 330;
-        --sidebar-ring: 0.65 0.28 330;
-    }
+    /* Card colors */
+    --card: 98% 0 0;
+    --card-foreground: 20% 0 0;
 
-    * {
-        @apply border-border;
-    }
-    body {
-        @apply bg-background text-foreground;
-    }
+    /* Popover colors */
+    --popover: 100% 0 0;
+    --popover-foreground: 20% 0 0;
+
+    /* Primary - Bold Magenta */
+    --primary: 55% 0.25 330;
+    --primary-foreground: 100% 0 0;
+
+    /* Secondary - Softer Purple */
+    --secondary: 85% 0.05 300;
+    --secondary-foreground: 30% 0.1 300;
+
+    /* Muted colors */
+    --muted: 95% 0.01 270;
+    --muted-foreground: 50% 0.02 270;
+
+    /* Accent - Vibrant Crimson */
+    --accent: 60% 0.22 15;
+    --accent-foreground: 100% 0 0;
+
+    /* Destructive - Red */
+    --destructive: 55% 0.22 25;
+    --destructive-foreground: 100% 0 0;
+
+    /* Urgent - High-visibility red for safety warnings */
+    --urgent: 50% 0.24 20;
+
+    /* Border and input */
+    --border: 90% 0.01 270;
+    --input: 90% 0.01 270;
+    --ring: 55% 0.25 330;
+
+    /* Chart colors */
+    --chart-1: 60% 0.20 15;
+    --chart-2: 65% 0.18 140;
+    --chart-3: 55% 0.22 25;
+    --chart-4: 70% 0.15 60;
+    --chart-5: 50% 0.18 250;
+
+    /* Sidebar colors */
+    --sidebar: 98% 0 0;
+    --sidebar-foreground: 30% 0.05 270;
+    --sidebar-primary: 55% 0.25 330;
+    --sidebar-primary-foreground: 100% 0 0;
+    --sidebar-accent: 95% 0.02 270;
+    --sidebar-accent-foreground: 30% 0.05 270;
+    --sidebar-border: 92% 0.01 270;
+    --sidebar-ring: 55% 0.25 330;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark mode base colors */
+    --background: 20% 0.02 270;
+    --foreground: 95% 0.01 270;
+
+    /* Card colors */
+    --card: 22% 0.02 270;
+    --card-foreground: 95% 0.01 270;
+
+    /* Popover colors */
+    --popover: 22% 0.02 270;
+    --popover-foreground: 95% 0.01 270;
+
+    /* Primary - Brighter Magenta for dark mode */
+    --primary: 65% 0.25 330;
+    --primary-foreground: 20% 0.02 270;
+
+    /* Secondary */
+    --secondary: 30% 0.05 300;
+    --secondary-foreground: 90% 0.02 300;
+
+    /* Muted colors */
+    --muted: 28% 0.03 270;
+    --muted-foreground: 70% 0.02 270;
+
+    /* Accent - Vibrant Crimson for dark mode */
+    --accent: 65% 0.22 15;
+    --accent-foreground: 20% 0.02 270;
+
+    /* Destructive */
+    --destructive: 60% 0.22 25;
+    --destructive-foreground: 95% 0.01 270;
+
+    /* Urgent - High-visibility red for safety warnings (dark mode) */
+    --urgent: 60% 0.24 20;
+
+    /* Border and input */
+    --border: 30% 0.03 270;
+    --input: 30% 0.03 270;
+    --ring: 65% 0.25 330;
+
+    /* Chart colors - adjusted for dark mode */
+    --chart-1: 65% 0.20 15;
+    --chart-2: 70% 0.18 140;
+    --chart-3: 60% 0.22 25;
+    --chart-4: 75% 0.15 60;
+    --chart-5: 60% 0.18 250;
+
+    /* Sidebar colors */
+    --sidebar: 22% 0.02 270;
+    --sidebar-foreground: 85% 0.02 270;
+    --sidebar-primary: 65% 0.25 330;
+    --sidebar-primary-foreground: 20% 0.02 270;
+    --sidebar-accent: 28% 0.03 270;
+    --sidebar-accent-foreground: 85% 0.02 270;
+    --sidebar-border: 28% 0.03 270;
+    --sidebar-ring: 65% 0.25 330;
+  }
 }
 
-/* Custom gradient utilities for empowerment theme */
-@layer utilities {
-    .gradient-empowerment {
-        background: linear-gradient(135deg, oklch(0.45 0.25 330) 0%, oklch(0.50 0.22 10) 100%);
-    }
-    
-    .gradient-empowerment-dark {
-        background: linear-gradient(135deg, oklch(0.65 0.28 330) 0%, oklch(0.60 0.24 10) 100%);
-    }
-
-    /* Red chat log mode styles - angry feminine touch */
-    .red-chat-card {
-        @apply border-2;
-        border-color: oklch(0.55 0.26 15);
-        background: oklch(0.98 0.02 15 / 0.05);
-    }
-
-    .dark .red-chat-card {
-        border-color: oklch(0.60 0.28 15);
-        background: oklch(0.20 0.05 15 / 0.15);
-    }
-
-    .red-chat-badge {
-        background: oklch(0.55 0.26 15 / 0.15);
-        color: oklch(0.40 0.22 15);
-        border-color: oklch(0.55 0.26 15 / 0.3);
-    }
-
-    .dark .red-chat-badge {
-        background: oklch(0.60 0.28 15 / 0.25);
-        color: oklch(0.85 0.20 15);
-        border-color: oklch(0.60 0.28 15 / 0.5);
-    }
-
-    .red-chat-badge-intensity {
-        background: oklch(0.50 0.24 10 / 0.2);
-        color: oklch(0.35 0.20 10);
-        border-color: oklch(0.50 0.24 10 / 0.4);
-    }
-
-    .dark .red-chat-badge-intensity {
-        background: oklch(0.55 0.26 10 / 0.3);
-        color: oklch(0.90 0.18 10);
-        border-color: oklch(0.55 0.26 10 / 0.6);
-    }
-
-    .red-chat-timestamp {
-        color: oklch(0.50 0.22 10);
-    }
-
-    .dark .red-chat-timestamp {
-        color: oklch(0.75 0.20 15);
-    }
-
-    .red-chat-separator {
-        @apply mb-4;
-        background-color: oklch(0.55 0.26 15 / 0.3);
-    }
-
-    .dark .red-chat-separator {
-        background-color: oklch(0.60 0.28 15 / 0.4);
-    }
-
-    .red-chat-content {
-        @apply rounded-lg p-4;
-        background: oklch(0.96 0.03 15 / 0.3);
-        border: 1px solid oklch(0.55 0.26 15 / 0.2);
-    }
-
-    .dark .red-chat-content {
-        background: oklch(0.18 0.06 15 / 0.4);
-        border: 1px solid oklch(0.60 0.28 15 / 0.3);
-    }
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
-/* Mobile-specific optimizations */
+/* Custom gradient utilities */
 @layer utilities {
-    /* Extra small breakpoint for very small phones */
-    @media (min-width: 360px) {
-        .xs\:text-xs {
-            font-size: 0.75rem;
-            line-height: 1rem;
-        }
-        .xs\:text-sm {
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-        }
-        .xs\:text-base {
-            font-size: 1rem;
-            line-height: 1.5rem;
-        }
-        .xs\:px-2 {
-            padding-left: 0.5rem;
-            padding-right: 0.5rem;
-        }
-        .xs\:px-4 {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-        .xs\:py-3 {
-            padding-top: 0.75rem;
-            padding-bottom: 0.75rem;
-        }
-        .xs\:gap-2 {
-            gap: 0.5rem;
-        }
-        .xs\:h-9 {
-            height: 2.25rem;
-        }
-        .xs\:w-9 {
-            width: 2.25rem;
-        }
-        .xs\:h-11 {
-            height: 2.75rem;
-        }
-        .xs\:w-11 {
-            width: 2.75rem;
-        }
-        .xs\:h-7 {
-            height: 1.75rem;
-        }
-        .xs\:w-7 {
-            width: 1.75rem;
-        }
-        .xs\:h-3\.5 {
-            height: 0.875rem;
-        }
-        .xs\:w-3\.5 {
-            width: 0.875rem;
-        }
-        .xs\:h-4\.5 {
-            height: 1.125rem;
-        }
-        .xs\:w-4\.5 {
-            width: 1.125rem;
-        }
-        .xs\:ml-1 {
-            margin-left: 0.25rem;
-        }
-        .xs\:w-44 {
-            width: 11rem;
-        }
-    }
+  .gradient-primary {
+    background: linear-gradient(135deg, oklch(var(--primary)) 0%, oklch(var(--accent)) 100%);
+  }
+
+  .gradient-secondary {
+    background: linear-gradient(135deg, oklch(var(--secondary)) 0%, oklch(var(--primary)) 100%);
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, oklch(var(--accent)) 0%, oklch(55% 0.28 340) 100%);
+  }
+
+  /* Red chat-log mode utilities for angry feminine styling */
+  .red-chat-card {
+    @apply bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/30;
+  }
+
+  .red-chat-badge {
+    @apply bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-300 dark:border-red-800;
+  }
+
+  .red-chat-text {
+    @apply text-red-900 dark:text-red-100;
+  }
+
+  .red-chat-muted {
+    @apply text-red-700 dark:text-red-300;
+  }
+
+  /* Urgent/safety utilities */
+  .bg-urgent {
+    background-color: oklch(var(--urgent));
+  }
+
+  .text-urgent {
+    color: oklch(var(--urgent));
+  }
+
+  .border-urgent {
+    border-color: oklch(var(--urgent));
+  }
 }

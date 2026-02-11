@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useGetIncidentSummary } from '../hooks/useQueries';
+import { useGenerateIncidentSummary } from '../hooks/useQueries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ import {
   Shield,
   BarChart3
 } from 'lucide-react';
-import { ToneIntensity } from '../backend';
+import { ToneIntensity, IncidentSummary } from '../backend';
 
 interface InteractiveSummaryViewProps {
   onBack: () => void;
@@ -28,9 +28,19 @@ interface InteractiveSummaryViewProps {
 
 export default function InteractiveSummaryView({ onBack }: InteractiveSummaryViewProps) {
   const { identity } = useInternetIdentity();
-  const { data: summary, isLoading, error } = useGetIncidentSummary(
-    identity?.getPrincipal() || null
-  );
+  const [summary, setSummary] = useState<IncidentSummary | null>(null);
+  const generateSummary = useGenerateIncidentSummary();
+
+  // Generate summary on mount
+  useEffect(() => {
+    if (identity && !summary && !generateSummary.isPending) {
+      generateSummary.mutateAsync().then((result) => {
+        setSummary(result);
+      }).catch((error) => {
+        console.error('Failed to generate summary:', error);
+      });
+    }
+  }, [identity]);
 
   const formatDate = (timestamp: bigint) => {
     const date = new Date(Number(timestamp) / 1_000_000);
@@ -84,7 +94,7 @@ export default function InteractiveSummaryView({ onBack }: InteractiveSummaryVie
     }
   };
 
-  if (isLoading) {
+  if (generateSummary.isPending) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -95,7 +105,7 @@ export default function InteractiveSummaryView({ onBack }: InteractiveSummaryVie
     );
   }
 
-  if (error) {
+  if (generateSummary.isError) {
     return (
       <Card>
         <CardContent className="py-12">

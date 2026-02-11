@@ -20,8 +20,17 @@ export default function ProfileSetup() {
     try {
       await saveProfile.mutateAsync({ name: name.trim() });
       toast.success('Profile created successfully');
-    } catch (error) {
-      toast.error('Failed to create profile');
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to create profile';
+      if (errorMessage.includes('Unauthorized') || errorMessage.includes('authenticated')) {
+        toast.error('Authentication required', {
+          description: 'Please sign in to create your profile',
+        });
+      } else {
+        toast.error('Failed to create profile', {
+          description: errorMessage,
+        });
+      }
       console.error(error);
     }
   };
@@ -30,7 +39,7 @@ export default function ProfileSetup() {
     <div className="container mx-auto px-4 py-12 max-w-md">
       <Card>
         <CardHeader>
-          <CardTitle>Welcome to SafeReport</CardTitle>
+          <CardTitle>Welcome to Reporther</CardTitle>
           <CardDescription>
             Please enter your name to get started. This will help personalize your experience.
           </CardDescription>
@@ -46,12 +55,13 @@ export default function ProfileSetup() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={saveProfile.isPending}
+                autoFocus
               />
             </div>
             <Button
               type="submit"
               className="w-full"
-              disabled={saveProfile.isPending}
+              disabled={saveProfile.isPending || !name.trim()}
             >
               {saveProfile.isPending ? 'Creating Profile...' : 'Continue'}
             </Button>

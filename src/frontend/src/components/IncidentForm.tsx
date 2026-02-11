@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { Shield, Upload, X, FileImage, FileAudio, FileText, Loader2, CheckCircle2, FileStack, User, MapPin, Phone, Car, LogOut } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -162,7 +163,7 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
       const evidenceMeta = await saveEvidenceFile.mutateAsync({
         incidentId,
         storageId,
-        filename: fileUpload.file.name,
+        originalFilename: fileUpload.file.name,
         fileType: fileUpload.file.type,
         fileSize: BigInt(fileUpload.file.size),
       });
@@ -271,7 +272,7 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
   const isSubmitting = submitIncident.isPending || files.some((f) => f.uploading);
 
   return (
-    <>
+    <div className="space-y-6">
       <Card className="border-2 border-primary/20 shadow-lg">
         <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
           <div className="flex items-start justify-between gap-4">
@@ -331,17 +332,19 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
             {/* Display selected profile info */}
             {reportType === 'supplement' && selectedProfile && (
               <div className="mt-4 p-3 bg-background border-2 border-primary/20 rounded-lg">
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-primary" />
                     <span className="font-semibold">Name:</span>
                     <span>{selectedProfile.name}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <span className="font-semibold">Location:</span>
-                    <span>{selectedProfile.city}, {selectedProfile.state}</span>
-                  </div>
+                  {selectedProfile.fullAddress && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-primary" />
+                      <span className="font-semibold">Address:</span>
+                      <span>{selectedProfile.fullAddress}</span>
+                    </div>
+                  )}
                   {selectedProfile.phoneNumber && (
                     <div className="flex items-center gap-2">
                       <Phone className="w-4 h-4 text-primary" />
@@ -349,11 +352,11 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
                       <span>{selectedProfile.phoneNumber}</span>
                     </div>
                   )}
-                  {selectedProfile.vehiclePlate && (
+                  {selectedProfile.vehicleDescription && (
                     <div className="flex items-center gap-2">
                       <Car className="w-4 h-4 text-primary" />
                       <span className="font-semibold">Vehicle:</span>
-                      <span>{selectedProfile.vehiclePlate}</span>
+                      <span>{selectedProfile.vehicleDescription}</span>
                     </div>
                   )}
                 </div>
@@ -366,16 +369,13 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="date" className="text-base font-semibold">
-                  Date of Incident *
+                  Date *
                 </Label>
                 <Input
                   id="date"
                   type="date"
                   value={formData.date}
-                  onChange={(e) => {
-                    setFormData({ ...formData, date: e.target.value });
-                    setValidationErrors({ ...validationErrors, date: '' });
-                  }}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                   className={validationErrors.date ? 'border-destructive' : ''}
                 />
                 {validationErrors.date && (
@@ -385,16 +385,13 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="time" className="text-base font-semibold">
-                  Time of Incident *
+                  Time *
                 </Label>
                 <Input
                   id="time"
                   type="time"
                   value={formData.time}
-                  onChange={(e) => {
-                    setFormData({ ...formData, time: e.target.value });
-                    setValidationErrors({ ...validationErrors, time: '' });
-                  }}
+                  onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                   className={validationErrors.time ? 'border-destructive' : ''}
                 />
                 {validationErrors.time && (
@@ -412,10 +409,7 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
                 id="location"
                 placeholder="Where did this incident occur?"
                 value={formData.location}
-                onChange={(e) => {
-                  setFormData({ ...formData, location: e.target.value });
-                  setValidationErrors({ ...validationErrors, location: '' });
-                }}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 className={validationErrors.location ? 'border-destructive' : ''}
               />
               {validationErrors.location && (
@@ -432,12 +426,9 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
                 id="description"
                 placeholder="Describe what happened in detail..."
                 value={formData.description}
-                onChange={(e) => {
-                  setFormData({ ...formData, description: e.target.value });
-                  setValidationErrors({ ...validationErrors, description: '' });
-                }}
-                rows={5}
-                className={validationErrors.description ? 'border-destructive' : ''}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={6}
+                className={`resize-none ${validationErrors.description ? 'border-destructive' : ''}`}
               />
               {validationErrors.description && (
                 <p className="text-sm text-destructive">{validationErrors.description}</p>
@@ -454,7 +445,8 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
                 placeholder="Describe any evidence you have (photos, videos, messages, etc.)"
                 value={formData.evidenceNotes}
                 onChange={(e) => setFormData({ ...formData, evidenceNotes: e.target.value })}
-                rows={3}
+                rows={4}
+                className="resize-none"
               />
             </div>
 
@@ -468,11 +460,14 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
                 placeholder="Any other relevant information..."
                 value={formData.additionalNotes}
                 onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
-                rows={3}
+                rows={4}
+                className="resize-none"
               />
             </div>
 
-            {/* File Upload */}
+            <Separator />
+
+            {/* File Upload Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">Evidence Files</Label>
@@ -481,10 +476,10 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => document.getElementById('file-upload')?.click()}
-                  className="flex items-center gap-2"
+                  disabled={isSubmitting}
                 >
-                  <Upload className="w-4 h-4" />
-                  Upload Files
+                  <Upload className="w-4 h-4 mr-2" />
+                  Add Files
                 </Button>
                 <input
                   id="file-upload"
@@ -499,78 +494,77 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
               {files.length > 0 && (
                 <div className="space-y-3">
                   {files.map((fileUpload, index) => (
-                    <div
-                      key={index}
-                      className="p-4 border-2 border-primary/20 rounded-lg bg-card space-y-2"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
-                          <div className="text-primary flex-shrink-0 mt-1">
-                            {getFileIcon(fileUpload.file.type)}
-                          </div>
+                    <Card key={index} className="border-2">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          {fileUpload.preview ? (
+                            <img
+                              src={fileUpload.preview}
+                              alt={fileUpload.file.name}
+                              className="w-16 h-16 object-cover rounded"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 flex items-center justify-center bg-muted rounded">
+                              {getFileIcon(fileUpload.file.type)}
+                            </div>
+                          )}
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-foreground truncate">
-                              {fileUpload.file.name}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {formatFileSize(fileUpload.file.size)}
-                            </p>
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm truncate">{fileUpload.file.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatFileSize(fileUpload.file.size)}
+                                </p>
+                              </div>
+                              {!fileUpload.uploading && !fileUpload.uploaded && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeFile(index)}
+                                  disabled={isSubmitting}
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              )}
+                              {fileUpload.uploaded && (
+                                <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                              )}
+                            </div>
+                            {fileUpload.uploading && (
+                              <div className="mt-2">
+                                <Progress value={fileUpload.progress} className="h-2" />
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Uploading... {fileUpload.progress}%
+                                </p>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          {fileUpload.uploaded && (
-                            <CheckCircle2 className="w-5 h-5 text-green-600" />
-                          )}
-                          {fileUpload.uploading && (
-                            <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                          )}
-                          {!fileUpload.uploading && !fileUpload.uploaded && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeFile(index)}
-                              className="h-8 w-8"
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-
-                      {fileUpload.uploading && (
-                        <Progress value={fileUpload.progress} className="h-2" />
-                      )}
-
-                      {fileUpload.preview && (
-                        <img
-                          src={fileUpload.preview}
-                          alt="Preview"
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                      )}
-                    </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Submit Button */}
-            <div className="flex gap-3 pt-4">
+            <Separator />
+
+            <div className="flex items-center justify-end gap-4">
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 h-12 text-base font-bold"
+                className="bg-primary hover:bg-primary/90 font-bold px-8"
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Submitting...
                   </>
                 ) : (
                   <>
-                    <Shield className="w-5 h-5 mr-2" />
-                    Document Incident
+                    <Shield className="w-4 h-4 mr-2" />
+                    Submit Incident Report
                   </>
                 )}
               </Button>
@@ -581,65 +575,74 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
 
       {/* Report Type Selection Dialog */}
       <Dialog open={reportTypeDialogOpen} onOpenChange={setReportTypeDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Select Report Type</DialogTitle>
             <DialogDescription>
-              Choose whether this is a new incident or a supplement to an existing stalker profile
+              Choose whether this is a new incident or a supplement to an existing stalker profile.
             </DialogDescription>
           </DialogHeader>
 
           {reportType === null ? (
-            <div className="space-y-3 py-4">
+            <div className="space-y-3">
               <Button
                 onClick={() => handleReportTypeConfirm('new')}
                 variant="outline"
-                className="w-full h-auto py-4 flex flex-col items-start gap-2"
+                className="w-full justify-start h-auto py-4"
               >
-                <span className="font-bold text-base">New Incident Report</span>
-                <span className="text-sm text-muted-foreground text-left">
-                  Document a new incident without linking to a stalker profile
-                </span>
+                <div className="text-left">
+                  <div className="font-semibold">New Incident Report</div>
+                  <div className="text-sm text-muted-foreground">
+                    Document a new incident without linking to a stalker profile
+                  </div>
+                </div>
               </Button>
-
               <Button
                 onClick={() => handleReportTypeConfirm('supplement')}
                 variant="outline"
-                className="w-full h-auto py-4 flex flex-col items-start gap-2"
-                disabled={profilesLoading || allProfiles.length === 0}
+                className="w-full justify-start h-auto py-4"
               >
-                <span className="font-bold text-base">Supplement Existing Profile</span>
-                <span className="text-sm text-muted-foreground text-left">
-                  Add this incident to an existing stalker profile
-                </span>
+                <div className="text-left">
+                  <div className="font-semibold">Supplement Existing Profile</div>
+                  <div className="text-sm text-muted-foreground">
+                    Add this incident to an existing stalker profile
+                  </div>
+                </div>
               </Button>
-
-              {allProfiles.length === 0 && !profilesLoading && (
-                <p className="text-sm text-muted-foreground text-center pt-2">
-                  No stalker profiles found. Create one in the "Stalker Info" tab first.
-                </p>
+            </div>
+          ) : reportType === 'supplement' ? (
+            <div className="space-y-3">
+              <Label>Select Stalker Profile</Label>
+              {profilesLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : allProfiles.length === 0 ? (
+                <Alert>
+                  <AlertDescription>
+                    No stalker profiles found. Please create a profile first in the Stalker Info tab.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <Select value={selectedProfileId || ''} onValueChange={handleProfileSelect}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a profile..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allProfiles.map(([id, profile]) => (
+                      <SelectItem key={id.toString()} value={id.toString()}>
+                        {profile.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
             </div>
-          ) : (
-            <div className="space-y-3 py-4">
-              <Label className="text-base font-semibold">Select Stalker Profile</Label>
-              <Select value={selectedProfileId || ''} onValueChange={handleProfileSelect}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a profile..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {allProfiles.map(([id, profile]) => (
-                    <SelectItem key={id.toString()} value={id.toString()}>
-                      {profile.name} - {profile.city}, {profile.state}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          ) : null}
 
           <DialogFooter>
             <Button
+              type="button"
               variant="outline"
               onClick={() => {
                 setReportTypeDialogOpen(false);
@@ -653,6 +656,6 @@ export default function IncidentForm({ onIncidentCreated }: IncidentFormProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

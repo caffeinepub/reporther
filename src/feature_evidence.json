@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-clearly-visible-one-tap-quick-exit-panic-abort-control-that-is-accessible-from-anywhere-in-the-authenticated-app-ui-e-g-in-the-sticky-header-and-immediately-redirects-the-current-tab-to-a-weather-report-website-to-disguise-reporting-activity",
-      "featureTitle": "Add a clearly visible, one-tap \"Quick Exit\" panic/abort control that is accessible from anywhere in the authenticated app UI (e.g., in the sticky header) and immediately redirects the current tab to a weather report website to disguise reporting activity.",
+      "featureId": "feature-in-the-dv-journal-select-from-saved-profiles-dropdown-frontend-src-components-dvjournalsection-tsx-add-a-per-profile-delete-control-directly-in-the-dropdown-list-so-a-user-can-delete-a-saved-abuser-stalker-profile-from-within-the-dropdown",
+      "featureTitle": "In the DV Journal \"Select from saved profiles\" dropdown (frontend/src/components/DVJournalSection.tsx), add a per-profile delete control directly in the dropdown list so a user can delete a saved abuser/stalker profile from within the dropdown.",
       "files": [
-        "frontend/src/components/Header.tsx",
-        "frontend/src/utils/quickExit.ts"
+        "frontend/src/components/DVJournalSection.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -25,11 +24,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-provide-a-simple-in-app-way-to-configure-the-quick-exit-destination-url-weather-report-website-and-persist-it-locally-on-the-device-so-it-works-without-requiring-login-or-backend-changes-include-safe-validation-and-a-default-value-if-none-is-set",
-      "featureTitle": "Provide a simple in-app way to configure the Quick Exit destination URL (weather report website) and persist it locally on the device (so it works without requiring login or backend changes). Include safe validation and a default value if none is set.",
+      "featureId": "feature-add-a-confirmation-step-before-deleting-a-profile-from-the-dv-journal-dropdown-and-wire-the-delete-action-to-the-existing-stalker-profile-deletion-mutation-usedeletestalkerprofile-from-frontend-src-hooks-usequeries-ts-calling-backend-deletestalkerprofile",
+      "featureTitle": "Add a confirmation step before deleting a profile from the DV Journal dropdown, and wire the delete action to the existing stalker profile deletion mutation (useDeleteStalkerProfile from frontend/src/hooks/useQueries.ts calling backend deleteStalkerProfile).",
       "files": [
-        "frontend/src/components/InstallationGuide.tsx",
-        "frontend/src/components/QuickExitSettings.tsx"
+        "frontend/src/components/DVJournalSection.tsx",
+        "frontend/src/components/ProfileDeleteConfirmDialog.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -48,12 +47,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-an-optional-fast-activation-shortcut-for-quick-exit-keyboard-shortcut-on-desktop-and-an-additional-placement-within-the-incident-reporting-flow-without-interfering-with-form-submission-or-other-critical-actions",
-      "featureTitle": "Add an optional fast activation shortcut for Quick Exit (keyboard shortcut on desktop and an additional placement within the incident reporting flow) without interfering with form submission or other critical actions.",
+      "featureId": "feature-handle-local-dv-journal-name-input-state-safely-after-a-profile-is-deleted-from-the-dropdown-if-the-deleted-profile-name-currently-matches-the-abuser-name-input-field-value-clear-the-input-field-and-keep-the-user-in-an-editable-state-do-not-auto-save",
+      "featureTitle": "Handle local DV Journal name input state safely after a profile is deleted from the dropdown: if the deleted profile name currently matches the abuser name input field value, clear the input field and keep the user in an editable state (do not auto-save).",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/IncidentForm.tsx",
-        "frontend/src/components/QuickExitSettings.tsx"
+        "frontend/src/components/DVJournalSection.tsx"
       ],
       "components": [
         "authorization@4.0.0",

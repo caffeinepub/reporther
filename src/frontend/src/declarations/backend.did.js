@@ -19,6 +19,19 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
+export const RiskFactor = IDL.Variant({
+  'low' : IDL.Null,
+  'high' : IDL.Null,
+  'extreme' : IDL.Null,
+  'moderate' : IDL.Null,
+});
+export const DVJournalAnalysis = IDL.Record({
+  'riskFactor' : RiskFactor,
+  'analyzedTimestamp' : IDL.Int,
+  'summary' : IDL.Text,
+  'analyzedBy' : IDL.Text,
+  'suggestedActions' : IDL.Vec(IDL.Text),
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
@@ -133,6 +146,20 @@ export const StalkerProfile = IDL.Record({
   'phoneNumber' : IDL.Opt(IDL.Text),
 });
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const HighRiskKeyword = IDL.Record({
+  'description' : IDL.Text,
+  'keyword' : IDL.Text,
+  'exampleContext' : IDL.Text,
+});
+export const JournalEntry = IDL.Record({
+  'entry' : IDL.Text,
+  'timestamp' : IDL.Int,
+  'timestampMs' : IDL.Int,
+});
+export const DVJournal = IDL.Record({
+  'entries' : IDL.Vec(JournalEntry),
+  'abuserName' : IDL.Text,
+});
 export const PlaceCandidate = IDL.Record({
   'displayName' : IDL.Text,
   'websiteUri' : IDL.Text,
@@ -217,6 +244,8 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addJournalEntry' : IDL.Func([IDL.Text], [IDL.Bool], []),
+  'analyzeJournal' : IDL.Func([], [IDL.Opt(DVJournalAnalysis)], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'clearSelectedDepartment' : IDL.Func([], [], []),
   'deletePoliceDepartment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
@@ -232,6 +261,7 @@ export const idlService = IDL.Service({
       [GeneratedMessage],
       [],
     ),
+  'getAbuserName' : IDL.Func([], [IDL.Text], ['query']),
   'getAllIncidents' : IDL.Func([], [IDL.Vec(IncidentReport)], ['query']),
   'getAllPoliceDepartments' : IDL.Func(
       [],
@@ -250,7 +280,15 @@ export const idlService = IDL.Service({
       [IDL.Vec(EvidenceMeta)],
       ['query'],
     ),
+  'getHighRiskKeywords' : IDL.Func([], [IDL.Vec(HighRiskKeyword)], ['query']),
   'getIncident' : IDL.Func([IDL.Text], [IDL.Opt(IncidentReport)], ['query']),
+  'getJournal' : IDL.Func([], [IDL.Opt(DVJournal)], ['query']),
+  'getJournalEntries' : IDL.Func([], [IDL.Vec(JournalEntry)], ['query']),
+  'getLastJournalAnalysis' : IDL.Func(
+      [],
+      [IDL.Opt(DVJournalAnalysis)],
+      ['query'],
+    ),
   'getMessagesForIncident' : IDL.Func(
       [IDL.Text],
       [IDL.Vec(GeneratedMessage)],
@@ -316,6 +354,7 @@ export const idlService = IDL.Service({
   'saveSelectedDepartment' : IDL.Func([PoliceDepartment], [], []),
   'saveStalkerProfile' : IDL.Func([StalkerProfile], [], []),
   'saveVictimProfile' : IDL.Func([VictimProfile], [], []),
+  'setAbuserName' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'transform' : IDL.Func(
       [TransformationInput],
       [TransformationOutput],
@@ -347,6 +386,19 @@ export const idlFactory = ({ IDL }) => {
   const _CaffeineStorageRefillResult = IDL.Record({
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const RiskFactor = IDL.Variant({
+    'low' : IDL.Null,
+    'high' : IDL.Null,
+    'extreme' : IDL.Null,
+    'moderate' : IDL.Null,
+  });
+  const DVJournalAnalysis = IDL.Record({
+    'riskFactor' : RiskFactor,
+    'analyzedTimestamp' : IDL.Int,
+    'summary' : IDL.Text,
+    'analyzedBy' : IDL.Text,
+    'suggestedActions' : IDL.Vec(IDL.Text),
   });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
@@ -462,6 +514,20 @@ export const idlFactory = ({ IDL }) => {
     'phoneNumber' : IDL.Opt(IDL.Text),
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const HighRiskKeyword = IDL.Record({
+    'description' : IDL.Text,
+    'keyword' : IDL.Text,
+    'exampleContext' : IDL.Text,
+  });
+  const JournalEntry = IDL.Record({
+    'entry' : IDL.Text,
+    'timestamp' : IDL.Int,
+    'timestampMs' : IDL.Int,
+  });
+  const DVJournal = IDL.Record({
+    'entries' : IDL.Vec(JournalEntry),
+    'abuserName' : IDL.Text,
+  });
   const PlaceCandidate = IDL.Record({
     'displayName' : IDL.Text,
     'websiteUri' : IDL.Text,
@@ -543,6 +609,8 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addJournalEntry' : IDL.Func([IDL.Text], [IDL.Bool], []),
+    'analyzeJournal' : IDL.Func([], [IDL.Opt(DVJournalAnalysis)], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'clearSelectedDepartment' : IDL.Func([], [], []),
     'deletePoliceDepartment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
@@ -558,6 +626,7 @@ export const idlFactory = ({ IDL }) => {
         [GeneratedMessage],
         [],
       ),
+    'getAbuserName' : IDL.Func([], [IDL.Text], ['query']),
     'getAllIncidents' : IDL.Func([], [IDL.Vec(IncidentReport)], ['query']),
     'getAllPoliceDepartments' : IDL.Func(
         [],
@@ -576,7 +645,15 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(EvidenceMeta)],
         ['query'],
       ),
+    'getHighRiskKeywords' : IDL.Func([], [IDL.Vec(HighRiskKeyword)], ['query']),
     'getIncident' : IDL.Func([IDL.Text], [IDL.Opt(IncidentReport)], ['query']),
+    'getJournal' : IDL.Func([], [IDL.Opt(DVJournal)], ['query']),
+    'getJournalEntries' : IDL.Func([], [IDL.Vec(JournalEntry)], ['query']),
+    'getLastJournalAnalysis' : IDL.Func(
+        [],
+        [IDL.Opt(DVJournalAnalysis)],
+        ['query'],
+      ),
     'getMessagesForIncident' : IDL.Func(
         [IDL.Text],
         [IDL.Vec(GeneratedMessage)],
@@ -642,6 +719,7 @@ export const idlFactory = ({ IDL }) => {
     'saveSelectedDepartment' : IDL.Func([PoliceDepartment], [], []),
     'saveStalkerProfile' : IDL.Func([StalkerProfile], [], []),
     'saveVictimProfile' : IDL.Func([VictimProfile], [], []),
+    'setAbuserName' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'transform' : IDL.Func(
         [TransformationInput],
         [TransformationOutput],

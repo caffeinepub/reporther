@@ -1,36 +1,56 @@
 /**
- * Centralized user-friendly error messages for actor initialization failures.
+ * Maps actor initialization errors to user-friendly messages
  */
-
-export const ACTOR_INIT_ERROR_MESSAGE = 
-  'Unable to connect to the backend service. Please try logging out and logging back in, or refresh the page. If the problem persists, please try again later.';
-
-export const ACTOR_UNAVAILABLE_MESSAGE = 
-  'The backend service is currently initializing. Please wait a moment and try again.';
-
-/**
- * Maps various error types to user-friendly messages.
- */
-export function getActorErrorMessage(error: unknown): string {
+export function getActorErrorMessage(error: any): string {
   if (!error) {
-    return ACTOR_UNAVAILABLE_MESSAGE;
+    return 'Unable to connect to the backend service. Please check your connection and try again.';
   }
 
-  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorMessage = error?.message || error?.toString() || '';
 
-  // Check for specific error patterns
-  if (errorMessage.includes('Actor not available')) {
-    return ACTOR_UNAVAILABLE_MESSAGE;
+  // Authorization/Authentication errors - more specific handling
+  if (errorMessage.includes('Unauthorized') || errorMessage.includes('Only users can')) {
+    return 'Authentication required. Please sign in to continue.';
   }
 
-  if (errorMessage.includes('Unauthorized') || errorMessage.includes('access')) {
-    return 'You do not have permission to perform this action. Please ensure you are logged in with the correct account.';
+  if (errorMessage.includes('authenticated')) {
+    return 'You must be signed in to perform this action.';
   }
 
-  if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-    return 'Network error: Unable to reach the backend service. Please check your internet connection and try again.';
+  // Actor not ready / initialization
+  if (errorMessage.includes('Actor not available') || errorMessage.includes('not initialized')) {
+    return 'Service is still starting up. Please wait a moment and try again.';
   }
 
-  // Default to the initialization error message
-  return ACTOR_INIT_ERROR_MESSAGE;
+  if (errorMessage.includes('initialization timeout') || errorMessage.includes('still starting up')) {
+    return 'Service initialization is taking longer than expected. Please try again.';
+  }
+
+  // Network/connection errors
+  if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('timeout')) {
+    return 'Network connection issue. Please check your internet connection and try again.';
+  }
+
+  // Canister/backend errors
+  if (errorMessage.includes('canister') || errorMessage.includes('replica')) {
+    return 'Backend service temporarily unavailable. Please try again in a moment.';
+  }
+
+  // Trap errors (backend runtime errors)
+  if (errorMessage.includes('trap') || errorMessage.includes('trapped')) {
+    // Try to extract meaningful message from trap
+    const trapMatch = errorMessage.match(/trap[^:]*:\s*(.+?)(?:\n|$)/i);
+    if (trapMatch && trapMatch[1]) {
+      const trapMessage = trapMatch[1].trim();
+      // Check for authorization in trap message
+      if (trapMessage.includes('Unauthorized') || trapMessage.includes('Only users can')) {
+        return 'You need to be signed in to access this feature.';
+      }
+      return trapMessage;
+    }
+    return 'An error occurred while processing your request. Please try again.';
+  }
+
+  // Generic fallback
+  return errorMessage || 'An unexpected error occurred. Please try again.';
 }

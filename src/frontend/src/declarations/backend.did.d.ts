@@ -14,6 +14,17 @@ export interface AddressPlaceCandidate {
   'formattedAddress' : string,
   'placeCandidates' : Array<PlaceCandidate>,
 }
+export interface DVJournal {
+  'entries' : Array<JournalEntry>,
+  'abuserName' : string,
+}
+export interface DVJournalAnalysis {
+  'riskFactor' : RiskFactor,
+  'analyzedTimestamp' : bigint,
+  'summary' : string,
+  'analyzedBy' : string,
+  'suggestedActions' : Array<string>,
+}
 export interface EvidenceMeta {
   'id' : bigint,
   'originalFilename' : string,
@@ -30,6 +41,11 @@ export interface GeneratedMessage {
   'tone' : MessageTone,
   'timestamp' : bigint,
   'intensity' : [] | [ToneIntensity],
+}
+export interface HighRiskKeyword {
+  'description' : string,
+  'keyword' : string,
+  'exampleContext' : string,
 }
 export interface IncidentMessageSummary {
   'id' : bigint,
@@ -64,6 +80,11 @@ export interface IncidentSummaryItem {
   'evidence' : Array<EvidenceMeta>,
   'timestamp' : bigint,
   'location' : string,
+}
+export interface JournalEntry {
+  'entry' : string,
+  'timestamp' : bigint,
+  'timestampMs' : bigint,
 }
 export interface LocationPattern {
   'count' : bigint,
@@ -109,6 +130,10 @@ export interface PoliceSubmissionLog {
   'victimInfoIncluded' : boolean,
   'department' : PoliceDepartment,
 }
+export type RiskFactor = { 'low' : null } |
+  { 'high' : null } |
+  { 'extreme' : null } |
+  { 'moderate' : null };
 export interface SeverityPattern {
   'incidentCount' : bigint,
   'evidenceCount' : bigint,
@@ -198,6 +223,8 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addJournalEntry' : ActorMethod<[string], boolean>,
+  'analyzeJournal' : ActorMethod<[], [] | [DVJournalAnalysis]>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'clearSelectedDepartment' : ActorMethod<[], undefined>,
   'deletePoliceDepartment' : ActorMethod<[bigint], boolean>,
@@ -211,6 +238,7 @@ export interface _SERVICE {
     [string, MessageTone, [] | [ToneIntensity]],
     GeneratedMessage
   >,
+  'getAbuserName' : ActorMethod<[], string>,
   'getAllIncidents' : ActorMethod<[], Array<IncidentReport>>,
   'getAllPoliceDepartments' : ActorMethod<
     [],
@@ -220,7 +248,11 @@ export interface _SERVICE {
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getEvidenceForIncident' : ActorMethod<[string], Array<EvidenceMeta>>,
+  'getHighRiskKeywords' : ActorMethod<[], Array<HighRiskKeyword>>,
   'getIncident' : ActorMethod<[string], [] | [IncidentReport]>,
+  'getJournal' : ActorMethod<[], [] | [DVJournal]>,
+  'getJournalEntries' : ActorMethod<[], Array<JournalEntry>>,
+  'getLastJournalAnalysis' : ActorMethod<[], [] | [DVJournalAnalysis]>,
   'getMessagesForIncident' : ActorMethod<[string], Array<GeneratedMessage>>,
   'getMotivationalVideoAccess' : ActorMethod<[], boolean>,
   'getMotivationalVideoStorageId' : ActorMethod<[], string>,
@@ -262,6 +294,7 @@ export interface _SERVICE {
   'saveSelectedDepartment' : ActorMethod<[PoliceDepartment], undefined>,
   'saveStalkerProfile' : ActorMethod<[StalkerProfile], undefined>,
   'saveVictimProfile' : ActorMethod<[VictimProfile], undefined>,
+  'setAbuserName' : ActorMethod<[string], boolean>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
   'updatePoliceDepartment' : ActorMethod<[bigint, PoliceDepartment], boolean>,
   'updateStalkerProfile' : ActorMethod<[bigint, StalkerProfile], boolean>,

@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T03:22:05.096Z",
+  "generatedAt": "2026-02-11T03:21:07.031Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -12,59 +12,48 @@
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add a clearly visible, one-tap \"Quick Exit\" panic/abort control that is accessible from anywhere in the authenticated app UI (e.g., in the sticky header) and immediately redirects the current tab to a weather report website to disguise reporting activity.",
+        "summary": "In the DV Journal \"Select from saved profiles\" dropdown (frontend/src/components/DVJournalSection.tsx), add a per-profile delete control directly in the dropdown list so a user can delete a saved abuser/stalker profile from within the dropdown.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/quickExit.ts",
-          "frontend/src/components/Header.tsx"
+          "frontend/src/components/DVJournalSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/utils/quickExit.ts",
-          "frontend/src/components/Header.tsx"
+          "frontend/src/components/DVJournalSection.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Provide a simple in-app way to configure the Quick Exit destination URL (weather report website) and persist it locally on the device (so it works without requiring login or backend changes). Include safe validation and a default value if none is set.",
+        "summary": "Add a confirmation step before deleting a profile from the DV Journal dropdown, and wire the delete action to the existing stalker profile deletion mutation (useDeleteStalkerProfile from frontend/src/hooks/useQueries.ts calling backend deleteStalkerProfile).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/QuickExitSettings.tsx",
-          "frontend/src/components/InstallationGuide.tsx"
+          "frontend/src/components/ProfileDeleteConfirmDialog.tsx",
+          "frontend/src/components/DVJournalSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/QuickExitSettings.tsx",
-          "frontend/src/components/InstallationGuide.tsx"
+          "frontend/src/components/ProfileDeleteConfirmDialog.tsx",
+          "frontend/src/components/DVJournalSection.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Add an optional fast activation shortcut for Quick Exit (keyboard shortcut on desktop and an additional placement within the incident reporting flow) without interfering with form submission or other critical actions.",
+        "summary": "Handle local DV Journal name input state safely after a profile is deleted from the dropdown: if the deleted profile name currently matches the abuser name input field value, clear the input field and keep the user in an editable state (do not auto-save).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/IncidentForm.tsx",
-          "frontend/src/components/QuickExitSettings.tsx"
+          "frontend/src/components/DVJournalSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/IncidentForm.tsx",
-          "frontend/src/components/QuickExitSettings.tsx"
+          "frontend/src/components/DVJournalSection.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/components/Header.tsx",
-    "frontend/src/components/IncidentForm.tsx",
-    "frontend/src/components/InstallationGuide.tsx",
-    "frontend/src/components/QuickExitSettings.tsx",
-    "frontend/src/utils/quickExit.ts",
+    "frontend/src/components/DVJournalSection.tsx",
+    "frontend/src/components/ProfileDeleteConfirmDialog.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

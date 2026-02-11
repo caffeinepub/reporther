@@ -42,9 +42,14 @@ export function useGetCallerUserProfile() {
 export function useSaveCallerUserProfile() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
     mutationFn: async (profile: UserProfile) => {
+      if (!identity) {
+        throw new Error('You must be authenticated to save your profile');
+      }
+
       if (!actor) {
         await waitForActorReady(queryClient);
       }
@@ -54,8 +59,18 @@ export function useSaveCallerUserProfile() {
       }
       return currentActor.saveCallerUserProfile(profile);
     },
-    onSuccess: () => {
+    onSuccess: (_, profile) => {
+      // Immediately update the cache with the new profile
+      queryClient.setQueryData<UserProfile>(['currentUserProfile'], profile);
+      // Then invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    },
+    onError: (error: any) => {
+      // Map authorization errors to user-friendly messages
+      if (error?.message?.includes('Unauthorized') || error?.message?.includes('trap')) {
+        throw new Error('You must be signed in to save your profile');
+      }
+      throw error;
     },
   });
 }
@@ -524,85 +539,84 @@ export function useSubmitIncident() {
       evidenceNotes: string;
       additionalNotes: string;
     }) => {
-      if (!actor) throw new Error('Actor not available');
-      if (!identity) throw new Error('User not authenticated');
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
       
-      return actor.saveIncident(
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.saveIncident(
         data.location,
         data.description,
         data.evidenceNotes,
         data.additionalNotes
       );
     },
-    onSuccess: (newIncident: IncidentReport) => {
+    onSuccess: () => {
       const principalStr = identity?.getPrincipal().toString();
-      
-      // Update the cache optimistically with the new incident
-      queryClient.setQueryData<IncidentReport[]>(
-        ['userIncidents', principalStr],
-        (oldData) => {
-          if (!oldData) return [newIncident];
-          // Add new incident and sort by timestamp (most recent first)
-          return [newIncident, ...oldData].sort((a, b) => 
-            Number(b.timestamp) - Number(a.timestamp)
-          );
+      queryClient.invalidateQueries({ queryKey: ['userIncidents', principalStr] });
+    },
+  });
+}
+
+// Message Queries
+export function useGenerateMessage() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      incidentId: string;
+      tone: MessageTone;
+      intensity: ToneIntensity | null;
+    }) => {
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
         }
-      );
-      
-      // Invalidate to ensure fresh data on next fetch
-      queryClient.invalidateQueries({ 
-        queryKey: ['userIncidents', principalStr] 
-      });
-      
-      // Invalidate incident summary to refresh with new data
-      queryClient.invalidateQueries({ 
-        queryKey: ['incidentSummary', principalStr] 
-      });
-    },
-  });
-}
-
-// Incident Summary Query
-export function useGetIncidentSummary(userPrincipal: any | null) {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  return useQuery<IncidentSummary | null>({
-    queryKey: ['incidentSummary', userPrincipal?.toString()],
-    queryFn: async () => {
-      if (!actor || !userPrincipal) return null;
-      try {
-        return actor.generateIncidentSummary();
-      } catch (error) {
-        console.error('Error fetching incident summary:', error);
-        return null;
       }
+      
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.generateMessage(data.incidentId, data.tone, data.intensity);
     },
-    enabled: !!actor && !actorFetching && !!userPrincipal,
-    staleTime: 30000,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['messages', variables.incidentId] });
+    },
   });
 }
+
+export function useGetMessagesForIncident(incidentId: string | null) {
+  const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+
+  return useQuery<GeneratedMessage[]>({
+    queryKey: ['messages', incidentId],
+    queryFn: async () => {
+      if (!actor || incidentId === null || !identity) return [];
+      return actor.getMessagesForIncident(incidentId);
+    },
+    enabled: !!actor && !actorFetching && incidentId !== null && !!identity,
+  });
+}
+
+// Alias for backward compatibility
+export const useGetIncidentMessages = useGetMessagesForIncident;
 
 // Evidence Queries
-export function useGetIncidentEvidence(incidentId: string | null) {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  return useQuery<EvidenceMeta[]>({
-    queryKey: ['incidentEvidence', incidentId],
-    queryFn: async () => {
-      if (!actor || !incidentId) return [];
-      try {
-        return actor.getEvidenceForIncident(incidentId);
-      } catch (error) {
-        console.error('Error fetching incident evidence:', error);
-        return [];
-      }
-    },
-    enabled: !!actor && !actorFetching && incidentId !== null,
-    staleTime: 30000,
-  });
-}
-
-export function useSaveEvidenceFile() {
+export function useUploadEvidence() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
@@ -610,66 +624,125 @@ export function useSaveEvidenceFile() {
     mutationFn: async (data: {
       incidentId: string;
       storageId: string;
-      filename: string;
+      originalFilename: string;
       fileType: string;
       fileSize: bigint;
     }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.uploadEvidence(
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
+      
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.uploadEvidence(
         data.incidentId,
         data.storageId,
-        data.filename,
+        data.originalFilename,
         data.fileType,
         data.fileSize
       );
     },
     onSuccess: (_, variables) => {
-      // Invalidate evidence cache for this incident so it refetches
-      queryClient.invalidateQueries({ 
-        queryKey: ['incidentEvidence', variables.incidentId] 
-      });
+      queryClient.invalidateQueries({ queryKey: ['evidence', variables.incidentId] });
     },
   });
 }
 
-// Message Queries
-export function useGetIncidentMessages(incidentId: string | null) {
+// Alias for backward compatibility
+export const useSaveEvidenceFile = useUploadEvidence;
+
+export function useGetEvidenceForIncident(incidentId: string | null) {
   const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
 
-  return useQuery<GeneratedMessage[]>({
-    queryKey: ['incidentMessages', incidentId],
+  return useQuery<EvidenceMeta[]>({
+    queryKey: ['evidence', incidentId],
     queryFn: async () => {
-      if (!actor || !incidentId) return [];
-      try {
-        return actor.getMessagesForIncident(incidentId);
-      } catch (error) {
-        console.error('Error fetching incident messages:', error);
-        return [];
-      }
+      if (!actor || incidentId === null || !identity) return [];
+      return actor.getEvidenceForIncident(incidentId);
     },
-    enabled: !!actor && !actorFetching && incidentId !== null,
-    staleTime: 10000,
+    enabled: !!actor && !actorFetching && incidentId !== null && !!identity,
   });
 }
 
-export function useGenerateMessage() {
+// Alias for backward compatibility
+export const useGetIncidentEvidence = useGetEvidenceForIncident;
+
+// Police Submission Queries
+export function useLogPoliceSubmission() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
-    mutationFn: async (data: { incidentId: string; tone: MessageTone; intensity: ToneIntensity | null }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.generateMessage(data.incidentId, data.tone, data.intensity);
+    mutationFn: async (data: {
+      department: PoliceDepartment;
+      submissionResult: string;
+      attachedEvidence: EvidenceMeta[];
+      victimInfoIncluded: boolean;
+      victimInfo: VictimProfile | null;
+      includedSummary: boolean;
+      narrative: string;
+    }) => {
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
+      
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.logPoliceSubmission(
+        data.department,
+        data.submissionResult,
+        data.attachedEvidence,
+        data.victimInfoIncluded,
+        data.victimInfo,
+        data.includedSummary,
+        data.narrative
+      );
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['incidentMessages', variables.incidentId] });
+    onSuccess: () => {
+      const principalStr = identity?.getPrincipal().toString();
+      queryClient.invalidateQueries({ queryKey: ['policeSubmissionLogs', principalStr] });
     },
   });
 }
 
+// Alias for backward compatibility
+export const useSubmitPoliceReportWithEvidence = useLogPoliceSubmission;
+
+export function useGetPoliceSubmissionLogs() {
+  const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+
+  return useQuery<PoliceSubmissionLog[]>({
+    queryKey: ['policeSubmissionLogs', identity?.getPrincipal().toString()],
+    queryFn: async () => {
+      if (!actor || !identity) return [];
+      return actor.getPoliceSubmissionLogs();
+    },
+    enabled: !!actor && !actorFetching && !!identity,
+  });
+}
+
+// SMS Queries
 export function useLogSmsUsage() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
     mutationFn: async (data: {
@@ -678,8 +751,20 @@ export function useLogSmsUsage() {
       messageContent: string;
       recipient: string | null;
     }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.logSmsUsage(
+      if (!actor) {
+        try {
+          await waitForActorReady(queryClient);
+        } catch (error) {
+          throw new Error(getActorErrorMessage(error));
+        }
+      }
+      
+      const currentActor = actor || queryClient.getQueryData<any>(['actor']);
+      if (!currentActor) {
+        throw new Error(getActorErrorMessage(null));
+      }
+      
+      return currentActor.logSmsUsage(
         data.incidentId,
         data.messageId,
         data.messageContent,
@@ -687,7 +772,8 @@ export function useLogSmsUsage() {
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['smsLogs'] });
+      const principalStr = identity?.getPrincipal().toString();
+      queryClient.invalidateQueries({ queryKey: ['smsLogs', principalStr] });
     },
   });
 }
@@ -700,64 +786,23 @@ export function useGetSmsLogs() {
     queryKey: ['smsLogs', identity?.getPrincipal().toString()],
     queryFn: async () => {
       if (!actor || !identity) return [];
-      try {
-        return actor.getSmsLogs();
-      } catch (error) {
-        console.error('Error fetching SMS logs:', error);
-        return [];
-      }
+      return actor.getSmsLogs();
     },
     enabled: !!actor && !actorFetching && !!identity,
   });
 }
 
-// Police Submission Queries
-export function useSubmitPoliceReportWithEvidence() {
+// Summary Queries
+export function useGenerateIncidentSummary() {
   const { actor } = useActor();
-  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: {
-      department: PoliceDepartment;
-      submissionResult: string;
-      attachedEvidence: EvidenceMeta[];
-      victimInfoIncluded: boolean;
-      victimInfo: VictimProfile | null;
-      includedSummary: boolean;
-      narrative: string;
-    }) => {
+    mutationFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      return actor.logPoliceSubmission(
-        data.department,
-        data.submissionResult,
-        data.attachedEvidence,
-        data.victimInfoIncluded,
-        data.victimInfo,
-        data.includedSummary,
-        data.narrative
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['policeSubmissionLogs'] });
+      return actor.generateIncidentSummary();
     },
   });
 }
 
-export function useGetPoliceSubmissionLogs() {
-  const { actor, isFetching: actorFetching } = useActor();
-  const { identity } = useInternetIdentity();
-
-  return useQuery<PoliceSubmissionLog[]>({
-    queryKey: ['policeSubmissionLogs', identity?.getPrincipal().toString()],
-    queryFn: async () => {
-      if (!actor || !identity) return [];
-      try {
-        return actor.getPoliceSubmissionLogs();
-      } catch (error) {
-        console.error('Error fetching police submission logs:', error);
-        return [];
-      }
-    },
-    enabled: !!actor && !actorFetching && !!identity,
-  });
-}
+// Alias for backward compatibility
+export const useGetIncidentSummary = useGenerateIncidentSummary;

@@ -20,6 +20,10 @@ export interface SeverityPattern {
     evidenceCount: bigint;
     intensity: ToneIntensity;
 }
+export interface DVJournal {
+    entries: Array<JournalEntry>;
+    abuserName: string;
+}
 export interface VictimProfile {
     dob?: string;
     name?: string;
@@ -81,6 +85,18 @@ export interface IncidentMessageSummary {
     location: string;
     intensity?: ToneIntensity;
 }
+export interface DVJournalAnalysis {
+    riskFactor: RiskFactor;
+    analyzedTimestamp: bigint;
+    summary: string;
+    analyzedBy: string;
+    suggestedActions: Array<string>;
+}
+export interface HighRiskKeyword {
+    description: string;
+    keyword: string;
+    exampleContext: string;
+}
 export interface SmsLog {
     messageContent: string;
     incidentId: string;
@@ -117,6 +133,11 @@ export interface PatternAnalysis {
     patterns: Array<Pattern>;
     severityPatterns: Array<SeverityPattern>;
     locations: Array<LocationPattern>;
+}
+export interface JournalEntry {
+    entry: string;
+    timestamp: bigint;
+    timestampMs: bigint;
 }
 export interface PlaceCandidate {
     displayName: string;
@@ -167,6 +188,12 @@ export enum MessageTone {
     formalEvidence = "formalEvidence",
     directWarning = "directWarning"
 }
+export enum RiskFactor {
+    low = "low",
+    high = "high",
+    extreme = "extreme",
+    moderate = "moderate"
+}
 export enum ToneIntensity {
     calm = "calm",
     firm = "firm",
@@ -179,6 +206,8 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    addJournalEntry(entry: string): Promise<boolean>;
+    analyzeJournal(): Promise<DVJournalAnalysis | null>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     clearSelectedDepartment(): Promise<void>;
     deletePoliceDepartment(deptId: bigint): Promise<boolean>;
@@ -186,13 +215,18 @@ export interface backendInterface {
     findNearestPoliceDepartment(address: string): Promise<PoliceDepartment | null>;
     generateIncidentSummary(): Promise<IncidentSummary>;
     generateMessage(incidentId: string, tone: MessageTone, intensity: ToneIntensity | null): Promise<GeneratedMessage>;
+    getAbuserName(): Promise<string>;
     getAllIncidents(): Promise<Array<IncidentReport>>;
     getAllPoliceDepartments(): Promise<Array<[bigint, PoliceDepartment]>>;
     getAllStalkerProfiles(): Promise<Array<[bigint, StalkerProfile]>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getEvidenceForIncident(incidentId: string): Promise<Array<EvidenceMeta>>;
+    getHighRiskKeywords(): Promise<Array<HighRiskKeyword>>;
     getIncident(id: string): Promise<IncidentReport | null>;
+    getJournal(): Promise<DVJournal | null>;
+    getJournalEntries(): Promise<Array<JournalEntry>>;
+    getLastJournalAnalysis(): Promise<DVJournalAnalysis | null>;
     getMessagesForIncident(incidentId: string): Promise<Array<GeneratedMessage>>;
     getMotivationalVideoAccess(): Promise<boolean>;
     getMotivationalVideoStorageId(): Promise<string>;
@@ -214,6 +248,7 @@ export interface backendInterface {
     saveSelectedDepartment(persistedDepartment: PoliceDepartment): Promise<void>;
     saveStalkerProfile(profile: StalkerProfile): Promise<void>;
     saveVictimProfile(profile: VictimProfile): Promise<void>;
+    setAbuserName(abuserName: string): Promise<boolean>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
     updatePoliceDepartment(deptId: bigint, department: PoliceDepartment): Promise<boolean>;
     updateStalkerProfile(profileId: bigint, profile: StalkerProfile): Promise<boolean>;

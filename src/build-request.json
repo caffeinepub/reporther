@@ -1,73 +1,70 @@
 {
   "kind": "build_request",
-  "title": "Add panic/abort (quick-exit) button that redirects to a weather website",
+  "title": "Add delete option for abuser profile in DV Journal saved-profiles dropdown",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add a clearly visible, one-tap \"Quick Exit\" panic/abort control that is accessible from anywhere in the authenticated app UI (e.g., in the sticky header) and immediately redirects the current tab to a weather report website to disguise reporting activity.",
+      "text": "In the DV Journal \"Select from saved profiles\" dropdown (frontend/src/components/DVJournalSection.tsx), add a per-profile delete control directly in the dropdown list so a user can delete a saved abuser/stalker profile from within the dropdown.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "are we able to add a panic button/abort button that if a woman is caught making a report, she can push the button and it will load a weather report website?"
+          "add a delete button for the abuser profile in the drop down box"
         ]
       },
       "acceptanceCriteria": [
-        "When the user activates the Quick Exit control, the app navigates away to the configured weather report URL immediately.",
-        "The Quick Exit control is available across the app (not only on a single tab/screen).",
-        "The redirect uses a navigation method that minimizes the ability to return to the app via the browser back button (e.g., replace-style navigation)."
+        "Each saved profile row in the dropdown shows the profile name and a visible delete button/icon.",
+        "Clicking the delete button does not select/change the dropdown value (i.e., it only initiates delete).",
+        "Deleting a profile removes it from the dropdown list after completion (list refreshes via React Query invalidation)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Provide a simple in-app way to configure the Quick Exit destination URL (weather report website) and persist it locally on the device (so it works without requiring login or backend changes). Include safe validation and a default value if none is set.",
+      "text": "Add a confirmation step before deleting a profile from the DV Journal dropdown, and wire the delete action to the existing stalker profile deletion mutation (useDeleteStalkerProfile from frontend/src/hooks/useQueries.ts calling backend deleteStalkerProfile).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "are we able to add a panic button/abort button that if a woman is caught making a report, she can push the button and it will load a weather report website?"
+          "add a delete button for the abuser profile in the drop down box"
         ]
       },
       "acceptanceCriteria": [
-        "A user can view and edit the Quick Exit destination URL in the UI.",
-        "The configured URL persists across reloads (local device persistence).",
-        "Invalid/empty URL entries are rejected with an English error message and do not break the Quick Exit action.",
-        "If the user has never configured a URL, Quick Exit still works by using the app’s default weather destination."
+        "When a user clicks delete on a dropdown item, a confirmation dialog is shown with English text that clearly states the profile will be permanently deleted.",
+        "Confirming triggers the delete mutation for the correct profile id; canceling performs no delete.",
+        "On successful delete, show a success toast; on error, show an error toast with a helpful message.",
+        "While deletion is in progress, the UI prevents double-submission (e.g., disables the confirm button and/or shows a loading state)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add an optional fast activation shortcut for Quick Exit (keyboard shortcut on desktop and an additional placement within the incident reporting flow) without interfering with form submission or other critical actions.",
+      "text": "Handle local DV Journal name input state safely after a profile is deleted from the dropdown: if the deleted profile name currently matches the abuser name input field value, clear the input field and keep the user in an editable state (do not auto-save).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "are we able to add a panic button/abort button that if a woman is caught making a report, she can push the button and it will load a weather report website?"
+          "add a delete button for the abuser profile in the drop down box"
         ]
       },
       "acceptanceCriteria": [
-        "A documented keyboard shortcut triggers Quick Exit on desktop browsers while the app is open.",
-        "A Quick Exit action is available within the incident report creation screen so a user can leave quickly while reporting.",
-        "Quick Exit activation does not require confirmation dialogs and does not trigger accidental form submission."
+        "If the deleted profile name equals the current abuser name input value, the input is cleared after successful deletion.",
+        "No automatic call is made to save/update the DV Journal abuser name as a side effect of deleting a saved profile."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/components/ui or any other immutable paths listed in SYSTEM_CONTEXT.",
-    "Do not add any third-party authentication; continue using Internet Identity only.",
-    "Implement as a frontend-only feature (no backend state required) unless strictly necessary."
+    "Do not edit files under frontend/src/components/ui (shadcn components are read-only).",
+    "Respect the existing single-actor backend architecture; no new backend canisters/services."
   ],
   "nonGoals": [
-    "Implementing real-time alerts, messaging, or notifications triggered by the panic button.",
-    "Wiping or deleting user data/evidence when Quick Exit is triggered.",
-    "Adding analytics/tracking around Quick Exit usage."
+    "Adding a new backend API for deletion (use the existing deleteStalkerProfile).",
+    "Adding profile editing/management features beyond delete-from-dropdown behavior."
   ],
   "imageRequirements": {
     "required": [],

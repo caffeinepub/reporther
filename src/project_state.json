@@ -1,30 +1,30 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "Add a delete button option for the abuser profile in a dropdown UI.",
   "architectural_notes": [],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-add-a-clearly-visible-one-tap-quick-exit-panic-abort-control-that-is-accessible-from-anywhere-in-the-authenticated-app-ui-e-g-in-the-sticky-header-and-immediately-redirects-the-current-tab-to-a-weather-report-website-to-disguise-reporting-activity",
-      "title": "Add a clearly visible, one-tap \"Quick Exit\" panic/abort control that is accessible from anywhere in the authenticated app UI (e.g., in the sticky header) and immediately redirects the current tab to a weather report website to disguise reporting activity.",
+      "id": "feature-in-the-dv-journal-select-from-saved-profiles-dropdown-frontend-src-components-dvjournalsection-tsx-add-a-per-profile-delete-control-directly-in-the-dropdown-list-so-a-user-can-delete-a-saved-abuser-stalker-profile-from-within-the-dropdown",
+      "title": "In the DV Journal \"Select from saved profiles\" dropdown (frontend/src/components/DVJournalSection.tsx), add a per-profile delete control directly in the dropdown list so a user can delete a saved abuser/stalker profile from within the dropdown.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-provide-a-simple-in-app-way-to-configure-the-quick-exit-destination-url-weather-report-website-and-persist-it-locally-on-the-device-so-it-works-without-requiring-login-or-backend-changes-include-safe-validation-and-a-default-value-if-none-is-set",
-      "title": "Provide a simple in-app way to configure the Quick Exit destination URL (weather report website) and persist it locally on the device (so it works without requiring login or backend changes). Include safe validation and a default value if none is set.",
+      "id": "feature-add-a-confirmation-step-before-deleting-a-profile-from-the-dv-journal-dropdown-and-wire-the-delete-action-to-the-existing-stalker-profile-deletion-mutation-usedeletestalkerprofile-from-frontend-src-hooks-usequeries-ts-calling-backend-deletestalkerprofile",
+      "title": "Add a confirmation step before deleting a profile from the DV Journal dropdown, and wire the delete action to the existing stalker profile deletion mutation (useDeleteStalkerProfile from frontend/src/hooks/useQueries.ts calling backend deleteStalkerProfile).",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-an-optional-fast-activation-shortcut-for-quick-exit-keyboard-shortcut-on-desktop-and-an-additional-placement-within-the-incident-reporting-flow-without-interfering-with-form-submission-or-other-critical-actions",
-      "title": "Add an optional fast activation shortcut for Quick Exit (keyboard shortcut on desktop and an additional placement within the incident reporting flow) without interfering with form submission or other critical actions.",
+      "id": "feature-handle-local-dv-journal-name-input-state-safely-after-a-profile-is-deleted-from-the-dropdown-if-the-deleted-profile-name-currently-matches-the-abuser-name-input-field-value-clear-the-input-field-and-keep-the-user-in-an-editable-state-do-not-auto-save",
+      "title": "Handle local DV Journal name input state safely after a profile is deleted from the dropdown: if the deleted profile name currently matches the abuser name input field value, clear the input field and keep the user in an editable state (do not auto-save).",
       "reqIds": [
         "REQ-3"
       ],
@@ -34,12 +34,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Add a panic/abort button that quickly redirects to a weather report website to disguise reporting activity",
+      "summary": "Add a delete button/option for the abuser profile in the dropdown box",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Add panic/abort (quick-exit) button that redirects to a weather website",
+  "projectName": "Add delete option for abuser profile in DV Journal saved-profiles dropdown",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }
