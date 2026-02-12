@@ -1,58 +1,26 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Delete saved stalker profile from DV Journal saved-profiles dropdown",
+  "title": "Fix DV Journal frontend query keys & React Query invalidation for abuser name persistence",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Add a per-saved-profile delete control inside the DV Journal saved-profiles dropdown list.",
+      "id": "REQ-6",
+      "summary": "Align DV Journal React Query query keys/invalidation so saving abuser name and adding entries refreshes the correct cached data and surfaces backend/auth errors clearly.",
       "acceptanceCriteria": [
-        "Each saved profile row in the dropdown shows the profile name and a visible delete button/icon.",
-        "Clicking the delete button does not select/change the dropdown value (i.e., it only initiates delete).",
-        "Deleting a profile removes it from the dropdown list after completion (list refreshes via React Query invalidation)."
+        "After saving an abuser name, the UI shows the saved name and it remains present after navigating away/back or reloading the app (while authenticated).",
+        "React Query invalidation targets the actual keys used by DV journal queries (e.g., dvAbuserName, dvJournalEntries, dvJournalAnalysis for the current principal) rather than unused keys.",
+        "If saving the abuser name fails due to an authorization/backend error, the user sees an English error message and the UI does not falsely indicate the name was saved."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/DVJournalSection.tsx",
+          "path": "frontend/src/hooks/useDVJournalQueries.ts",
           "operation": "modify",
-          "description": "Update the \"Select from saved profiles\" SelectContent rendering to show each profile row with both the profile name and an inline delete icon/button. Ensure the delete control prevents SelectItem selection (e.g., stopPropagation/preventDefault on pointer/click events) and triggers a delete-intent handler rather than onValueChange. Keep the Select's value-change behavior intact when the user clicks the profile name/row."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Confirm deletion and wire the delete action to useDeleteStalkerProfile with success/error toasts and loading-safe submission.",
-      "acceptanceCriteria": [
-        "When a user clicks delete on a dropdown item, a confirmation dialog is shown with English text that clearly states the profile will be permanently deleted.",
-        "Confirming triggers the delete mutation for the correct profile id; canceling performs no delete.",
-        "On successful delete, show a success toast; on error, show an error toast with a helpful message.",
-        "While deletion is in progress, the UI prevents double-submission (e.g., disables the confirm button and/or shows a loading state)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ProfileDeleteConfirmDialog.tsx",
-          "operation": "create",
-          "description": "Create a small, reusable confirmation dialog component (outside of frontend/src/components/ui) that displays clear English copy about permanent deletion, supports cancel/confirm actions, and exposes a loading/disabled state to prevent double-submission while deletion is in progress. Implement it using existing app UI primitives (e.g., shadcn Dialog/Button) without editing any files under frontend/src/components/ui."
+          "description": "Refactor DV Journal query key creation into shared helpers/constants (e.g., dvAbuserNameKey(principal), dvJournalEntriesKey(principal), dvJournalAnalysisKey(principal)) and update all queries/mutations to use them. Update mutation success handlers to invalidate/refetch only the actual DV Journal keys in use (remove/avoid invalidation of unused keys like dvJournal), and ensure invalidations are scoped to the current principal to prevent cross-user cache bleed. Also ensure mutation error paths propagate clear English messages (leveraging existing getActorErrorMessage) and do not optimistically update caches when principal is unavailable."
         },
         {
           "path": "frontend/src/components/DVJournalSection.tsx",
           "operation": "modify",
-          "description": "Import and use useDeleteStalkerProfile from frontend/src/hooks/useQueries.ts to perform deletions by profile id, and render/wire ProfileDeleteConfirmDialog for the confirmation step. On confirm: call the mutation, disable the confirm button while pending, and show sonner toasts for success and error (with a helpful message). Rely on React Query invalidation from the existing mutation to refresh the dropdown list after completion."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Safely clear the local DV Journal abuser name input when the currently-typed name corresponds to a deleted saved profile, without triggering any save.",
-      "acceptanceCriteria": [
-        "If the deleted profile name equals the current abuser name input value, the input is cleared after successful deletion.",
-        "No automatic call is made to save/update the DV Journal abuser name as a side effect of deleting a saved profile."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/DVJournalSection.tsx",
-          "operation": "modify",
-          "description": "After a successful delete mutation, compare the deleted profile name to the current abuserNameInput. If they match, clear abuserNameInput and keep the user in an editable state (e.g., set isEditingName true) so the existing initialization effect does not repopulate the cleared input. Do not call any DV Journal save/update mutation as part of the deletion flow."
+          "description": "Ensure the abuser-name input reliably reflects the latest loaded query data across refresh/navigation by syncing local input state with the fetched abuserName when the user is not actively editing, and avoid any UI state that could imply a successful save when the mutation fails (keep success toast only on resolved mutateAsync and ensure editing state is not cleared on error). Verify the component's usage instructions before implementing."
         }
       ]
     }

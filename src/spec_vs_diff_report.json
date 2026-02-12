@@ -1,41 +1,52 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T03:21:07.028Z",
-  "summary": "The diff adds a reusable confirmation dialog component and starts plumbing delete-related state and imports in DVJournalSection, but the provided truncated DVJournalSection diff does not show the dropdown-row delete control implementation, mutation wiring, React Query invalidation, toast notifications, or abuser-name input clearing behavior after deletion.",
+  "generatedAt": "2026-02-12T01:42:34.601Z",
+  "summary": "Frontend DV Journal query key helpers and some DVJournalSection save/error handling were updated, and a backend migration module was added, but the diff summary does not show concrete backend DV Journal API fixes (abuser name persistence/authorization semantics, journal read behavior) nor clear React Query invalidation updates for the DV Journal mutations.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Add a per-profile delete control directly in the DV Journal saved-profiles dropdown list; clicking delete must not change the selected value; after deletion the profile disappears via React Query invalidation.",
-      "reason": "DVJournalSection shows new delete-related state and imports (Trash2, ProfileDeleteConfirmDialog, useDeleteStalkerProfile), but the truncated diff does not include the dropdown rendering (SelectItem rows) showing a visible delete control, nor evidence of preventing selection on delete-click, nor evidence of list refresh/invalidation after deletion.",
+      "id": "REQ-4",
+      "requirement": "Ensure the backend Domestic Violence Journal API persists and returns the abuser name for the authenticated caller (setAbuserName must be retrievable via getAbuserName after page refresh), returns \"\" when no journal exists, and traps \"Unauthorized\" when caller lacks #user permission.",
+      "reason": "backend/main.mo is truncated and contains no visible implementation or changes to getAbuserName/setAbuserName behavior, persistence, empty-journal handling, or unauthorized trapping. The added migration file explicitly says no changes are needed, which does not demonstrate the required fixes.",
       "evidence": [
-        "frontend/src/components/DVJournalSection.tsx (truncated)"
+        "backend/main.mo (truncated; DV journal methods not shown)",
+        "backend/migration.mo (\"No changes needed as state is already persistent\")"
       ]
     },
     {
-      "id": "REQ-2",
-      "requirement": "Show a confirmation dialog before delete; confirm calls existing useDeleteStalkerProfile with correct id; cancel does nothing; success/error toasts; prevent double-submission while deleting.",
-      "reason": "A confirmation dialog component is added with permanent-delete English copy and disabled/loading UI, but the diff does not show DVJournalSection wiring: opening the dialog from a dropdown item, passing the correct profile id to the existing mutation, handling cancel/no-op, showing success/error toasts, or triggering React Query invalidation on success.",
+      "id": "REQ-5",
+      "requirement": "Ensure getJournalEntries returns the caller’s entries reliably without mutating/overwriting abuserName; addJournalEntry must not reset/blank an existing abuserName; return [] when no journal exists.",
+      "reason": "No visible backend changes to getJournalEntries/addJournalEntry are present in the truncated backend/main.mo excerpt, so the required ordering/empty-array behavior and non-mutation of abuserName cannot be verified from the diff summary.",
       "evidence": [
-        "frontend/src/components/ProfileDeleteConfirmDialog.tsx",
-        "frontend/src/components/DVJournalSection.tsx (truncated)"
+        "backend/main.mo (truncated; DV journal read/write methods not shown)"
       ]
     },
     {
-      "id": "REQ-3",
-      "requirement": "After successful deletion, if the deleted profile name equals the current abuser name input value, clear the input without auto-saving.",
-      "reason": "DVJournalSection contains abuserNameInput state, but there is no shown logic tying successful profile deletion to clearing abuserNameInput or ensuring no save/update mutation is triggered as a side effect.",
+      "id": "REQ-6",
+      "requirement": "Fix DV Journal React Query cache invalidation/query keys so saving abuser name and adding entries refresh the correct DV Journal queries; show an English error on failure and do not falsely indicate success.",
+      "reason": "Although shared DV query keys are introduced, the diff summary does not show any explicit query invalidation/refetch logic for the relevant keys after mutations (setAbuserName/addJournalEntry/analyze). DVJournalSection shows toasts and error handling, but cache invalidation targeting the actual keys is not evidenced in the truncated hook content.",
       "evidence": [
-        "frontend/src/components/DVJournalSection.tsx (truncated)"
+        "frontend/src/hooks/useDVJournalQueries.ts (truncated; mutation invalidation not shown)",
+        "frontend/src/components/DVJournalSection.tsx (save handler shown; no query invalidation code visible here)"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.56,
+  "hallucinated_features": [
+    {
+      "description": "Client-side \"self-service\" permission initialization logic that attempts to assign the caller a user role when unauthorized (ensureUserPermission + assignCallerUserRole call).",
+      "reason": "The BuildRequest explicitly focuses on persisting/loading the DV journal abuser name and fixing React Query keys/invalidation. Adding logic to modify/initialize permissions/roles from the frontend is not requested and may change authorization behavior beyond what is needed.",
+      "evidence": [
+        "frontend/src/hooks/useDVJournalQueries.ts (ensureUserPermission tries getCallerUserRole then calls assignCallerUserRole on unauthorized)"
+      ]
+    }
+  ],
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
     "frontend/src/components/DVJournalSection.tsx",
-    "frontend/src/components/ProfileDeleteConfirmDialog.tsx",
+    "frontend/src/hooks/useDVJournalQueries.ts",
     "project_state.json"
   ]
 }

@@ -1,59 +1,53 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T03:21:07.031Z",
+  "generatedAt": "2026-02-12T01:42:34.604Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 3,
-    "implemented": 3,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-1",
-        "summary": "In the DV Journal \"Select from saved profiles\" dropdown (frontend/src/components/DVJournalSection.tsx), add a per-profile delete control directly in the dropdown list so a user can delete a saved abuser/stalker profile from within the dropdown.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/DVJournalSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/DVJournalSection.tsx"
-        ]
+        "id": "REQ-4",
+        "summary": "Ensure the backend Domestic Violence Journal API persists and returns the abuser name for the authenticated caller (setAbuserName must be retrievable via getAbuserName after page refresh).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
-        "id": "REQ-2",
-        "summary": "Add a confirmation step before deleting a profile from the DV Journal dropdown, and wire the delete action to the existing stalker profile deletion mutation (useDeleteStalkerProfile from frontend/src/hooks/useQueries.ts calling backend deleteStalkerProfile).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ProfileDeleteConfirmDialog.tsx",
-          "frontend/src/components/DVJournalSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ProfileDeleteConfirmDialog.tsx",
-          "frontend/src/components/DVJournalSection.tsx"
-        ]
+        "id": "REQ-5",
+        "summary": "Ensure the backend exposes/query-implements DV Journal read APIs used by the frontend so journal entries and the stored abuser name can be loaded reliably (getJournalEntries must return the caller’s entries without mutating/overwriting abuserName).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
-        "id": "REQ-3",
-        "summary": "Handle local DV Journal name input state safely after a profile is deleted from the dropdown: if the deleted profile name currently matches the abuser name input field value, clear the input field and keep the user in an editable state (do not auto-save).",
+        "id": "REQ-6",
+        "summary": "Fix the DV Journal frontend React Query cache invalidation/query keys so that saving an abuser name and adding entries always refreshes the correct DV Journal queries (no stale/empty abuser name shown after save or refresh).",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/hooks/useDVJournalQueries.ts",
           "frontend/src/components/DVJournalSection.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/hooks/useDVJournalQueries.ts",
           "frontend/src/components/DVJournalSection.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/components/DVJournalSection.tsx",
-    "frontend/src/components/ProfileDeleteConfirmDialog.tsx",
+    "frontend/src/hooks/useDVJournalQueries.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -2,33 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-in-the-dv-journal-select-from-saved-profiles-dropdown-frontend-src-components-dvjournalsection-tsx-add-a-per-profile-delete-control-directly-in-the-dropdown-list-so-a-user-can-delete-a-saved-abuser-stalker-profile-from-within-the-dropdown",
-      "featureTitle": "In the DV Journal \"Select from saved profiles\" dropdown (frontend/src/components/DVJournalSection.tsx), add a per-profile delete control directly in the dropdown list so a user can delete a saved abuser/stalker profile from within the dropdown.",
-      "files": [
-        "frontend/src/components/DVJournalSection.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "http-outcalls@3.0.0",
-        "blob-storage@4.0.0",
-        "camera@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-confirmation-step-before-deleting-a-profile-from-the-dv-journal-dropdown-and-wire-the-delete-action-to-the-existing-stalker-profile-deletion-mutation-usedeletestalkerprofile-from-frontend-src-hooks-usequeries-ts-calling-backend-deletestalkerprofile",
-      "featureTitle": "Add a confirmation step before deleting a profile from the DV Journal dropdown, and wire the delete action to the existing stalker profile deletion mutation (useDeleteStalkerProfile from frontend/src/hooks/useQueries.ts calling backend deleteStalkerProfile).",
+      "featureId": "feature-fix-the-dv-journal-frontend-react-query-cache-invalidation-query-keys-so-that-saving-an-abuser-name-and-adding-entries-always-refreshes-the-correct-dv-journal-queries-no-stale-empty-abuser-name-shown-after-save-or-refresh",
+      "featureTitle": "Fix the DV Journal frontend React Query cache invalidation/query keys so that saving an abuser name and adding entries always refreshes the correct DV Journal queries (no stale/empty abuser name shown after save or refresh).",
       "files": [
         "frontend/src/components/DVJournalSection.tsx",
-        "frontend/src/components/ProfileDeleteConfirmDialog.tsx"
+        "frontend/src/hooks/useDVJournalQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -42,29 +20,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-handle-local-dv-journal-name-input-state-safely-after-a-profile-is-deleted-from-the-dropdown-if-the-deleted-profile-name-currently-matches-the-abuser-name-input-field-value-clear-the-input-field-and-keep-the-user-in-an-editable-state-do-not-auto-save",
-      "featureTitle": "Handle local DV Journal name input state safely after a profile is deleted from the dropdown: if the deleted profile name currently matches the abuser name input field value, clear the input field and keep the user in an editable state (do not auto-save).",
-      "files": [
-        "frontend/src/components/DVJournalSection.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "http-outcalls@3.0.0",
-        "blob-storage@4.0.0",
-        "camera@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
+        "REQ-6"
       ],
       "confidence": "high"
     }

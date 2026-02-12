@@ -1,32 +1,18 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Add a delete button option for the abuser profile in a dropdown UI.",
+  "summary": "New project",
   "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Domestic violence journal does not save the abuser's name."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-in-the-dv-journal-select-from-saved-profiles-dropdown-frontend-src-components-dvjournalsection-tsx-add-a-per-profile-delete-control-directly-in-the-dropdown-list-so-a-user-can-delete-a-saved-abuser-stalker-profile-from-within-the-dropdown",
-      "title": "In the DV Journal \"Select from saved profiles\" dropdown (frontend/src/components/DVJournalSection.tsx), add a per-profile delete control directly in the dropdown list so a user can delete a saved abuser/stalker profile from within the dropdown.",
+      "id": "feature-fix-the-dv-journal-frontend-react-query-cache-invalidation-query-keys-so-that-saving-an-abuser-name-and-adding-entries-always-refreshes-the-correct-dv-journal-queries-no-stale-empty-abuser-name-shown-after-save-or-refresh",
+      "title": "Fix the DV Journal frontend React Query cache invalidation/query keys so that saving an abuser name and adding entries always refreshes the correct DV Journal queries (no stale/empty abuser name shown after save or refresh).",
       "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-confirmation-step-before-deleting-a-profile-from-the-dv-journal-dropdown-and-wire-the-delete-action-to-the-existing-stalker-profile-deletion-mutation-usedeletestalkerprofile-from-frontend-src-hooks-usequeries-ts-calling-backend-deletestalkerprofile",
-      "title": "Add a confirmation step before deleting a profile from the DV Journal dropdown, and wire the delete action to the existing stalker profile deletion mutation (useDeleteStalkerProfile from frontend/src/hooks/useQueries.ts calling backend deleteStalkerProfile).",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-handle-local-dv-journal-name-input-state-safely-after-a-profile-is-deleted-from-the-dropdown-if-the-deleted-profile-name-currently-matches-the-abuser-name-input-field-value-clear-the-input-field-and-keep-the-user-in-an-editable-state-do-not-auto-save",
-      "title": "Handle local DV Journal name input state safely after a profile is deleted from the dropdown: if the deleted profile name currently matches the abuser name input field value, clear the input field and keep the user in an editable state (do not auto-save).",
-      "reqIds": [
-        "REQ-3"
+        "REQ-6"
       ],
       "version": 1
     }
@@ -34,12 +20,22 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Add a delete button/option for the abuser profile in the dropdown box",
-      "reqIds": [],
+      "summary": "Ensure the backend Domestic Violence Journal API persists and returns the abuser name for the authenticated caller (setAbuserName must be retrievable via getAbuserName after page refresh).",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Ensure the backend exposes/query-implements DV Journal read APIs used by the frontend so journal entries and the stored abuser name can be loaded reliably (getJournalEntries must return the caller’s entries without mutating/overwriting abuserName).",
+      "reqIds": [
+        "REQ-5"
+      ],
       "status": "pending"
     }
   ],
-  "projectName": "Add delete option for abuser profile in DV Journal saved-profiles dropdown",
+  "projectName": "Fix DV Journal: abuser name is not persisted/loaded correctly",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

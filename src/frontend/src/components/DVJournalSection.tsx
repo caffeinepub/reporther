@@ -75,12 +75,12 @@ export default function DVJournalSection({ onNavigateToImmediateHelp }: DVJourna
   // Show escalation CTA if either condition is true
   const showEscalationCTA = mostRecentEntryIsHighRisk || analysisIsExtreme;
 
-  // Initialize abuser name input when data loads (using useEffect to avoid render-time state updates)
+  // Sync input with fetched abuser name when not actively editing
   useEffect(() => {
-    if (nameFetched && abuserName && !abuserNameInput && !isEditingName) {
+    if (nameFetched && abuserName && !isEditingName) {
       setAbuserNameInput(abuserName);
     }
-  }, [abuserName, nameFetched, abuserNameInput, isEditingName]);
+  }, [abuserName, nameFetched, isEditingName]);
 
   const handleSaveAbuserName = async () => {
     if (!identity) {
@@ -104,6 +104,7 @@ export default function DVJournalSection({ onNavigateToImmediateHelp }: DVJourna
       toast.error('Failed to save name', {
         description: errorMessage,
       });
+      // Don't clear editing state on error so user can retry
     }
   };
 
@@ -292,102 +293,38 @@ export default function DVJournalSection({ onNavigateToImmediateHelp }: DVJourna
             <Button
               onClick={onNavigateToImmediateHelp}
               size="lg"
-              className="w-full bg-urgent hover:bg-urgent/90 text-white font-bold mt-2"
+              className="w-full bg-urgent hover:bg-urgent/90 text-white font-bold"
             >
               <Phone className="mr-2 h-5 w-5" />
-              Get Immediate Help Now
+              Access Immediate Help & Safety Plan
             </Button>
           </AlertDescription>
         </Alert>
       )}
 
+      {/* Abuser Name Section */}
       <Card className="border-2 border-primary/20">
         <CardHeader>
-          <CardTitle className="text-xl font-bold">Domestic Violence Entry</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            Abuser Information
+          </CardTitle>
           <CardDescription>
-            Document incidents in a private journal. Each entry is timestamped and can be analyzed for risk
-            assessment.
+            Save the name of the person you're documenting. You can select from saved profiles or enter a new name.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <Alert className="bg-primary/5 border-primary/20">
-            <Shield className="h-5 w-5" />
-            <AlertDescription>
-              All entries are stored securely and privately. This information is for your safety and documentation
-              purposes.
-            </AlertDescription>
-          </Alert>
-
-          {/* Abuser Name Section */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <Label htmlFor="abuserName" className="text-base font-semibold">
-                Abuser Name
-              </Label>
-            </div>
-
-            {/* Dropdown to select from saved stalker profiles */}
-            <div className="space-y-2">
-              <Label htmlFor="profileSelect" className="text-sm text-muted-foreground">
-                Select from saved profiles (optional)
-              </Label>
-              <Select
-                onValueChange={handleProfileSelect}
-                disabled={profilesLoading || setAbuserNameMutation.isPending || nameLoading}
-              >
-                <SelectTrigger id="profileSelect" className="w-full">
-                  <SelectValue
-                    placeholder={
-                      profilesLoading
-                        ? 'Loading profiles...'
-                        : stalkerProfiles.length === 0
-                        ? 'No saved profiles'
-                        : 'Choose a saved profile'
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {stalkerProfiles.length === 0 ? (
-                    <SelectItem value="__no_profiles__" disabled>
-                      No saved profiles
-                    </SelectItem>
-                  ) : (
-                    stalkerProfiles.map(([id, profile]) => (
-                      <SelectItem
-                        key={id.toString()}
-                        value={profile.name}
-                        className="flex items-center justify-between group"
-                      >
-                        <div className="flex items-center justify-between w-full pr-2">
-                          <span>{profile.name}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity ml-2"
-                            onClick={(e) => handleDeleteClick(id, profile.name, e)}
-                            disabled={deleteStalkerProfileMutation.isPending}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Manual input field */}
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="abuser-name">Abuser Name</Label>
             <div className="flex gap-2">
               <Input
-                id="abuserName"
+                id="abuser-name"
                 value={abuserNameInput}
                 onChange={(e) => {
                   setAbuserNameInput(e.target.value);
                   setIsEditingName(true);
                 }}
-                placeholder="Enter abuser's name"
+                placeholder="Enter name"
                 disabled={setAbuserNameMutation.isPending || nameLoading}
                 className="flex-1"
               />
@@ -395,11 +332,10 @@ export default function DVJournalSection({ onNavigateToImmediateHelp }: DVJourna
                 onClick={handleSaveAbuserName}
                 disabled={
                   setAbuserNameMutation.isPending ||
-                  nameLoading ||
                   !abuserNameInput.trim() ||
                   (abuserNameInput.trim() === abuserName && !isEditingName)
                 }
-                className="min-w-[100px]"
+                className="shrink-0"
               >
                 {setAbuserNameMutation.isPending ? (
                   <>
@@ -416,58 +352,119 @@ export default function DVJournalSection({ onNavigateToImmediateHelp }: DVJourna
             </div>
           </div>
 
-          <Separator />
+          {/* Dropdown to select from saved stalker profiles */}
+          {stalkerProfiles.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="profile-select">Or select from saved profiles</Label>
+              <Select
+                value=""
+                onValueChange={(value) => {
+                  const profile = stalkerProfiles.find(([id]) => id.toString() === value);
+                  if (profile) {
+                    handleProfileSelect(profile[1].name);
+                  }
+                }}
+                disabled={profilesLoading || setAbuserNameMutation.isPending}
+              >
+                <SelectTrigger id="profile-select">
+                  <SelectValue placeholder="Select a saved profile" />
+                </SelectTrigger>
+                <SelectContent>
+                  {stalkerProfiles.map(([id, profile]) => (
+                    <SelectItem key={id.toString()} value={id.toString()} className="flex items-center justify-between">
+                      <div className="flex items-center justify-between w-full">
+                        <span>{profile.name}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => handleDeleteClick(id, profile.name, e)}
+                          className="ml-2 h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
-          {/* Add Journal Entry Section */}
-          <div className="space-y-3">
-            <Label htmlFor="journalEntry" className="text-base font-semibold">
-              Add Journal Entry
-            </Label>
+          {abuserName && !isEditingName && (
+            <Alert>
+              <Shield className="h-4 w-4" />
+              <AlertDescription>
+                Currently documenting: <strong>{abuserName}</strong>
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Journal Entry Section */}
+      <Card className="border-2 border-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            Add Journal Entry
+          </CardTitle>
+          <CardDescription>
+            Document incidents, behaviors, and patterns. All entries are timestamped and securely stored.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="journal-entry">Entry</Label>
             <Textarea
-              id="journalEntry"
+              id="journal-entry"
               value={journalEntryInput}
               onChange={(e) => setJournalEntryInput(e.target.value)}
-              placeholder="Describe what happened... Each entry will be dated and timestamped automatically."
+              placeholder="Describe what happened, when, and any relevant details..."
+              rows={6}
               disabled={addEntryMutation.isPending || !abuserName}
-              rows={4}
               className="resize-none"
             />
             {!abuserName && (
-              <p className="text-sm text-muted-foreground">Please save the abuser name before adding entries</p>
+              <p className="text-sm text-muted-foreground">Please save the abuser name first before adding entries.</p>
             )}
-            <Button
-              onClick={handleAddEntry}
-              disabled={addEntryMutation.isPending || !journalEntryInput.trim() || !abuserName}
-              className="w-full sm:w-auto"
-            >
-              {addEntryMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adding Entry...
-                </>
-              ) : (
-                <>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Add Entry
-                </>
-              )}
-            </Button>
           </div>
 
-          <Separator />
+          <Button
+            onClick={handleAddEntry}
+            disabled={addEntryMutation.isPending || !journalEntryInput.trim() || !abuserName}
+            className="w-full"
+          >
+            {addEntryMutation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Adding Entry...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Add Entry
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
 
-          {/* Risk Analysis Section */}
-          <div className="space-y-3">
+      {/* Journal Entries List */}
+      {entries.length > 0 && (
+        <Card className="border-2 border-primary/20">
+          <CardHeader>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                <Label className="text-base font-semibold">Risk Analysis</Label>
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  Journal Entries ({entries.length})
+                </CardTitle>
+                <CardDescription>Your documented history</CardDescription>
               </div>
               <Button
                 onClick={handleAnalyze}
                 disabled={analyzeJournalMutation.isPending || entries.length === 0}
                 variant="outline"
-                size="sm"
               >
                 {analyzeJournalMutation.isPending ? (
                   <>
@@ -476,102 +473,80 @@ export default function DVJournalSection({ onNavigateToImmediateHelp }: DVJourna
                   </>
                 ) : (
                   <>
-                    <AlertTriangle className="mr-2 h-4 w-4" />
-                    Analyze Report
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Analyze Risk
                   </>
                 )}
               </Button>
             </div>
-
-            {entries.length === 0 ? (
-              <Alert>
-                <AlertTriangle className="h-5 w-5" />
-                <AlertDescription>
-                  No entries available for analysis. Add journal entries to generate a risk assessment.
-                </AlertDescription>
-              </Alert>
-            ) : analysis ? (
-              <Card className="bg-muted/30">
-                <CardContent className="pt-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Risk Factor:</span>
-                    <Badge className={getRiskFactorColor(analysis.riskFactor)} variant="outline">
-                      {getRiskFactorLabel(analysis.riskFactor)}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium mb-2">Summary:</p>
-                    <p className="text-sm text-muted-foreground">{analysis.summary}</p>
-                  </div>
-                  {analysis.suggestedActions.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium mb-2">Suggested Actions:</p>
-                      <ul className="list-disc list-inside space-y-1">
-                        {analysis.suggestedActions.map((action, idx) => (
-                          <li key={idx} className="text-sm text-muted-foreground">
-                            {action}
-                          </li>
-                        ))}
-                      </ul>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {entries.map((entry, index) => {
+              const isHighRisk = containsHighRiskKeyword(entry.entry);
+              return (
+                <div key={index} className="space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Clock className="h-4 w-4" />
+                      <span>{formatTimestampSafe(entry.timestampMs)}</span>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            ) : null}
-          </div>
-        </CardContent>
-      </Card>
+                    {isHighRisk && (
+                      <Badge variant="destructive" className="shrink-0">
+                        <AlertTriangle className="mr-1 h-3 w-3" />
+                        High Risk
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-md">{entry.entry}</p>
+                  {index < entries.length - 1 && <Separator className="mt-4" />}
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Journal Entries List */}
-      <Card className="border-2 border-primary/20">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg font-bold">Journal Entries ({entries.length})</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {entriesLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      {/* Risk Analysis Section */}
+      {analysis && (
+        <Card className={`border-2 ${getRiskFactorColor(analysis.riskFactor)}`}>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Risk Analysis
+              </CardTitle>
+              <Badge className={getRiskFactorColor(analysis.riskFactor)}>
+                {getRiskFactorLabel(analysis.riskFactor)} Risk
+              </Badge>
             </div>
-          ) : entries.length === 0 ? (
-            <Alert>
-              <FileText className="h-5 w-5" />
-              <AlertDescription>No journal entries yet. Add your first entry above.</AlertDescription>
-            </Alert>
-          ) : (
-            <div className="space-y-4">
-              {entries.map((entry, idx) => {
-                const isHighRisk = containsHighRiskKeyword(entry.entry);
-                return (
-                  <Card key={idx} className={isHighRisk ? 'bg-urgent/5 border-urgent/30' : 'bg-muted/30'}>
-                    <CardContent className="pt-4">
-                      <div className="flex items-start justify-between gap-4 mb-2">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>{formatTimestampSafe(entry.timestampMs)}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            Entry #{entries.length - idx}
-                          </Badge>
-                          {isHighRisk && (
-                            <Badge className="bg-urgent/10 text-urgent border-urgent/30 text-xs" variant="outline">
-                              High Risk
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <p className="text-sm whitespace-pre-wrap">{entry.entry}</p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+            <CardDescription>{analysis.summary}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <h4 className="font-semibold mb-2">Suggested Actions:</h4>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                {analysis.suggestedActions.map((action, index) => (
+                  <li key={index}>{action}</li>
+                ))}
+              </ul>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <p className="text-xs text-muted-foreground">
+              Analyzed by {analysis.analyzedBy} on {formatTimestampSafe(analysis.analyzedTimestamp)}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Empty State */}
+      {entries.length === 0 && !entriesLoading && abuserName && (
+        <Alert>
+          <FileText className="h-4 w-4" />
+          <AlertTitle>No entries yet</AlertTitle>
+          <AlertDescription>
+            Start documenting incidents to build your evidence record. All entries are timestamped and securely stored.
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }

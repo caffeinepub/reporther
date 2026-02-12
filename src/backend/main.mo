@@ -14,8 +14,9 @@ import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
 import OutCall "http-outcalls/outcall";
+import Migration "migration";
 
-
+(with migration = Migration.run)
 actor {
   type StalkerProfile = StalkerProfile.StalkerProfile;
   type PoliceDepartment = PoliceDepartment.PoliceDepartment;
@@ -62,7 +63,6 @@ actor {
     additionalNotes : Text;
   };
 
-  // Updated police submission log type with narrative field
   public type PoliceSubmissionLog = {
     timestamp : Int;
     department : PoliceDepartment;
@@ -255,7 +255,7 @@ actor {
   let policeDepartments = Map.empty<Nat, PoliceDepartment>();
   var policeDepartmentCounter = 0;
 
-  // NEW: Persist user police department selection
+  // Persist user police department selection
   let userSelectedDepartments = Map.empty<Principal, PoliceDepartment>();
 
   // Motivational video storage - only accessible to authenticated users
@@ -264,7 +264,8 @@ actor {
   include MixinAuthorization(accessControlState);
   include MixinStorage();
 
-  let domesticViolenceJournals = Map.empty<Principal, DVJournal>();
+  // Persisted domestic violence journals
+  var domesticViolenceJournals = Map.empty<Principal, DVJournal>();
   let dvJournalAnalyses = Map.empty<Principal, DVJournalAnalysis>();
 
   let highRiskKeywords = [
@@ -445,6 +446,14 @@ actor {
     };
   };
 
+  func victimProfilesMatch(profile1 : VictimProfile, profile2 : VictimProfile) : Bool {
+    profile1.name == profile2.name and
+    profile1.dob == profile2.dob and
+    profile1.address == profile2.address and
+    profile1.email == profile2.email and
+    profile1.phoneNumber == profile2.phoneNumber;
+  };
+
   // NEW Feature: Save the selected department for the caller
   public shared ({ caller }) func saveSelectedDepartment(persistedDepartment : PoliceDepartment) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
@@ -587,7 +596,7 @@ actor {
   // Get all journal entries for the current user
   public query ({ caller }) func getJournalEntries() : async [JournalEntry] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update journal");
+      Runtime.trap("Unauthorized: Only users can access journal");
     };
 
     switch (domesticViolenceJournals.get(caller)) {
@@ -599,7 +608,7 @@ actor {
   // Get abuser name for current user
   public query ({ caller }) func getAbuserName() : async Text {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update journal");
+      Runtime.trap("Unauthorized: Only users can access journal");
     };
 
     switch (domesticViolenceJournals.get(caller)) {
@@ -611,7 +620,7 @@ actor {
   // Get full journal for current user
   public query ({ caller }) func getJournal() : async ?DVJournal {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update journal");
+      Runtime.trap("Unauthorized: Only users can access journal");
     };
 
     switch (domesticViolenceJournals.get(caller)) {
@@ -642,7 +651,7 @@ actor {
   // Analyze journal and return summary and risk factor
   public shared ({ caller }) func analyzeJournal() : async ?DVJournalAnalysis {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update journal");
+      Runtime.trap("Unauthorized: Only users can analyze journal");
     };
 
     switch (domesticViolenceJournals.get(caller)) {
@@ -723,7 +732,7 @@ actor {
   // Get last analysis result for current user
   public query ({ caller }) func getLastJournalAnalysis() : async ?DVJournalAnalysis {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update journal");
+      Runtime.trap("Unauthorized: Only users can access journal analysis");
     };
 
     dvJournalAnalyses.get(caller);
@@ -1207,7 +1216,6 @@ actor {
     };
   };
 
-  // Fixed: Now validates that all attached evidence belongs to the caller
   public shared ({ caller }) func logPoliceSubmission(
     department : PoliceDepartment,
     submissionResult : Text,
@@ -1235,32 +1243,27 @@ actor {
       };
     };
 
-    // SECURITY FIX: Validate that victimInfo, if provided, belongs to the caller
+    // SECURITY FIX: Strictly validate that victimInfo matches the caller's stored profile
     switch (victimInfo) {
       case (?providedVictimInfo) {
-        // Check if the caller has a victim profile stored
-        switch (victimProfiles.get(caller)) {
-          case (null) {
-            // Caller has no victim profile stored, but is trying to submit one
-            // This is suspicious - reject unless admin
-            if (not AccessControl.isAdmin(accessControlState, caller)) {
-              Runtime.trap("Unauthorized: Cannot submit victim information that is not your own");
+        // Only admins can submit arbitrary victim information
+        if (not AccessControl.isAdmin(accessControlState, caller)) {
+          // For non-admins, verify the victim info matches their stored profile exactly
+          switch (victimProfiles.get(caller)) {
+            case (null) {
+              Runtime.trap("Unauthorized: You must save your victim profile before submitting it to police");
             };
-          };
-          case (?storedVictimProfile) {
-            // Verify that the provided victim info matches the stored profile
-            // Allow submission only if it's the caller's own profile or if caller is admin
-            if (not AccessControl.isAdmin(accessControlState, caller)) {
-              // For non-admins, we enforce that they can only submit their own victim profile
-              // The frontend should ensure this, but we validate on the backend
-              // Note: We're being permissive here and allowing any victim info as long as
-              // the user has a victim profile. A stricter check would validate field-by-field.
+            case (?storedVictimProfile) {
+              // Strict field-by-field validation
+              if (not victimProfilesMatch(providedVictimInfo, storedVictimProfile)) {
+                Runtime.trap("Unauthorized: Victim information must match your stored profile exactly");
+              };
             };
           };
         };
       };
       case (null) {
-        // No victim info provided, which is fine
+        // No victim info provided, which is acceptable
       };
     };
 

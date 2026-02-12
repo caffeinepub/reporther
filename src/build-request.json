@@ -1,83 +1,73 @@
 {
   "kind": "build_request",
-  "title": "Add delete option for abuser profile in DV Journal saved-profiles dropdown",
+  "title": "Fix DV Journal: abuser name is not persisted/loaded correctly",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "In the DV Journal \"Select from saved profiles\" dropdown (frontend/src/components/DVJournalSection.tsx), add a per-profile delete control directly in the dropdown list so a user can delete a saved abuser/stalker profile from within the dropdown.",
-      "target": "frontend",
+      "id": "REQ-4",
+      "text": "Ensure the backend Domestic Violence Journal API persists and returns the abuser name for the authenticated caller (setAbuserName must be retrievable via getAbuserName after page refresh).",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-10"
         ],
         "quotes": [
-          "add a delete button for the abuser profile in the drop down box"
+          "It doesn't save the abuser's name in the domestic violence journal"
         ]
       },
       "acceptanceCriteria": [
-        "Each saved profile row in the dropdown shows the profile name and a visible delete button/icon.",
-        "Clicking the delete button does not select/change the dropdown value (i.e., it only initiates delete).",
-        "Deleting a profile removes it from the dropdown list after completion (list refreshes via React Query invalidation)."
+        "After calling setAbuserName(\"Alex\"), a subsequent call to getAbuserName() (including after a full page reload) returns \"Alex\" for the same authenticated principal.",
+        "If no journal exists for the caller, getAbuserName() returns an empty string (\"\"), not an error.",
+        "If the caller is not authorized (no #user permission), the method traps with a clear \"Unauthorized\" message consistent with other DV journal methods."
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Add a confirmation step before deleting a profile from the DV Journal dropdown, and wire the delete action to the existing stalker profile deletion mutation (useDeleteStalkerProfile from frontend/src/hooks/useQueries.ts calling backend deleteStalkerProfile).",
-      "target": "frontend",
+      "id": "REQ-5",
+      "text": "Ensure the backend exposes/query-implements DV Journal read APIs used by the frontend so journal entries and the stored abuser name can be loaded reliably (getJournalEntries must return the caller’s entries without mutating/overwriting abuserName).",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-10"
         ],
         "quotes": [
-          "add a delete button for the abuser profile in the drop down box"
+          "It doesn't save the abuser's name in the domestic violence journal"
         ]
       },
       "acceptanceCriteria": [
-        "When a user clicks delete on a dropdown item, a confirmation dialog is shown with English text that clearly states the profile will be permanently deleted.",
-        "Confirming triggers the delete mutation for the correct profile id; canceling performs no delete.",
-        "On successful delete, show a success toast; on error, show an error toast with a helpful message.",
-        "While deletion is in progress, the UI prevents double-submission (e.g., disables the confirm button and/or shows a loading state)."
+        "getJournalEntries() returns the list of entries for the caller in the same order they were stored (most recent first if that is the current behavior).",
+        "Calling addJournalEntry() must not reset/blank out an already-saved abuserName.",
+        "When no journal exists, getJournalEntries() returns an empty array."
       ]
     },
     {
-      "id": "REQ-3",
-      "text": "Handle local DV Journal name input state safely after a profile is deleted from the dropdown: if the deleted profile name currently matches the abuser name input field value, clear the input field and keep the user in an editable state (do not auto-save).",
+      "id": "REQ-6",
+      "text": "Fix the DV Journal frontend React Query cache invalidation/query keys so that saving an abuser name and adding entries always refreshes the correct DV Journal queries (no stale/empty abuser name shown after save or refresh).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-10"
         ],
         "quotes": [
-          "add a delete button for the abuser profile in the drop down box"
+          "It doesn't save the abuser's name in the domestic violence journal"
         ]
       },
       "acceptanceCriteria": [
-        "If the deleted profile name equals the current abuser name input value, the input is cleared after successful deletion.",
-        "No automatic call is made to save/update the DV Journal abuser name as a side effect of deleting a saved profile."
+        "After saving an abuser name, the UI shows the saved name and it remains present after navigating away/back or reloading the app (while authenticated).",
+        "React Query invalidation targets the actual keys used by DV journal queries (e.g., dvAbuserName, dvJournalEntries, dvJournalAnalysis for the current principal) rather than unused keys.",
+        "If saving the abuser name fails due to an authorization/backend error, the user sees an English error message and the UI does not falsely indicate the name was saved."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/components/ui (shadcn components are read-only).",
-    "Respect the existing single-actor backend architecture; no new backend canisters/services."
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not edit files under frontend/src/components/ui or any other immutable frontend paths listed in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Adding a new backend API for deletion (use the existing deleteStalkerProfile).",
-    "Adding profile editing/management features beyond delete-from-dropdown behavior."
+    "Do not change the DV Journal feature set or UX beyond what is needed to make the abuser name persist and load correctly.",
+    "Do not add new authentication providers (Internet Identity only)."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

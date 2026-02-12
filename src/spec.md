@@ -1,12 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Let users delete a saved abuser/stalker profile directly from the DV Journal “Select from saved profiles” dropdown, with confirmation and safe local state handling.
+**Goal:** Fix the Domestic Violence Journal so the abuser name is correctly saved and loaded for the authenticated user (including after refresh), and ensure DV journal reads/writes don’t inadvertently clear it.
 
 **Planned changes:**
-- Add a per-profile delete icon/button inside each row of the DV Journal saved-profiles dropdown (without changing the selected value when clicked).
-- Add a confirmation dialog before deletion; on confirm, call the existing `useDeleteStalkerProfile` mutation and refresh the dropdown list via React Query invalidation.
-- Show success/error toasts for deletion results and prevent double-submission while the delete request is in progress.
-- After successful deletion, if the deleted profile name matches the current abuser name input value, clear the input and keep the user in an editable state (no auto-save).
+- Update the backend DV Journal API so `setAbuserName` persists per authenticated principal and `getAbuserName` reliably returns the stored value after refresh (or `""` when no journal exists), with consistent unauthorized handling.
+- Ensure backend DV Journal read APIs (`getJournalEntries`) return the caller’s entries reliably and do not mutate/overwrite an already-saved `abuserName` when adding or reading entries.
+- Fix frontend React Query query keys and cache invalidation so saving the abuser name and adding journal entries refreshes the correct DV Journal queries and shows accurate saved state and errors.
 
-**User-visible outcome:** Users can delete a saved profile from the dropdown (after confirming), see immediate feedback, and the list updates without accidentally changing selection; if they were using that name in the input, it is cleared safely.
+**User-visible outcome:** After entering and saving an abuser name, it remains visible across navigation and full reload while authenticated, and DV journal entries load consistently without clearing the saved abuser name; authorization failures show a clear English error.

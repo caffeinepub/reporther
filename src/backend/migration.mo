@@ -1,23 +1,25 @@
 import Map "mo:core/Map";
 import Principal "mo:core/Principal";
-import PoliceDepartment "police-department";
 
 module {
-  // Old actor type
   type OldActor = {
-    policeDepartments : Map.Map<Nat, PoliceDepartment.PoliceDepartment>;
+    domesticViolenceJournals : Map.Map<Principal, { abuserName : Text; entries : [Record] }>;
+    // Other state fields...
   };
 
-  // New actor type
+  type Record = {
+    timestamp : Int;
+    timestampMs : Int;
+    entry : Text;
+  };
+
   type NewActor = {
-    policeDepartments : Map.Map<Nat, PoliceDepartment.PoliceDepartment>;
-    userSelectedDepartments : Map.Map<Principal, PoliceDepartment.PoliceDepartment>;
+    domesticViolenceJournals : Map.Map<Principal, { abuserName : Text; entries : [Record] }>;
+    // Other state fields...
   };
 
   public func run(old : OldActor) : NewActor {
-    {
-      old with
-      userSelectedDepartments = Map.empty<Principal, PoliceDepartment.PoliceDepartment>()
-    };
+    // No changes needed as state is already persistent
+    old;
   };
 };

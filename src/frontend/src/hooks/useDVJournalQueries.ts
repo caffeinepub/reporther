@@ -6,13 +6,20 @@ import { getActorErrorMessage } from '../utils/actorInitErrorMessage';
 import { normalizeTimestampMs } from '../utils/normalizeTimestampMs';
 import type { JournalEntry, DVJournalAnalysis, backendInterface } from '../backend';
 
+// Shared query key helpers to ensure consistency
+const dvQueryKeys = {
+  abuserName: (principal?: string) => ['dvAbuserName', principal] as const,
+  journalEntries: (principal?: string) => ['dvJournalEntries', principal] as const,
+  journalAnalysis: (principal?: string) => ['dvJournalAnalysis', principal] as const,
+};
+
 // Get abuser name for current user
 export function useGetAbuserName() {
   const { actor, isFetching: actorFetching } = useActor();
   const { identity } = useInternetIdentity();
 
   return useQuery<string>({
-    queryKey: ['dvAbuserName', identity?.getPrincipal().toString()],
+    queryKey: dvQueryKeys.abuserName(identity?.getPrincipal().toString()),
     queryFn: async () => {
       if (!actor || !identity) return '';
       return actor.getAbuserName();
@@ -106,12 +113,21 @@ export function useSetAbuserName() {
       return currentActor.setAbuserName(abuserName);
     },
     onSuccess: (_, abuserName) => {
-      const principalStr = identity?.getPrincipal().toString();
+      if (!identity) return;
+      
+      const principalStr = identity.getPrincipal().toString();
+      
       // Immediately update the cache with the new name
-      queryClient.setQueryData<string>(['dvAbuserName', principalStr], abuserName);
-      // Then invalidate to refetch and ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['dvAbuserName', principalStr] });
-      queryClient.invalidateQueries({ queryKey: ['dvJournal', principalStr] });
+      queryClient.setQueryData<string>(dvQueryKeys.abuserName(principalStr), abuserName);
+      
+      // Invalidate to refetch and ensure consistency
+      queryClient.invalidateQueries({ queryKey: dvQueryKeys.abuserName(principalStr) });
+      queryClient.invalidateQueries({ queryKey: dvQueryKeys.journalEntries(principalStr) });
+      queryClient.invalidateQueries({ queryKey: dvQueryKeys.journalAnalysis(principalStr) });
+    },
+    onError: (error: any) => {
+      // Ensure error is properly propagated with clear message
+      console.error('Failed to save abuser name:', error);
     },
   });
 }
@@ -122,7 +138,7 @@ export function useGetJournalEntries() {
   const { identity } = useInternetIdentity();
 
   return useQuery<JournalEntry[]>({
-    queryKey: ['dvJournalEntries', identity?.getPrincipal().toString()],
+    queryKey: dvQueryKeys.journalEntries(identity?.getPrincipal().toString()),
     queryFn: async () => {
       if (!actor || !identity) return [];
       const entries = await actor.getJournalEntries();
@@ -157,11 +173,13 @@ export function useAddJournalEntry() {
       return currentActor.addJournalEntry(entry);
     },
     onSuccess: (_, entry) => {
-      const principalStr = identity?.getPrincipal().toString();
+      if (!identity) return;
+      
+      const principalStr = identity.getPrincipal().toString();
       
       // Optimistically add the new entry to the cache
       queryClient.setQueryData<JournalEntry[]>(
-        ['dvJournalEntries', principalStr],
+        dvQueryKeys.journalEntries(principalStr),
         (oldEntries = []) => {
           const newEntry: JournalEntry = {
             timestamp: BigInt(Date.now() * 1_000_000), // Convert to nanoseconds for consistency
@@ -173,9 +191,8 @@ export function useAddJournalEntry() {
       );
 
       // Invalidate and refetch to get authoritative data from backend
-      queryClient.invalidateQueries({ queryKey: ['dvJournalEntries', principalStr] });
-      queryClient.invalidateQueries({ queryKey: ['dvJournal', principalStr] });
-      queryClient.invalidateQueries({ queryKey: ['dvJournalAnalysis', principalStr] });
+      queryClient.invalidateQueries({ queryKey: dvQueryKeys.journalEntries(principalStr) });
+      queryClient.invalidateQueries({ queryKey: dvQueryKeys.journalAnalysis(principalStr) });
     },
   });
 }
@@ -205,12 +222,15 @@ export function useAnalyzeJournal() {
       return currentActor.analyzeJournal();
     },
     onSuccess: (analysis) => {
-      const principalStr = identity?.getPrincipal().toString();
+      if (!identity) return;
+      
+      const principalStr = identity.getPrincipal().toString();
+      
       if (analysis) {
         // Update the cache with the new analysis
-        queryClient.setQueryData<DVJournalAnalysis>(['dvJournalAnalysis', principalStr], analysis);
+        queryClient.setQueryData<DVJournalAnalysis>(dvQueryKeys.journalAnalysis(principalStr), analysis);
       }
-      queryClient.invalidateQueries({ queryKey: ['dvJournalAnalysis', principalStr] });
+      queryClient.invalidateQueries({ queryKey: dvQueryKeys.journalAnalysis(principalStr) });
     },
   });
 }
@@ -221,7 +241,7 @@ export function useGetLastJournalAnalysis() {
   const { identity } = useInternetIdentity();
 
   return useQuery<DVJournalAnalysis | null>({
-    queryKey: ['dvJournalAnalysis', identity?.getPrincipal().toString()],
+    queryKey: dvQueryKeys.journalAnalysis(identity?.getPrincipal().toString()),
     queryFn: async () => {
       if (!actor || !identity) return null;
       const result = await actor.getLastJournalAnalysis();
